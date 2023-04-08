@@ -1,0 +1,6 @@
+services:
+  - name: my-app
+    env:
+      - key: PORT
+        value: "80"
+    startCommand: npm run start
