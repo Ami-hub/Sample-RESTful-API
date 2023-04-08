@@ -1,8 +1,9 @@
 import express from "express";
+import { env } from "./env";
 
 const main = async () => {
   const app = express();
-  const port = process.env.PORT || 3000;
+  const port = env.isDev ? 3000 : 80;
 
   app.get("/", (req, res) => {
     res.send({ message: "Hello World!" });

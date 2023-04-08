@@ -15,10 +15,12 @@
   "author": "Ami",
   "license": "MIT License",
   "dependencies": {
+    "dotenv": "^16.0.3",
+    "envalid": "^7.3.1",
     "express": "^4.18.2"
   },
   "devDependencies": {
-    "typescript": "^5.0.4",
-    "@types/express": "^4.17.17"
+    "@types/express": "^4.17.17",
+    "typescript": "^5.0.4"
   }
 }
