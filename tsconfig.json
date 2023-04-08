@@ -1,0 +1,21 @@
+{
+  // Specify the compiler version to use
+  "compilerOptions": {
+    "target": "es5", // Specify ECMAScript target version
+    "module": "CommonJS", // Specify module code generation
+    "strict": true, // Enable all strict type-checking options
+    "esModuleInterop": true, // Emit additional JavaScript to ease support for importing CommonJS modules
+    "skipLibCheck": true, // Skip type checking of all declaration files (*.d.ts)
+    "forceConsistentCasingInFileNames": true, // Ensure that casing is consistent in file names
+    "outDir": "./dist", // Specify an output folder for compiled files
+    "sourceMap": true // Generates corresponding .map file
+  },
+  // Specify which files to include in compilation
+  "include": [
+    "src/**/*.ts" // Match any .ts file in the 'src' directory and its subdirectories
+  ],
+  // Specify which files to exclude from compilation
+  "exclude": [
+    "node_modules" // Exclude the 'node_modules' directory
+  ]
+}
