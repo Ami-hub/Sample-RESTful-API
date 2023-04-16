@@ -1,5 +1,6 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import { env } from "../../utils/env";
+import { EntitesMap } from "../../types/types";
 
 const client = new MongoClient(env.MONGODB_URI);
 
@@ -20,8 +21,10 @@ export const getDbInstance = () => {
   return client.db(env.MAIN_DB_NAME);
 };
 
-export const getCollection = (collectionName: string) => {
-  return getDbInstance().collection(collectionName);
+export const getCollection = <E extends keyof EntitesMap>(
+  collectionName: E
+) => {
+  return getDbInstance().collection<EntitesMap[E]>(collectionName);
 };
 
 export const disconnectFromDB = async () => {

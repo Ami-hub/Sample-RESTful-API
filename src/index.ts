@@ -8,11 +8,9 @@ const main = async () => {
   const dal = getMongoDal();
   dal.connect();
 
-  const collection = getCollection("restaurants");
+  const collection = getCollection("accounts");
 
-  const kingsHighwayRestaurants = await collection
-    .find({ borough: "Brooklyn", "address.street": "Kings Highway" })
-    .toArray();
+  const kingsHighwayRestaurants = await collection.find().limit(121).toArray();
 
   console.log(JSON.stringify(kingsHighwayRestaurants, null, 4));
 
