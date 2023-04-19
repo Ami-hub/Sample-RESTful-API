@@ -1,3 +1,4 @@
+import { EntitiesMap } from "../../types/general";
 import { connectToDB, disconnectFromDB, getDbInstance } from "./init";
 
 interface MongoDal {
@@ -19,10 +20,10 @@ interface MongoDal {
   disconnect(): Promise<void>;
 }
 
-export const getMongoDal = () => {
+export const getMongoDalManager = () => {
   return {
     connect: connectToDB,
-    getEntityDalByName: (collectionName: string) => {
+    getEntityDalByName: <T extends keyof EntitiesMap>(collectionName: T) => {
       throw new Error("Not implemented!");
     },
     disconnect: disconnectFromDB,
