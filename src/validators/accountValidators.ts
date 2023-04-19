@@ -2,7 +2,7 @@ import z from "zod";
 import { objectIdSchema } from "./valitationUtils";
 
 /**
- * Represents a product name.
+ * Zod schema for a product name.
  */
 export const productsSchema = z.enum([
   "Derivatives",
@@ -14,7 +14,7 @@ export const productsSchema = z.enum([
 ]);
 
 /**
- * Zod schema that represent an account.
+ * Zod schema for an account.
  *
  * @example
  * ```ts
