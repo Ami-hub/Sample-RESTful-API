@@ -1,23 +1,24 @@
 import express from "express";
 import { env } from "./utils/env";
 import { connectToDB, getCollection } from "./DB/mongo/init";
-import { getMongoDal } from "./DB/mongo/mongoDal";
+import { getMongoDalManager } from "./DB/mongo/mongoDal";
+import { ObjectId } from "mongodb";
+import { accountSchema } from "./validators/accountValidators";
+import { customerSchema } from "./validators/customerValidator";
 
 const main = async () => {
   const app = express();
-  const dal = getMongoDal();
+  const dal = getMongoDalManager();
   dal.connect();
 
-  const collection = getCollection("accounts");
-
-  const kingsHighwayRestaurants = await collection.find().limit(121).toArray();
-
-  console.log(JSON.stringify(kingsHighwayRestaurants, null, 4));
+  // Goal:
+  // const customersDal = await dal.getEntityDalByName("customers");
+  // const allCustomers = await customersDal.readAll();
+  // console.log(allCustomers);
 
   app.get("/", (_req, res) => {
     res.send({
-      "restaurants in `Kings Highway` street, Brooklyn":
-        kingsHighwayRestaurants,
+      Response: "Hello World",
     });
   });
 
