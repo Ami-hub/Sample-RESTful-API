@@ -1,20 +1,25 @@
 import express from "express";
+import { getDalManager } from "./DB/dalManager";
+import { getMongoCRUD } from "./DB/mongo/mongoCRUD";
 import { env } from "./utils/env";
-import { connectToDB, getCollection } from "./DB/mongo/init";
-import { getMongoDalManager } from "./DB/mongo/mongoDal";
-import { ObjectId } from "mongodb";
-import { accountSchema } from "./validators/accountValidators";
-import { customerSchema } from "./validators/customerValidator";
 
 const main = async () => {
   const app = express();
-  const dal = getMongoDalManager();
-  dal.connect();
 
-  // Goal:
-  // const customersDal = await dal.getEntityDalByName("customers");
-  // const allCustomers = await customersDal.readAll();
-  // console.log(allCustomers);
+  // Goal of how to read all customers from the database
+  /*
+  const dalManager = await getDalManager().connect();
+  const customersDal = dalManager.getEntityDalByName("customers");
+  const allCustomers = await customersDal.readAll();
+  console.log(allCustomers);
+  await dalManager.disconnect();
+  */
+
+  const dalManager = await getDalManager("mongo").connect();
+
+  const crud = getMongoCRUD("accounts");
+
+  await dalManager.disconnect();
 
   app.get("/", (_req, res) => {
     res.send({

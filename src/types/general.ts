@@ -1,4 +1,5 @@
-import { idSchema } from "../validators/valitationUtils";
+import { env } from "../utils/env";
+import { objectIdSchema } from "../validators/valitationUtils";
 import { Account } from "./account";
 import { Customer } from "./customer";
 import { z } from "zod";
@@ -6,8 +7,17 @@ import { z } from "zod";
 /**
  * The key name of the unique identifier for each entity
  */
-export const idKey = "_id";
+const idKey = "_id";
+
+/**
+ * The type of the unique identifier for each entity
+ */
 export type IdKey = typeof idKey;
+
+/**
+ * The schema of the unique identifier for each entity
+ */
+export const idSchema = objectIdSchema;
 
 /**
  * The type of the unique identifier for each entity
