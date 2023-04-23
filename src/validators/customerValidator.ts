@@ -1,5 +1,5 @@
 import z from "zod";
-import { objectIdSchema } from "./valitationUtils";
+import { idSchema } from "../types/general";
 
 /**
  * Zod schema for `tier` enum.
@@ -20,7 +20,7 @@ export const tierAndDetailsSchema = z.object({
  * Zod schema for `customer` object.
  */
 export const customerSchema = z.object({
-  _id: objectIdSchema,
+  _id: idSchema,
   username: z.string(),
   name: z.string(),
   address: z.string(),

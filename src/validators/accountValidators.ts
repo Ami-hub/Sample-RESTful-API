@@ -1,5 +1,5 @@
 import z from "zod";
-import { objectIdSchema } from "./valitationUtils";
+import { idSchema } from "../types/general";
 
 /**
  * Zod schema for a product name.
@@ -24,8 +24,8 @@ export const productsSchema = z.enum([
  * ```
  */
 export const accountSchema = z.object({
-  _id: objectIdSchema,
-  account_id: z.number().min(100000).max(999999),
+  _id: idSchema,
+  account_id: z.number().min(100000).max(9007199254740991), // 2^53 - 1, the max safe integer
   limit: z.number().positive(),
   products: z.array(productsSchema),
 });

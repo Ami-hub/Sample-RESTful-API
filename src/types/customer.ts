@@ -24,12 +24,15 @@ export type Tier = z.infer<typeof tiersSchema>;
  * @property `id` - The ID of the customer.
  *
  * @example
+ * ```ts
+ * const tierAndDetails: TierAndDetails =
  * {
  *  tier: "Bronze",
  *  benefits: ["24 hour dedicated line", "concierge services"],
  *  active: true,
  *  id: "699456451cc24f028d2aa99d7534c219",
  * }
+ * ```
  */
 export type TierAndDetails = z.infer<typeof tierAndDetailsSchema>;
 
@@ -47,19 +50,22 @@ export type TierAndDetails = z.infer<typeof tierAndDetailsSchema>;
  * @see {@link TierAndDetails}
  *
  * @example
+ * ```ts
+ * const customer: Customer =
  * {
- *   _id: "5ca4bbcea2dd94ee58162a68",
+ *   _id: myCustomerId,
  *   username: "fmiller",
  *   name: "Elizabeth Ray",
  *   address: "9286 Bethany Glens\nVasqueztown, CO 22939",
- *   birthdate: "1977-03-02T02:20:31Z",
+ *   birthdate: new Date("1977-03-02T02:20:31Z"),
  *   email: "arroyocolton@gmail.com",
  *   active: true,
  *   accounts: [371138, 422649, 387979],
  *   tier_and_details: {
- *     "<TierAndDetails1 Id>": "<TierAndDetails1>",
- *     "<TierAndDetails2 Id>": "<TierAndDetails2>"
+ *     "<TierAndDetails1Id>": <TierAndDetails1>,
+ *     "<TierAndDetails2Id>": <TierAndDetails2>
  *   }
  * };
+ * ```
  */
 export type Customer = z.infer<typeof customerSchema>;

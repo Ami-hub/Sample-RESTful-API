@@ -21,8 +21,8 @@ export type ProductName = z.infer<typeof productsSchema>;
  *
  * @example
  * ```ts
- * const account = {
- *   _id: new ObjectId("643c72cf2fd98fa41ba82445"),
+ * const account: Account = {
+ *   _id: myId,
  *   account_id: 433811,
  *   limit: 10000,
  *   products: [
