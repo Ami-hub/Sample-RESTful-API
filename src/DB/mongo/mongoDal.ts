@@ -1,5 +1,5 @@
 import { EntitiesMap } from "../../types/general";
-import { connectToDB, disconnectFromDB, getDbInstance } from "./init";
+import { connectToDB, disconnectFromDB } from "./init";
 
 interface MongoDal {
   /**
@@ -12,7 +12,7 @@ interface MongoDal {
    * @param collectionName name of the collection
    * @returns an entity dal
    */
-  getEntityDalByName(collectionName: string): Promise<void>;
+  getEntityDalByName<T extends keyof EntitiesMap>(collectionName: T): void;
 
   /**
    * Disconnect from the database
@@ -20,7 +20,7 @@ interface MongoDal {
   disconnect(): Promise<void>;
 }
 
-export const getMongoDalManager = () => {
+export const getMongoDalManager = (): MongoDal => {
   return {
     connect: connectToDB,
     getEntityDalByName: <T extends keyof EntitiesMap>(collectionName: T) => {
