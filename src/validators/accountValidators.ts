@@ -1,5 +1,5 @@
 import z from "zod";
-import { objectIdSchema } from "./valitationUtils";
+import { idSchema } from "./valitationUtils";
 
 /**
  * Zod schema for a product name.
@@ -24,7 +24,7 @@ export const productsSchema = z.enum([
  * ```
  */
 export const accountSchema = z.object({
-  _id: objectIdSchema,
+  _id: idSchema,
   account_id: z.number().min(100000).max(999999),
   limit: z.number().positive(),
   products: z.array(productsSchema),
