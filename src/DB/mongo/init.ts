@@ -16,14 +16,14 @@ export const connectToDB = async () => {
   }
 };
 
-export const getDbInstance = () => {
+const getDbInstance = () => {
   return client.db(env.MAIN_DB_NAME);
 };
 
-export const getCollection = <E extends keyof EntitiesMap>(
-  collectionName: E
+export const getCollection = <T extends keyof EntitiesMap>(
+  collectionName: T
 ) => {
-  return getDbInstance().collection<EntitiesMap[E]>(collectionName);
+  return getDbInstance().collection(collectionName);
 };
 
 export const disconnectFromDB = async () => {

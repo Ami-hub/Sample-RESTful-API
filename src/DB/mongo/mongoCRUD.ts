@@ -1,13 +1,11 @@
-import { Db, Collection } from "mongodb";
 import { EntitiesMap, IdType, IdKey } from "../../types/general";
-import { getDbInstance } from "./init";
+import { getCollection } from "./init";
 import { CRUD } from "../CRUD";
 
 export const getMongoCRUD = <T extends keyof EntitiesMap>(
   collectionName: T
 ): CRUD<EntitiesMap[T]> => {
-  const db = getDbInstance();
-  const collection = db.collection(collectionName);
+  const collection = getCollection(collectionName);
 
   const readAll = async () => {
     const res = await collection.find<EntitiesMap[T]>({}).toArray();
