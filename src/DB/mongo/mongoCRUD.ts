@@ -21,7 +21,9 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
     field: K,
     value: EntitiesMap[T][K]
   ) => {
-    const result = await collection.findOne<EntitiesMap[T]>({ [field]: value });
+    const result = await collection
+      .find<EntitiesMap[T]>({ [field]: value })
+      .toArray();
     return result;
   };
 

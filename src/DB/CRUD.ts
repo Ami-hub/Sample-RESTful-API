@@ -15,12 +15,12 @@ export interface CRUD<T extends Entities> {
   readById(id: IdType): Promise<T | null>;
 
   /**
-   * Gets an entity instance by field
+   * Gets all entities instances by a field
    * @param field field of the entity instance
    * @param value value of the field
    * @returns an entity instance or null if not found
    */
-  readByField<K extends keyof T>(field: K, value: T[K]): Promise<T | null>;
+  readByField<K extends keyof T>(field: K, value: T[K]): Promise<Array<T>>;
 
   /**
    * Creates a new entity instance
