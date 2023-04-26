@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  benefitSchema,
   customerSchema,
   tierAndDetailsSchema,
   tiersSchema,
@@ -14,6 +15,15 @@ import {
  * ```
  */
 export type Tier = z.infer<typeof tiersSchema>;
+
+/**
+ * Represents a benefit or advantage.
+ * @example
+ * ```ts
+ * const benefit: Benefit = "24 hour dedicated line";
+ * ```
+ */
+export type Benefit = z.infer<typeof benefitSchema>;
 
 /**
  * Represents an tier and details object.
