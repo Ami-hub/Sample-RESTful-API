@@ -15,27 +15,32 @@ export interface CRUD<T extends Entities> {
   readById(id: IdType): Promise<T | null>;
 
   /**
+   * Gets all entities instances by a field
+   * @param field field of the entity instance
+   * @param value value of the field
+   * @returns an entity instance or null if not found
+   */
+  readByField<K extends keyof T>(field: K, value: T[K]): Promise<Array<T>>;
+
+  /**
    * Creates a new entity instance
    * @param data data of the entity instance
-   * @returns id of the created entity instance
-   * @throws { Error } if the data represents an invalid entity instance
+   * @returns id of the created entity instance or null if not created
    */
-  create(data: Omit<T, IdKey>): Promise<IdType>;
+  create(data: Omit<T, IdKey>): Promise<IdType | null>;
 
   /**
    * Updates an entity instance
    * @param id id of the entity instance
    * @param data data of the entity instance
-   * @returns the updated entity instance
-   * @throws { Error } if the data represents an invalid part of an entity instance
+   * @returns the updated entity instance or null if not found
    */
-  update(id: IdType, data: Partial<Omit<T, IdKey>>): Promise<T>;
+  update(id: IdType, data: Partial<Omit<T, IdKey>>): Promise<T | null>;
 
   /**
    * Deletes an entity instance
    * @param id id of the entity instance
    * @returns the deleted entity instance or null it not deleted
-   * @throws { Error } if the entity instance does not exist
    */
   delete(id: IdType): Promise<T | null>;
 }

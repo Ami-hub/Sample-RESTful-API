@@ -1,4 +1,3 @@
-import { env } from "../utils/env";
 import { objectIdSchema } from "../validators/valitationUtils";
 import { Account } from "./account";
 import { Customer } from "./customer";
@@ -25,9 +24,10 @@ export const idSchema = objectIdSchema;
 export type IdType = z.infer<typeof idSchema>;
 
 /**
- * A map of all entities and their types
+ * A map of all entities collection names and their types
  * @example
  * const customer1: EntitiesMap["customers"] = { ... };
+ * // equivalent to
  * const customer2: Customer = { ... };
  */
 export type EntitiesMap = {

@@ -6,6 +6,8 @@ import { BSONError } from "bson";
  * Represents a zod schema for an ObjectId
  * @example
  * ```ts
+ * import { ObjectId } from "mongodb";
+ *
  * const id = new ObjectId("5f9b9b9b9b9b9b9b9b9b9b9b");
  * const objectId = objectIdSchema.parse(id);
  * console.log(objectId);

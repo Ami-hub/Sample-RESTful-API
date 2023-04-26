@@ -2,7 +2,7 @@ import { z } from "zod";
 import { accountSchema, productsSchema } from "../validators/accountValidators";
 
 /**
- * Represents a product name.
+ * Represents the options for the `products` field in an account.
  *
  * @example
  * ```ts
@@ -18,6 +18,7 @@ export type ProductName = z.infer<typeof productsSchema>;
  * @property `account_id` - The account ID number (5 digits).
  * @property `limit` - The credit limit for the account.
  * @property `products` - An array of product names associated with the account.
+ * @see {@link ProductName}
  *
  * @example
  * ```ts
