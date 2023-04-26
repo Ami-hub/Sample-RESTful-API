@@ -6,7 +6,7 @@ import { CRUD } from "../CRUD";
 export const getMongoCRUD = <T extends keyof EntitiesMap>(
   collectionName: T
 ): CRUD<EntitiesMap[T]> => {
-  const db: Db = getDbInstance();
+  const db = getDbInstance();
   const collection = db.collection(collectionName);
 
   const readAll = async () => {
@@ -36,8 +36,8 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
     id: IdType,
     data: Partial<Omit<EntitiesMap[T], IdKey>>
   ) => {
-    await collection.updateOne({ _id: id }, { $set: data });
-    return await readById(id);
+    const result = await collection.updateOne({ _id: id }, { $set: data });
+    return result.acknowledged ? await readById(id) : null;
   };
 
   const deleteOne = async (id: IdType) => {
