@@ -32,7 +32,7 @@ export const customerSchema = z.object({
     z
       .string()
       .length(32)
-      .regex(/^[a-zA-Z0-9]+$/), // id e.g. "59ee9884093f41cc94b4b59e81655bf4"
+      .regex(/^[a-zA-Z0-9]+$/), // an id, e.g. "59ee9884093f41cc94b4b59e81655bf4"
     tierAndDetailsSchema
   ),
 });
