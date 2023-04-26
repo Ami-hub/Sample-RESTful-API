@@ -8,8 +8,8 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
   const collection = getCollection(collectionName);
 
   const readAll = async () => {
-    const res = await collection.find<EntitiesMap[T]>({}).toArray();
-    return res;
+    const result = await collection.find<EntitiesMap[T]>({}).toArray();
+    return result;
   };
 
   const readById = async (id: IdType) => {
@@ -40,8 +40,8 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
 
   const deleteOne = async (id: IdType) => {
     const toDelete = await readById(id);
-    const res = await collection.deleteOne({ _id: id });
-    return res.acknowledged ? toDelete : null;
+    const result = await collection.deleteOne({ _id: id });
+    return result.acknowledged ? toDelete : null;
   };
 
   return {
