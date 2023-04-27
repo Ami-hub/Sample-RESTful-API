@@ -2,6 +2,7 @@ import { objectIdSchema } from "../validators/valitationUtils";
 import { Account } from "./account";
 import { Customer } from "./customer";
 import { z } from "zod";
+import { Transaction } from "./transactions";
 
 /**
  * The key name of the unique identifier for each entity
@@ -33,6 +34,7 @@ export type IdType = z.infer<typeof idSchema>;
 export type EntitiesMap = {
   accounts: Account;
   customers: Customer;
+  transactions: Transaction;
 };
 
 /**

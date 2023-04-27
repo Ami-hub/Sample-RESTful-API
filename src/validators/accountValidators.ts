@@ -25,7 +25,7 @@ export const productsSchema = z.enum([
  */
 export const accountSchema = z.object({
   _id: idSchema,
-  account_id: z.number().min(100000).max(9007199254740991), // 2^53 - 1, the max safe integer
+  account_id: z.number().min(10000).max(Number.MAX_SAFE_INTEGER),
   limit: z.number().positive(),
   products: z.array(productsSchema),
 });
