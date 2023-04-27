@@ -19,6 +19,8 @@ export interface DalManager {
   /**
    * Connect to the database
    * @returns a promise that resolves to the connected DAL manager
+   * @NOTE if you have already connected to the DB, this function will do nothing
+
    */
   connect(): Promise<DalManager>;
 
