@@ -15,7 +15,7 @@ export type ProductName = z.infer<typeof productsSchema>;
  * Represents an account.
  *
  * @property `_id` - The unique identifier for the account.
- * @property `account_id` - The account ID number (5 digits).
+ * @property `account_id` - The account ID number.
  * @property `limit` - The credit limit for the account.
  * @property `products` - An array of product names associated with the account.
  * @see {@link ProductName}
