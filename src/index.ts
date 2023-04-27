@@ -8,7 +8,7 @@ const main = async () => {
 
   // Goal of how to read all customers from the database
   /*
-  const dalManager = await getDalManager().connect();
+  const dalManager = await getDalManager("mongo").connect();
   const customersDal = dalManager.getEntityDalByName("customers");
   const allCustomers = await customersDal.readAll();
   console.log(allCustomers);
