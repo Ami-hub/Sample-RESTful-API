@@ -1,25 +1,30 @@
 import express from "express";
-import { getDalManager } from "./DB/dalManager";
-import { getMongoCRUD } from "./DB/mongo/mongoCRUD";
 import { env } from "./utils/env";
+import { getAccountRouter } from "./routing/routers/accountRouter";
+import { getDalManager } from "./DB/dalManager";
+import {
+  accountCollectionName,
+  mongoImplementationName,
+} from "./types/general";
+import { ObjectId } from "mongodb";
 
 const main = async () => {
   const app = express();
 
-  // Goal of how to read all customers from the database
-  /*
-  const dalManager = await getDalManager("mongo").connect();
-  const customersDal = dalManager.getEntityDalByName("customers");
-  const allCustomers = await customersDal.readAll();
-  console.log(allCustomers);
-  await dalManager.disconnect();
-  */
+  const dalManager = await getDalManager(mongoImplementationName).connect();
+  const entityDalGetter = dalManager.getEntityDalByName;
+  const accountsDal = entityDalGetter(accountCollectionName);
+  const account = await accountsDal.readAccountById(
+    new ObjectId("5f9c2a7d9d9b3b1e3c9d3b1e")
+  );
+  if (!account) {
+    throw new Error("Account not found");
+  }
+  console.log(account.products);
 
-  const dalManager = await getDalManager("mongo").connect();
+  app.use(express.json());
 
-  const crud = getMongoCRUD("accounts");
-
-  await dalManager.disconnect();
+  app.use(`/${accountCollectionName}`, getAccountRouter(entityDalGetter));
 
   app.get("/", (_req, res) => {
     res.send({
