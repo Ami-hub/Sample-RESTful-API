@@ -1,7 +1,13 @@
 import { Account } from "../../types/account";
-import { IdKey, IdType } from "../../types/general";
+import {
+  IdKey,
+  IdType,
+  ImplementationNames,
+  accountCollectionName,
+} from "../../types/general";
+import { getCRUD } from "../CRUD";
 
-interface AccountDAL {
+export interface AccountDAL {
   /**
    * Get all accounts
    * @returns all accounts
@@ -11,7 +17,7 @@ interface AccountDAL {
    * console.log(`Found ${accounts.length} accounts`);
    * ```
    */
-  readAll(): Promise<Account[]>;
+  readAllAccounts(): Promise<Account[]>;
 
   /**
    * Get an account by id
@@ -23,7 +29,7 @@ interface AccountDAL {
    * console.log(`Account with id ${id} is: ${account}`);
    * ```
    */
-  readById(id: IdType): Promise<Account | null>;
+  readAccountById(id: IdType): Promise<Account | null>;
 
   /**
    * Create an account
@@ -35,9 +41,9 @@ interface AccountDAL {
    * const id = await accountDal.create(anAccount);
    * console.log(`Account created with id: ${id}`);
    * ```
-   * @throws { Error } if the data represents an invalid account
+   *
    */
-  create(data: Omit<Account, IdKey>): Promise<IdType>;
+  createAccount(data: Omit<Account, IdKey>): Promise<IdType>;
 
   /**
    * Update an account
@@ -52,9 +58,11 @@ interface AccountDAL {
    * });
    * console.log(`Account updated to: ${account}`);
    * ```
-   * @throws { Error } if the data represents an invalid part of an account
    */
-  update(id: IdType, data: Partial<Omit<Account, IdKey>>): Promise<Account>;
+  updateAccount(
+    id: IdType,
+    data: Partial<Omit<Account, IdKey>>
+  ): Promise<Account>;
 
   /**
    * Delete an account
@@ -66,5 +74,60 @@ interface AccountDAL {
    * console.log(`Account deleted: ${account}`);
    * ```
    */
-  delete(id: IdType): Promise<Account>;
+  deleteAccount(id: IdType): Promise<Account>;
 }
+
+// ########################################
+//             Implementation
+// ########################################
+
+export const getAccountDAL = (
+  implementationName: ImplementationNames
+): AccountDAL => {
+  const accountCrud = getCRUD(implementationName, accountCollectionName);
+
+  const readAllAccounts = async () => {
+    const accounts = await accountCrud.readAll();
+    return accounts;
+  };
+
+  const readAccountById = async (id: IdType) => {
+    const account = await accountCrud.readById(id);
+    return account;
+  };
+
+  const createAccount = async (data: Omit<Account, IdKey>) => {
+    const id = await accountCrud.create(data);
+    if (!id) {
+      throw new Error("Failed to create account");
+    }
+    return id;
+  };
+
+  const updateAccount = async (
+    id: IdType,
+    data: Partial<Omit<Account, IdKey>>
+  ) => {
+    const updatedAccount = await accountCrud.update(id, data);
+    if (!updatedAccount) {
+      throw new Error("Failed to update account");
+    }
+    return updatedAccount;
+  };
+
+  const deleteAccount = async (id: IdType) => {
+    const deletedAccount = await accountCrud.delete(id);
+    if (!deletedAccount) {
+      throw new Error("Failed to delete account");
+    }
+    return deletedAccount;
+  };
+
+  return {
+    readAllAccounts,
+    readAccountById,
+    createAccount,
+    updateAccount,
+    deleteAccount,
+  };
+};
