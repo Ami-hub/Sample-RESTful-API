@@ -20,3 +20,10 @@ export const objectIdSchema = z.custom<ObjectId>((value) => {
     throw new BSONError("BSONError: Invalid ObjectId");
   }
 });
+
+/**
+ * Represents a zod schema for an ObjectId string
+ */
+export const objectIdStringSchema = z
+  .string()
+  .regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId");

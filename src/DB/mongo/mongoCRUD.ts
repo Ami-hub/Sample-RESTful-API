@@ -1,6 +1,7 @@
-import { EntitiesMap, IdType, IdKey } from "../../types/general";
+import { EntitiesMap, IdType, IdKey, idKey } from "../../types/general";
 import { getCollection } from "./init";
 import { CRUD } from "../CRUD";
+import { ObjectId } from "mongodb";
 
 export const getMongoCRUD = <T extends keyof EntitiesMap>(
   collectionName: T
@@ -13,7 +14,9 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
   };
 
   const readById = async (id: IdType) => {
-    const result = await collection.findOne<EntitiesMap[T]>(id);
+    const result = await collection.findOne<EntitiesMap[T]>({
+      [idKey]: new ObjectId(id),
+    });
     return result;
   };
 
@@ -29,20 +32,23 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
 
   const create = async (data: Omit<EntitiesMap[T], IdKey>) => {
     const result = await collection.insertOne(data);
-    return result.acknowledged ? result.insertedId : null;
+    return result.acknowledged ? result.insertedId.toString() : null;
   };
 
   const update = async (
     id: IdType,
     data: Partial<Omit<EntitiesMap[T], IdKey>>
   ) => {
-    const result = await collection.updateOne({ _id: id }, { $set: data });
+    const result = await collection.updateOne(
+      { [idKey]: new ObjectId(id) },
+      { $set: data }
+    );
     return result.acknowledged ? await readById(id) : null;
   };
 
   const deleteOne = async (id: IdType) => {
     const toDelete = await readById(id);
-    const result = await collection.deleteOne({ _id: id });
+    const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
     return result.acknowledged ? toDelete : null;
   };
 

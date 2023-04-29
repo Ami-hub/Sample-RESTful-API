@@ -18,7 +18,7 @@ export const getAccountRoutes = (accountDal: AccountDAL) => {
     } else {
       res
         .status(StatusCodes.NOT_FOUND)
-        .send({ error: `No such account (${id.toString()})` });
+        .json({ error: `No such account '${id.toString()}'` });
     }
   };
 

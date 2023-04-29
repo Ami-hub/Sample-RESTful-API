@@ -1,4 +1,4 @@
-import { objectIdSchema } from "../validators/valitationUtils";
+import { objectIdStringSchema } from "../validators/valitationUtils";
 import { Account } from "./account";
 import { Customer } from "./customer";
 import { z } from "zod";
@@ -21,7 +21,7 @@ export type ImplementationNames = typeof mongoImplementationName;
 /**
  * The key name of the unique identifier for each entity
  */
-const idKey = "_id";
+export const idKey = "_id";
 
 /**
  * The type of the unique identifier for each entity
@@ -31,7 +31,7 @@ export type IdKey = typeof idKey;
 /**
  * The schema of the unique identifier for each entity
  */
-export const idSchema = objectIdSchema;
+export const idSchema = objectIdStringSchema;
 
 /**
  * The type of the unique identifier for each entity
