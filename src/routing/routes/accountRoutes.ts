@@ -1,16 +1,24 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { idSchema } from "../../types/general";
 import { accountSchema } from "../../validators/accountValidators";
 import { AccountDAL } from "../../DB/entetiesDAL/accountDAL";
 
 export const getAccountRoutes = (accountDal: AccountDAL) => {
-  const getAllAccounts = async (_req: Request, res: Response) => {
+  const getAllAccounts = async (
+    _req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
     const accounts = await accountDal.readAllAccounts();
     res.json(accounts);
   };
 
-  const getAccountById = async (req: Request, res: Response) => {
+  const getAccountById = async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
     const id = idSchema.parse(req.params.id);
     const account = await accountDal.readAccountById(id);
     if (account) {
@@ -22,20 +30,32 @@ export const getAccountRoutes = (accountDal: AccountDAL) => {
     }
   };
 
-  const createAccount = async (req: Request, res: Response) => {
+  const createAccount = async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
     const account = accountSchema.parse(req.body);
     const id = await accountDal.createAccount(account);
     res.status(StatusCodes.CREATED).json({ "Inserted id": id.toString() });
   };
 
-  const updateAccount = async (req: Request, res: Response) => {
+  const updateAccount = async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
     const id = idSchema.parse(req.params.id);
     const account = req.body;
     const updatedAccount = await accountDal.updateAccount(id, account);
     res.json(updatedAccount);
   };
 
-  const deleteAccount = async (req: Request, res: Response) => {
+  const deleteAccount = async (
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
     const id = idSchema.parse(req.params.id);
     const account = await accountDal.deleteAccount(id);
     res.json(account);

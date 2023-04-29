@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getAccountRoutes } from "../routes/accountRoutes";
 import { EntitiesDalMap } from "../../DB/entetiesDAL/entetiesDAL";
 import { accountCollectionName } from "../../types/general";
+import { deferToErrorHandler } from "../routes/errorHandler";
 
 export const getAccountRouter = (
   entityDalGetter: <T extends keyof EntitiesDalMap>(
@@ -14,15 +15,18 @@ export const getAccountRouter = (
     entityDalGetter(accountCollectionName)
   );
 
-  accountsRouter.get("/", accountRoutes.getAllAccounts);
+  accountsRouter.get("/", deferToErrorHandler(accountRoutes.getAllAccounts));
 
-  accountsRouter.get("/:id", accountRoutes.getAccountById);
+  accountsRouter.get("/:id", deferToErrorHandler(accountRoutes.getAccountById));
 
-  accountsRouter.post("/", accountRoutes.createAccount);
+  accountsRouter.post("/", deferToErrorHandler(accountRoutes.createAccount));
 
-  accountsRouter.put("/:id", accountRoutes.updateAccount);
+  accountsRouter.put("/:id", deferToErrorHandler(accountRoutes.updateAccount));
 
-  accountsRouter.delete("/:id", accountRoutes.deleteAccount);
+  accountsRouter.delete(
+    "/:id",
+    deferToErrorHandler(accountRoutes.deleteAccount)
+  );
 
   return accountsRouter;
 };

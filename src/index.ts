@@ -6,6 +6,7 @@ import {
   accountCollectionName,
   mongoImplementationName,
 } from "./types/general";
+import { errorHandler } from "./routing/routes/errorHandler";
 
 const main = async () => {
   const app = express();
@@ -16,6 +17,8 @@ const main = async () => {
   app.use(express.json());
 
   app.use(`/${accountCollectionName}`, getAccountRouter(entityDalGetter));
+
+  app.use(`/${accountCollectionName}`, errorHandler);
 
   app.get("/", (_req, res) => {
     res.send({
