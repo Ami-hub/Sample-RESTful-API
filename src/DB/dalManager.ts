@@ -1,19 +1,6 @@
-import { EntitiesMap } from "../types/general";
+import { ImplementationNames, mongoImplementationName } from "../types/general";
+import { EntitiesDalMap } from "./entetiesDAL/entetiesDAL";
 import { getMongoDalManager } from "./mongo/mongoDalManager";
-
-/**
- * Names of the implementations of the DalManager interface
- */
-type implementationsNames = "mongo";
-
-/**
- * Map of the implementations of the DalManager interface
- *
- * @property mongo - mongoDB implementation
- */
-const implementations: Record<implementationsNames, DalManager> = {
-  mongo: getMongoDalManager(),
-};
 
 export interface DalManager {
   /**
@@ -28,8 +15,21 @@ export interface DalManager {
    * Get an entity dal by a collection name name
    * @param collectionName name of the collection
    * @returns an entity dal
+   * @example
+   * ```ts
+   * const dalManager =
+   *     await getDalManager(mongoImplementationName).connect();
+   *
+   * const entityDalGetter = dalManager.getEntityDalByName;
+   * const accountsDal = entityDalGetter(accountCollectionName);
+   *
+   * const accounts = await accountsDal.readAllAccounts();
+   * console.log(`I have ${accounts.length} accounts`);
+   * ```
    */
-  getEntityDalByName<T extends keyof EntitiesMap>(collectionName: T): void;
+  getEntityDalByName<T extends keyof EntitiesDalMap>(
+    collectionName: T
+  ): EntitiesDalMap[T];
 
   /**
    * Disconnect from the database
@@ -37,8 +37,15 @@ export interface DalManager {
   disconnect(): Promise<void>;
 }
 
+const dalManagerMap: {
+  [key in ImplementationNames]: () => DalManager;
+} = {
+  [mongoImplementationName]: getMongoDalManager,
+};
+
 export const getDalManager = (
-  implementationName: implementationsNames
+  implementationName: ImplementationNames
 ): DalManager => {
-  return implementations[implementationName];
+  const dalManagerCreator = dalManagerMap[implementationName];
+  return dalManagerCreator();
 };

@@ -1,5 +1,6 @@
-import { EntitiesMap } from "../../types/general";
+import { mongoImplementationName } from "../../types/general";
 import { DalManager } from "../dalManager";
+import { EntitiesDalMap, getEntityDal } from "../entetiesDAL/entetiesDAL";
 import { connectToDB, disconnectFromDB } from "./init";
 
 /**
@@ -11,8 +12,10 @@ export const getMongoDalManager = (): DalManager => {
       connectToDB();
       return getMongoDalManager();
     },
-    getEntityDalByName: <T extends keyof EntitiesMap>(collectionName: T) => {
-      throw new Error("Not implemented!");
+    getEntityDalByName: <T extends keyof EntitiesDalMap>(
+      collectionName: T
+    ): EntitiesDalMap[T] => {
+      return getEntityDal(mongoImplementationName, collectionName);
     },
     disconnect: disconnectFromDB,
   };

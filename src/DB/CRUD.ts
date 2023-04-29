@@ -1,4 +1,12 @@
-import { Entities, IdKey, IdType } from "../types/general";
+import {
+  Entities,
+  EntitiesMap,
+  IdKey,
+  IdType,
+  ImplementationNames,
+  mongoImplementationName,
+} from "../types/general";
+import { getMongoCRUD } from "./mongo/mongoCRUD";
 
 export interface CRUD<T extends Entities> {
   /**
@@ -44,3 +52,26 @@ export interface CRUD<T extends Entities> {
    */
   delete(id: IdType): Promise<T | null>;
 }
+
+const crudMap: {
+  [key in ImplementationNames]: <T extends keyof EntitiesMap>(
+    collectionName: T
+  ) => CRUD<EntitiesMap[T]>;
+} = {
+  [mongoImplementationName]: getMongoCRUD,
+};
+
+/**
+ * Gets a CRUD implementation
+ * @param collectionName name of the collection
+ * @param implementationName name of the implementation
+ * @returns a CRUD implementation
+ * @throws if the implementation name is invalid
+ */
+export const getCRUD = <T extends keyof EntitiesMap>(
+  implementationName: ImplementationNames,
+  collectionName: T
+): CRUD<EntitiesMap[T]> => {
+  const crudCreator = crudMap[implementationName];
+  return crudCreator(collectionName);
+};
