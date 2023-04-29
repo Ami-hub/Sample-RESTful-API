@@ -18,7 +18,7 @@ const main = async () => {
 
   app.use(`/${accountCollectionName}`, getAccountRouter(entityDalGetter));
 
-  app.use(`/${accountCollectionName}`, errorHandler);
+  app.use(errorHandler);
 
   app.get("/", (_req, res) => {
     res.send({
