@@ -15,6 +15,17 @@ export interface DalManager {
    * Get an entity dal by a collection name name
    * @param collectionName name of the collection
    * @returns an entity dal
+   * @example
+   * ```ts
+   * const dalManager =
+   *     await getDalManager(mongoImplementationName).connect();
+   *
+   * const entityDalGetter = dalManager.getEntityDalByName;
+   * const accountsDal = entityDalGetter(accountCollectionName);
+   *
+   * const accounts = await accountsDal.readAllAccounts();
+   * console.log(`I have ${accounts.length} accounts`);
+   * ```
    */
   getEntityDalByName<T extends keyof EntitiesDalMap>(
     collectionName: T
