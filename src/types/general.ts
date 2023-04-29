@@ -5,6 +5,20 @@ import { z } from "zod";
 import { Transaction } from "./transactions";
 
 /**
+ * The name of the mongo implementation
+ */
+export const mongoImplementationName = "mongo";
+
+/**
+ * The names of all supported implementations
+ *
+ * Modify this type to add support for more implementations
+ * @example
+ * export type ImplementationNames = typeof mongoImplementationName | typeof myImplementationName;
+ */
+export type ImplementationNames = typeof mongoImplementationName;
+
+/**
  * The key name of the unique identifier for each entity
  */
 const idKey = "_id";
@@ -25,16 +39,27 @@ export const idSchema = objectIdSchema;
 export type IdType = z.infer<typeof idSchema>;
 
 /**
+ * The name of the accounts collection
+ */
+export const accountCollectionName = "accounts";
+
+/**
+ * The name of the customers collection
+ */
+export const customerCollectionName = "customers";
+
+/**
+ * The name of the transactions collection
+ */
+export const transactionCollectionName = "transactions";
+
+/**
  * A map of all entities collection names and their types
- * @example
- * const customer1: EntitiesMap["customers"] = { ... };
- * // equivalent to
- * const customer2: Customer = { ... };
  */
 export type EntitiesMap = {
-  accounts: Account;
-  customers: Customer;
-  transactions: Transaction;
+  [accountCollectionName]: Account;
+  [customerCollectionName]: Customer;
+  [transactionCollectionName]: Transaction;
 };
 
 /**
