@@ -25,7 +25,7 @@ export interface StatusError extends Error {
  */
 export const toStatusError = (
   error: string | Error,
-  status: StatusCodes = StatusCodes.BAD_REQUEST,
+  status: StatusCodes = StatusCodes.INTERNAL_SERVER_ERROR,
   details: string | undefined = undefined
 ): StatusError => {
   const err = typeof error === "string" ? new Error(error) : error;
@@ -35,12 +35,21 @@ export const toStatusError = (
   };
 };
 
-type CommonError = "Not Found" | "Bad Request" | "Internal Server Error";
-
-const buildCommonError = <T extends keyof EntitiesMap>(
-  error: StatusCodes,
-  relatedTo?: T
+export const customStatusErrorBuilder = (
+  status: StatusCodes,
+  message: string
 ) => {
-  const errorMessage = `${getReasonPhrase(error)} from ${relatedTo}`;
-  return toStatusError(errorMessage, error);
+  return toStatusError(message, status);
+};
+
+export const statusErrorBuilder = <T extends keyof EntitiesMap>(
+  entity: T,
+  status: StatusCodes,
+  details: string | undefined = undefined
+) => {
+  return toStatusError(
+    `${getReasonPhrase(status)} ${entity} ${details}`,
+    status,
+    details
+  );
 };
