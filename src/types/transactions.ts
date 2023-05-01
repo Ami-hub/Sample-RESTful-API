@@ -3,6 +3,7 @@ import {
   singleTransactionSchema,
   transactionSchema,
 } from "../validators/transactionValidators";
+import { Id } from "./general";
 
 /**
  * Type for a single transaction object.
@@ -64,4 +65,4 @@ export type SingleTransaction = z.infer<typeof singleTransactionSchema>;
  * ```
  *
  */
-export type Transaction = z.infer<typeof transactionSchema>;
+export type Transaction = z.infer<typeof transactionSchema> & Id;

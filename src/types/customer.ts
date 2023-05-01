@@ -5,6 +5,7 @@ import {
   tierAndDetailsSchema,
   tiersSchema,
 } from "../validators/customerValidator";
+import { Id } from "./general";
 
 /**
  * Represents a tier level.
@@ -80,4 +81,4 @@ export type TierAndDetails = z.infer<typeof tierAndDetailsSchema>;
  * };
  * ```
  */
-export type Customer = z.infer<typeof customerSchema>;
+export type Customer = z.infer<typeof customerSchema> & Id;

@@ -45,7 +45,6 @@ export const tierAndDetailsSchema = z.object({
  * Zod schema for `customer` object.
  */
 export const customerSchema = z.object({
-  _id: idSchema,
   username: z.string(),
   name: z.string(),
   address: z.string(),

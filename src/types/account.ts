@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { accountSchema, productsSchema } from "../validators/accountValidators";
+import { Id } from "./general";
 
 /**
  * Represents the options for the `products` field in an account.
@@ -35,4 +36,4 @@ export type ProductName = z.infer<typeof productsSchema>;
  * };
  * ```
  */
-export type Account = z.infer<typeof accountSchema>;
+export type Account = z.infer<typeof accountSchema> & Id;
