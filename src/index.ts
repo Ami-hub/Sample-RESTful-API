@@ -1,5 +1,5 @@
 import express from "express";
-import { env } from "./utils/env";
+import { env } from "./env";
 import { getAccountRouter } from "./routing/routers/accountRouter";
 import { getDalManager } from "./DB/dalManager";
 import {
