@@ -31,7 +31,10 @@ const initilizeEntetiesRouters = async (
   const dalManager = await getDalManager(implementationName).connect();
   const entityDalGetter = dalManager.getEntityDalByName;
 
-  app.use(`/${accountCollectionName}`, getAccountRouter(entityDalGetter));
+  app.use(
+    `/${accountCollectionName}`,
+    getAccountRouter(entityDalGetter(accountCollectionName))
+  );
 };
 
 export const runApp = async (app: Express) => {
