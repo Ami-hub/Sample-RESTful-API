@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
 import { toStatusError } from "../../types/statusError";
 
 export const deferToErrorMiddleware = (
@@ -22,7 +21,7 @@ export const errorHandler = <T extends Error>(
 ) => {
   const statusError = toStatusError(err);
 
-  res.status(statusError.status).send({
+  res.status(statusError.status).json({
     error: statusError.message,
   });
 };
