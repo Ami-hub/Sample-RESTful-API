@@ -49,7 +49,9 @@ export const toStatusError = (
     : findKeyInAnyDepth(error, "message") || error.message || "Unknown error";
 
   const name = isString ? "Error" : error.name || "Error";
-
+  if (name === "ZodError") {
+    status = StatusCodes.BAD_REQUEST;
+  }
   const statusError: StatusError = {
     name,
     message,
