@@ -1,17 +1,15 @@
 import { NextFunction, Request, Response } from "express";
 import { toStatusError } from "../../types/statusError";
 
-export const deferToErrorMiddleware = (
-  Fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
-) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+export const deferToErrorMiddleware =
+  (route: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await Fn(req, res, next);
-    } catch (error) {
-      next(error);
+      await route(req, res, next);
+    } catch (err) {
+      next(err);
     }
   };
-};
 
 export const errorHandler = <T extends Error>(
   err: T,
