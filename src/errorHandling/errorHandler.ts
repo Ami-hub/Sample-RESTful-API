@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { toStatusError } from "../../types/statusError";
+import { toStatusError } from "./statusError";
 
 export const deferToErrorMiddleware =
   (route: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>

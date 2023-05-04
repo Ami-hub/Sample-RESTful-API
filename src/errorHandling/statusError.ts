@@ -1,5 +1,6 @@
-import { StatusCodes, getReasonPhrase } from "http-status-codes";
-import { EntitiesMap } from "./general";
+import { StatusCodes } from "http-status-codes";
+import { EntitiesMap, IdType } from "../types/general";
+import { CRUDOperation } from "../DB/CRUD";
 
 /**
  * An error with a status code.
@@ -29,14 +30,6 @@ const findKeyInAnyDepth = (obj: any, key: string): any => {
  * @param error The error to convert.
  * @param status The status code to use.
  * @returns The status error.
- *
- * @example
- * ```ts
- * const error = new Error("Something went wrong");
- * const statusError1 = toStatusError(error, StatusCodes.BAD_REQUEST);
- * const errorMsg = "Something went wrong"
- * const statusError2 = toStatusError(errorMsg, StatusCodes.BAD_REQUEST);
- * ```
  */
 export const toStatusError = (
   error: string | Error,
@@ -60,23 +53,4 @@ export const toStatusError = (
   };
 
   return statusError;
-};
-
-export const customStatusErrorBuilder = (
-  status: StatusCodes,
-  message: string
-) => {
-  return toStatusError(message, status);
-};
-
-export const statusErrorBuilder = <T extends keyof EntitiesMap>(
-  entity: T,
-  status: StatusCodes,
-  details: string | undefined = undefined
-) => {
-  return toStatusError(
-    `${getReasonPhrase(status)} ${entity} ${details}`,
-    status,
-    details
-  );
 };

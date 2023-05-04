@@ -8,6 +8,17 @@ import {
 } from "../types/general";
 import { getMongoCRUD } from "./mongo/mongoCRUD";
 
+/**
+ * Supported operations
+ */
+export type CRUDOperation = "read" | "create" | "update" | "delete";
+
+/**
+ * Gets a CRUD instance
+ * @param entityName name of the entity
+ * @param implementationName name of the implementation
+ * @returns a CRUD instance
+ */
 export interface CRUD<T extends Entities> {
   /**
    * Gets all entity instances

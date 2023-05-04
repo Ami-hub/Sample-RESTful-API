@@ -1,5 +1,5 @@
 import { getAccountRouter } from "../routing/routers/accountRouter";
-import { errorHandler } from "../routing/routes/errorHandler";
+import { errorHandler } from "../errorHandling/errorHandler";
 import { ImplementationNames, accountCollectionName } from "../types/general";
 import express, { Express } from "express";
 import { env } from "../env";

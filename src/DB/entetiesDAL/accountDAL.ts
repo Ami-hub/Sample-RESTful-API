@@ -1,3 +1,4 @@
+import { getErrorBuilder } from "../../errorHandling/errorBuilder";
 import { Account } from "../../types/account";
 import {
   IdKey,
@@ -85,6 +86,7 @@ export const getAccountDAL = (
   implementationName: ImplementationNames
 ): AccountDAL => {
   const accountCrud = getCRUD(implementationName, accountCollectionName);
+  const errorBuilder = getErrorBuilder(accountCollectionName);
 
   const readAllAccounts = async () => {
     const accounts = await accountCrud.readAll();
@@ -99,7 +101,7 @@ export const getAccountDAL = (
   const createAccount = async (data: Omit<Account, IdKey>) => {
     const id = await accountCrud.create(data);
     if (!id) {
-      throw new Error("Failed to create account");
+      throw errorBuilder.generalError("create");
     }
     return id;
   };
@@ -110,7 +112,7 @@ export const getAccountDAL = (
   ) => {
     const updatedAccount = await accountCrud.update(id, data);
     if (!updatedAccount) {
-      throw new Error("Failed to update account");
+      throw errorBuilder.generalError("update");
     }
     return updatedAccount;
   };
@@ -118,7 +120,7 @@ export const getAccountDAL = (
   const deleteAccount = async (id: IdType) => {
     const deletedAccount = await accountCrud.delete(id);
     if (!deletedAccount) {
-      throw new Error("Failed to delete account");
+      throw errorBuilder.generalError("delete");
     }
     return deletedAccount;
   };
