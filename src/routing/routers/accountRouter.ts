@@ -1,31 +1,30 @@
 import { Router } from "express";
 import { getAccountRoutes } from "../routes/accountRoutes";
-import { EntitiesDalMap } from "../../DB/entetiesDAL/entetiesDAL";
-import { accountCollectionName } from "../../types/general";
-import { deferToErrorHandler } from "../routes/errorHandler";
+import { deferToErrorMiddleware } from "../../errorHandling/errorHandler";
+import { AccountDAL } from "../../DB/entetiesDAL/accountDAL";
 
-export const getAccountRouter = (
-  entityDalGetter: <T extends keyof EntitiesDalMap>(
-    collectionName: T
-  ) => EntitiesDalMap[T]
-) => {
+export const getAccountRouter = (accountDAL: AccountDAL) => {
   const accountsRouter = Router();
 
-  const accountRoutes = getAccountRoutes(
-    entityDalGetter(accountCollectionName)
+  const accountRoutes = getAccountRoutes(accountDAL);
+
+  accountsRouter.get("/", deferToErrorMiddleware(accountRoutes.getAllAccounts));
+
+  accountsRouter.get(
+    "/:id",
+    deferToErrorMiddleware(accountRoutes.getAccountById)
   );
 
-  accountsRouter.get("/", deferToErrorHandler(accountRoutes.getAllAccounts));
+  accountsRouter.post("/", deferToErrorMiddleware(accountRoutes.createAccount));
 
-  accountsRouter.get("/:id", deferToErrorHandler(accountRoutes.getAccountById));
-
-  accountsRouter.post("/", deferToErrorHandler(accountRoutes.createAccount));
-
-  accountsRouter.put("/:id", deferToErrorHandler(accountRoutes.updateAccount));
+  accountsRouter.put(
+    "/:id",
+    deferToErrorMiddleware(accountRoutes.updateAccount)
+  );
 
   accountsRouter.delete(
     "/:id",
-    deferToErrorHandler(accountRoutes.deleteAccount)
+    deferToErrorMiddleware(accountRoutes.deleteAccount)
   );
 
   return accountsRouter;

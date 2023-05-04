@@ -32,7 +32,6 @@ export const singleTransactionSchema = z.object({
  * Zod schema for a transaction document how it is stored in the database.
  */
 export const transactionSchema = z.object({
-  _id: idSchema,
   account_id: z.number().min(10000).max(Number.MAX_SAFE_INTEGER),
   transaction_count: z.number().positive(),
   bucket_start_date: z.date(),

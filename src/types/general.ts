@@ -39,6 +39,13 @@ export const idSchema = objectIdStringSchema;
 export type IdType = z.infer<typeof idSchema>;
 
 /**
+ * The unique identifier for each entity
+ * @see {@link IdType}
+ * @see {@link idKey}
+ */
+export type Id = { [idKey]: IdType };
+
+/**
  * The name of the accounts collection
  */
 export const accountCollectionName = "accounts";

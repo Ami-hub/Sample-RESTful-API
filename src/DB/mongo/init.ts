@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import { env } from "../../utils/env";
+import { env } from "../../env";
 import { EntitiesMap } from "../../types/general";
 
 const client = new MongoClient(env.MONGODB_URI);
