@@ -4,6 +4,7 @@ import { ImplementationNames, accountCollectionName } from "../types/general";
 import express, { Express } from "express";
 import { env } from "../env";
 import { getDalManager } from "../DB/dalManager";
+import { logger } from "../logging/logger";
 
 export const initilizeApp = async (
   app: Express,
@@ -39,7 +40,9 @@ const initilizeEntetiesRouters = async (
 
 export const runApp = async (app: Express) => {
   app.listen(env.PORT, "0.0.0.0", () => {
-    console.log(`Server is up and listening on port ${env.PORT}`);
+    logger.info(`Server is up and listening on port ${env.PORT}`);
+    logger.info(`Running in ${env.NODE_ENV} mode`);
   });
+
   return app;
 };
