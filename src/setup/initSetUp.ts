@@ -9,6 +9,7 @@ import {
   httpResponsesLogger,
   logger,
 } from "../logging/logger";
+import { defaultRoutes, helloRoutes } from "../routing/routes/default";
 
 export const initilizeApp = async (
   app: Express,
@@ -25,11 +26,10 @@ export const initilizeApp = async (
   await initilizeEntetiesRouters(app, implementationName);
   logger.info(`All entities routers initialized`);
 
-  app.use("/", (_req, res) => {
-    res.send({
-      Response: "Hello World",
-    });
-  });
+  app.get("/", helloRoutes);
+  logger.info(`Initialized hello router`);
+
+  app.use(defaultRoutes);
   logger.info(`Initialized default router`);
 
   app.use(errorHandler);
