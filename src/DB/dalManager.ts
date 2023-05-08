@@ -1,5 +1,5 @@
 import { ImplementationNames, mongoImplementationName } from "../types/general";
-import { EntitiesDalMap } from "./entetiesDAL/entetiesDAL";
+import { EntitiesDalMap } from "./entitiesDAL/entitiesDAL";
 import { getMongoDalManager } from "./mongo/mongoDalManager";
 
 export interface DalManager {

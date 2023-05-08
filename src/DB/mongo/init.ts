@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { env } from "../../env";
 import { EntitiesMap } from "../../types/general";
+import { logger } from "../../logging/logger";
 
 const client = new MongoClient(env.MONGODB_URI);
 
@@ -12,11 +13,21 @@ export const connectToDB = async () => {
   try {
     await client.connect();
   } catch (error) {
-    console.log("Cannot connect to DB!");
-    console.log("Please make sure:");
-    console.log(
-      "\t1. Your DB connection string is valid.\n\t2. Your internet connection is stable.\n\t3. Your ip address is whitelisted in your DB."
-    );
+    logger.error(`Error connecting to DB: ${error}`);
+  }
+};
+
+/**
+ * Checks if the DB is connected
+ *
+ * @returns true if the DB is connected, false otherwise
+ */
+export const isConnected = () => {
+  try {
+    getDbInstance().command({ ping: 1 });
+    return true;
+  } catch (error) {
+    return false;
   }
 };
 

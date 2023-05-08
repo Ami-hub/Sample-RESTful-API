@@ -1,5 +1,4 @@
 import z from "zod";
-import { idSchema } from "../types/general";
 
 /**
  * Zod schema for an accurate number.

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { idSchema } from "../../types/general";
 import { accountSchema } from "../../validators/accountValidators";
-import { AccountDAL } from "../../DB/entetiesDAL/accountDAL";
+import { AccountDAL } from "../../DB/entitiesDAL/accountDAL";
 
 export const getAccountRoutes = (accountDal: AccountDAL) => {
   const getAllAccounts = async (_req: Request, res: Response) => {
