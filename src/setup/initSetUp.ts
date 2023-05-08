@@ -4,7 +4,11 @@ import { ImplementationNames, accountCollectionName } from "../types/general";
 import express, { Express } from "express";
 import { env } from "../env";
 import { getDalManager } from "../DB/dalManager";
-import { logger } from "../logging/logger";
+import {
+  httpRequestsLogger,
+  httpResponsesLogger,
+  logger,
+} from "../logging/logger";
 
 export const initilizeApp = async (
   app: Express,
@@ -12,15 +16,24 @@ export const initilizeApp = async (
 ) => {
   app.use(express.json());
 
+  app.use(httpRequestsLogger);
+  logger.info(`Initialized HTTP requests logger`);
+
+  app.use(httpResponsesLogger);
+  logger.info(`Initialized HTTP responses logger`);
+
   await initilizeEntetiesRouters(app, implementationName);
+  logger.info(`All entities routers initialized`);
 
   app.use("/", (_req, res) => {
     res.send({
       Response: "Hello World",
     });
   });
+  logger.info(`Initialized default router`);
 
   app.use(errorHandler);
+  logger.info(`Initialized error handler`);
 
   return app;
 };
@@ -36,6 +49,7 @@ const initilizeEntetiesRouters = async (
     `/${accountCollectionName}`,
     getAccountRouter(entityDalGetter(accountCollectionName))
   );
+  logger.info(`Initialized ${accountCollectionName} router`);
 };
 
 export const runApp = async (app: Express) => {
