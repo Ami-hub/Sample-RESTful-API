@@ -1,4 +1,4 @@
-import { objectIdStringSchema } from "../validators/valitationUtils";
+import { objectIdStringSchema } from "../validators/validationUtils";
 import { Account } from "./account";
 import { Customer } from "./customer";
 import { z } from "zod";

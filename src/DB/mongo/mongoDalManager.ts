@@ -1,6 +1,6 @@
 import { mongoImplementationName } from "../../types/general";
 import { DalManager } from "../dalManager";
-import { EntitiesDalMap, getEntityDal } from "../entetiesDAL/entetiesDAL";
+import { EntitiesDalMap, getEntityDal } from "../entitiesDAL/entitiesDAL";
 import { connectToDB, disconnectFromDB } from "./init";
 
 /**

@@ -3,18 +3,31 @@ import { EntitiesMap, IdType } from "../types/general";
 import { CRUDOperation } from "../DB/CRUD";
 import { toStatusError } from "./statusError";
 
-export const getErrorBuilder = <T extends keyof EntitiesMap>(
+/**
+ * Creates a custom error.
+ *
+ * @Note Do not use this function to create errors related to entities. **Use the {@link getEntityErrorBuilder} function instead.**
+ * @param status the status code of the error
+ * @param message the message of the error
+ * @param details the details of the error
+ * @returns a custom error
+ * @example
+ * ```ts
+ * customError(StatusCodes.NOT_FOUND, "No such resource", `No such resource ${resourceName} not exist`);
+ * ```
+ */
+export const customError = (
+  status: StatusCodes,
+  message: string,
+  details: string | undefined = undefined
+) => {
+  return toStatusError(message, status, details);
+};
+
+export const getEntityErrorBuilder = <T extends keyof EntitiesMap>(
   relatedEntity: T
 ) => {
   const entityName = relatedEntity.slice(0, -1); // make singular
-
-  const customError = (
-    status: StatusCodes,
-    message: string,
-    details: string | undefined = undefined
-  ) => {
-    return toStatusError(message, status, details);
-  };
 
   const generalError = (
     relatedOperation: CRUDOperation,

@@ -49,7 +49,7 @@ export type Benefit = z.infer<typeof benefitSchema>;
 export type TierAndDetails = z.infer<typeof tierAndDetailsSchema>;
 
 /**
- * Represents an cusomer object.
+ * Represents an customer object.
  *
  * @property `_id` - The ID of the customer.
  * @property `username` - The username of the customer.

@@ -1,4 +1,4 @@
-import { getErrorBuilder } from "../../errorHandling/errorBuilder";
+import { getEntityErrorBuilder } from "../../errorHandling/errorBuilder";
 import { Account } from "../../types/account";
 import {
   IdKey,
@@ -86,7 +86,7 @@ export const getAccountDAL = (
   implementationName: ImplementationNames
 ): AccountDAL => {
   const accountCrud = getCRUD(implementationName, accountCollectionName);
-  const errorBuilder = getErrorBuilder(accountCollectionName);
+  const errorBuilder = getEntityErrorBuilder(accountCollectionName);
 
   const readAllAccounts = async () => {
     const accounts = await accountCrud.readAll();
