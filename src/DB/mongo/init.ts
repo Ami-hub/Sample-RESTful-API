@@ -17,6 +17,20 @@ export const connectToDB = async () => {
   }
 };
 
+/**
+ * Checks if the DB is connected
+ *
+ * @returns true if the DB is connected, false otherwise
+ */
+export const isConnected = () => {
+  try {
+    getDbInstance().command({ ping: 1 });
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 const getDbInstance = () => {
   return client.db(env.MAIN_DB_NAME);
 };
