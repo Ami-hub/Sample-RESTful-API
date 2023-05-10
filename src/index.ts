@@ -7,7 +7,7 @@ const main = async () => {
 
   await initializeApp(app, mongoImplementationName);
 
-  runApp(app);
+  await runApp(app);
 };
 
 main();

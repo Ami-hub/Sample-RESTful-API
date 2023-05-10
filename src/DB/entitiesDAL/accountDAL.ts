@@ -1,12 +1,7 @@
-import { getEntityErrorBuilder } from "../../errorHandling/errorBuilder";
-import { Account } from "../../types/account";
-import {
-  IdKey,
-  IdType,
-  ImplementationNames,
-  accountCollectionName,
-} from "../../types/general";
-import { getCRUD } from "../CRUD";
+import {getEntityErrorBuilder} from "../../errorHandling/errorBuilder";
+import {Account} from "../../types/account";
+import {accountCollectionName, IdKey, IdType, ImplementationNames,} from "../../types/general";
+import {getCRUD} from "../CRUD";
 
 export interface AccountDAL {
   /**
@@ -89,13 +84,11 @@ export const getAccountDAL = (
   const errorBuilder = getEntityErrorBuilder(accountCollectionName);
 
   const readAllAccounts = async () => {
-    const accounts = await accountCrud.readAll();
-    return accounts;
+    return await accountCrud.readAll();
   };
 
   const readAccountById = async (id: IdType) => {
-    const account = await accountCrud.readById(id);
-    return account;
+    return await accountCrud.readById(id);
   };
 
   const createAccount = async (data: Omit<Account, IdKey>) => {

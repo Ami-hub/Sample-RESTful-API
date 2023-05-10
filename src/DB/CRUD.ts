@@ -1,5 +1,4 @@
 import {
-  Entities,
   EntitiesMap,
   IdKey,
   IdType,
@@ -9,7 +8,7 @@ import {
 import { getMongoCRUD } from "./mongo/mongoCRUD";
 
 /**
- * Supported operations
+ * Supported CRUD operations
  */
 export type CRUDOperation = "read" | "create" | "update" | "delete";
 
@@ -19,7 +18,7 @@ export type CRUDOperation = "read" | "create" | "update" | "delete";
  * @param implementationName name of the implementation
  * @returns a CRUD instance
  */
-export interface CRUD<T extends Entities> {
+export interface CRUD<T extends EntitiesMap[keyof EntitiesMap]> {
   /**
    * Gets all entity instances
    * @returns an array of entity instances
@@ -39,7 +38,10 @@ export interface CRUD<T extends Entities> {
    * @param value value of the field
    * @returns an entity instance or null if not found
    */
-  readByField<K extends keyof T>(field: K, value: T[K]): Promise<Array<T>>;
+  readByField<K extends keyof Omit<T, IdKey>>(
+    field: K,
+    value: Omit<T, IdKey>[K]
+  ): Promise<Array<T>>;
 
   /**
    * Creates a new entity instance
@@ -59,7 +61,7 @@ export interface CRUD<T extends Entities> {
   /**
    * Deletes an entity instance
    * @param id id of the entity instance
-   * @returns the deleted entity instance or null it not deleted
+   * @returns the deleted entity instance or null it did not delete
    */
   delete(id: IdType): Promise<T | null>;
 }

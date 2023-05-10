@@ -3,7 +3,7 @@ import z from "zod";
 /**
  * Zod schema for a product name.
  */
-export const productsSchema = z.enum([
+const productsSchema = z.enum([
   "Derivatives",
   "InvestmentStock",
   "Commodity",

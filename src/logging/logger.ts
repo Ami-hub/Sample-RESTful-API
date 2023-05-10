@@ -1,4 +1,5 @@
 import winston, { createLogger, format, transports } from "winston";
+import { env } from "../env";
 
 const { combine, timestamp, printf, colorize } = format;
 
@@ -29,11 +30,21 @@ const loggerFormat: winston.Logform.Format = combine(
   colorizer
 );
 
+const logLevelForTest = "error";
+const logLevelForDev = "silly";
+const logLevelForProd = "info";
+
+const loggerLevel = env.isProd
+  ? logLevelForProd
+  : env.isTest
+  ? logLevelForTest
+  : logLevelForDev;
+
 /**
  * Winston logger instance.
  */
 export const logger = createLogger({
-  level: "silly", // set the log level to the lowest (silliest) level
+  level: loggerLevel,
   transports: [new transports.Console()],
   format: loggerFormat,
 });

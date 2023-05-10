@@ -1,8 +1,9 @@
-import { objectIdStringSchema } from "../validators/validationUtils";
+import { objectIdStringSchema } from "../validators/objectIdValidator";
 import { Account } from "./account";
 import { Customer } from "./customer";
 import { z } from "zod";
 import { Transaction } from "./transactions";
+import { EntitiesDalMap } from "../DB/entitiesDAL/entitiesDAL";
 
 /**
  * The name of the mongo implementation
@@ -70,6 +71,9 @@ export type EntitiesMap = {
 };
 
 /**
- * A union of all entities
+ * A map of all entities collection names and their DALs
+ * @see {@link EntitiesDalMap}
  */
-export type Entities = EntitiesMap[keyof EntitiesMap];
+export type EntityDalGetter = <T extends keyof EntitiesDalMap>(
+  collectionName: T
+) => EntitiesDalMap[T];

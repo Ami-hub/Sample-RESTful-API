@@ -1,6 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-import { EntitiesMap, IdType } from "../types/general";
-import { CRUDOperation } from "../DB/CRUD";
 
 /**
  * An error with a status code.
@@ -29,6 +27,7 @@ const findKeyInAnyDepth = (obj: any, key: string): any => {
  *
  * @param error The error to convert.
  * @param status The status code to use.
+ * @param details
  * @returns The status error.
  */
 export const toStatusError = (

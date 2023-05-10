@@ -1,23 +1,13 @@
 import z from "zod";
 
-/**
- * Zod schema for `tier and details` id.
- * @example "59ee9884093f41cc94b4b59e81655bf4"
- */
 const tierAndDetailsIdSchema = z
   .string()
   .length(32)
   .regex(/^[a-zA-Z0-9]+$/); // 32 alphanumeric characters
 
-/**
- * Zod schema for a `tier`.
- */
-export const tiersSchema = z.enum(["Platinum", "Gold", "Silver", "Bronze"]);
+const tiersSchema = z.enum(["Platinum", "Gold", "Silver", "Bronze"]);
 
-/**
- * Zod schema for a `benefit`.
- */
-export const benefitSchema = z.enum([
+const benefitSchema = z.enum([
   "sports tickets",
   "24 hour dedicated line",
   "concierge services",

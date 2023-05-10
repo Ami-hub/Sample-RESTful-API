@@ -20,9 +20,9 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
     return result;
   };
 
-  const readByField = async <K extends keyof EntitiesMap[T]>(
+  const readByField = async <K extends keyof Omit<EntitiesMap[T], IdKey>>(
     field: K,
-    value: EntitiesMap[T][K]
+    value: Omit<EntitiesMap[T], IdKey>[K]
   ) => {
     const result = await collection
       .find<EntitiesMap[T]>({ [field]: value })

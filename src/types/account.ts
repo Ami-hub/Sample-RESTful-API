@@ -1,16 +1,6 @@
 import { z } from "zod";
-import { accountSchema, productsSchema } from "../validators/accountValidators";
+import { accountSchema } from "../validators/accountValidators";
 import { Id } from "./general";
-
-/**
- * Represents the options for the `products` field in an account.
- *
- * @example
- * ```ts
- * const productName: ProductName = "CurrencyService";
- * ```
- */
-export type ProductName = z.infer<typeof productsSchema>;
 
 /**
  * Represents an account.
