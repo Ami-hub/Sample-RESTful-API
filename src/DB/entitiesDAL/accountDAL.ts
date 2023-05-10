@@ -1,7 +1,13 @@
-import {getEntityErrorBuilder} from "../../errorHandling/errorBuilder";
-import {Account} from "../../types/account";
-import {accountCollectionName, IdKey, IdType, ImplementationNames,} from "../../types/general";
-import {getCRUD} from "../CRUD";
+import { getEntityErrorBuilder } from "../../errorHandling/errorBuilder";
+import { Account } from "../../types/account";
+import {
+  accountCollectionName,
+  IdKey,
+  IdType,
+  ImplementationNames,
+} from "../../types/general";
+import { getValidator } from "../../validators/validators";
+import { getCRUD } from "../CRUD";
 
 export interface AccountDAL {
   /**
@@ -39,7 +45,7 @@ export interface AccountDAL {
    * ```
    *
    */
-  createAccount(data: Omit<Account, IdKey>): Promise<IdType>;
+  createAccount(data: unknown): Promise<IdType>;
 
   /**
    * Update an account
@@ -55,10 +61,7 @@ export interface AccountDAL {
    * console.log(`Account updated to: ${account}`);
    * ```
    */
-  updateAccount(
-    id: IdType,
-    data: Partial<Omit<Account, IdKey>>
-  ): Promise<Account>;
+  updateAccount(id: IdType, data: unknown): Promise<Account>;
 
   /**
    * Delete an account
@@ -82,6 +85,7 @@ export const getAccountDAL = (
 ): AccountDAL => {
   const accountCrud = getCRUD(implementationName, accountCollectionName);
   const errorBuilder = getEntityErrorBuilder(accountCollectionName);
+  const accountValidator = getValidator(accountCollectionName);
 
   const readAllAccounts = async () => {
     return await accountCrud.readAll();
@@ -91,19 +95,19 @@ export const getAccountDAL = (
     return await accountCrud.readById(id);
   };
 
-  const createAccount = async (data: Omit<Account, IdKey>) => {
-    const id = await accountCrud.create(data);
+  const createAccount = async (data: unknown) => {
+    const validAccount = accountValidator.validateEntity(data);
+    const id = await accountCrud.create(validAccount);
     if (!id) {
       throw errorBuilder.generalError("create");
     }
     return id;
   };
 
-  const updateAccount = async (
-    id: IdType,
-    data: Partial<Omit<Account, IdKey>>
-  ) => {
-    const updatedAccount = await accountCrud.update(id, data);
+  const updateAccount = async (id: IdType, data: unknown) => {
+    const validAccount = accountValidator.validateFields(data);
+    const updatedAccount = await accountCrud.update(id, validAccount);
+
     if (!updatedAccount) {
       throw errorBuilder.generalError("update");
     }

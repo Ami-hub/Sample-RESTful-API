@@ -35,18 +35,12 @@ export const toStatusError = (
   status: StatusCodes = StatusCodes.INTERNAL_SERVER_ERROR,
   details: string | undefined = undefined
 ) => {
-  const isString = typeof error === "string";
-  const message = isString
-    ? error
-    : findKeyInAnyDepth(error, "message") || error.message || "Unknown error";
+  const errName = typeof error === "string" ? "Error" : error.name;
+  const errMessage = typeof error === "string" ? error : error.message;
 
-  const name = isString ? "Error" : error.name || "Error";
-  if (name === "ZodError") {
-    status = StatusCodes.BAD_REQUEST;
-  }
   const statusError: StatusError = {
-    name,
-    message,
+    name: errName,
+    message: errMessage,
     status,
     details,
   };

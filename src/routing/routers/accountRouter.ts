@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { getAccountRoutes } from "../routes/accountRoutes";
 import { deferToErrorMiddleware } from "../../errorHandling/errorHandler";
-import { AccountDAL } from "../../DB/entitiesDAL/accountDAL";
+import { EntityDalGetter } from "../../types/general";
 
-export const getAccountRouter = (accountDAL: AccountDAL) => {
+export const getAccountRouter = (entityDalGetter: EntityDalGetter) => {
   const accountsRouter = Router();
 
-  const accountRoutes = getAccountRoutes(accountDAL);
+  const accountRoutes = getAccountRoutes(entityDalGetter);
 
   accountsRouter.get("/", deferToErrorMiddleware(accountRoutes.getAllAccounts));
 

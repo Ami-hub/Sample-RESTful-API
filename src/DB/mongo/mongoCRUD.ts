@@ -2,6 +2,7 @@ import { EntitiesMap, IdType, IdKey, idKey } from "../../types/general";
 import { getCollection } from "./init";
 import { CRUD } from "../CRUD";
 import { ObjectId } from "mongodb";
+import { isValidId } from "../../validators/validators";
 
 export const getMongoCRUD = <T extends keyof EntitiesMap>(
   collectionName: T
@@ -14,6 +15,7 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
   };
 
   const readById = async (id: IdType) => {
+    if (!isValidId(id)) return null;
     const result = await collection.findOne<EntitiesMap[T]>({
       [idKey]: new ObjectId(id),
     });
@@ -39,15 +41,18 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
     id: IdType,
     data: Partial<Omit<EntitiesMap[T], IdKey>>
   ) => {
+    const toUpdate = await readById(id);
+    if (!toUpdate) return null;
     const result = await collection.updateOne(
       { [idKey]: new ObjectId(id) },
       { $set: data }
     );
-    return result.acknowledged ? await readById(id) : null;
+    return result.acknowledged ? toUpdate : null;
   };
 
   const deleteOne = async (id: IdType) => {
     const toDelete = await readById(id);
+    if (!toDelete) return null;
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
     return result.acknowledged ? toDelete : null;
   };

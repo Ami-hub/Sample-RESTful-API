@@ -45,16 +45,15 @@ const initializeEntitiesRouters = async (
   const dalManager = await getDalManager(implementationName).connect();
   const entityDalGetter = dalManager.getEntityDalByName;
 
-  app.use(
-    `/${accountCollectionName}`,
-    getAccountRouter(entityDalGetter(accountCollectionName))
-  );
+  app.use(`/${accountCollectionName}`, getAccountRouter(entityDalGetter));
   logger.info(`Initialized ${accountCollectionName} router`);
 };
 
 export const runApp = async (app: Express) => {
   app.listen(env.PORT, "0.0.0.0", () => {
-    logger.info(`Server is up and listening on port ${env.PORT}`);
+    logger.info(
+      `Server is listening on port ${env.PORT} with pid ${process.pid}`
+    );
     logger.info(`Running in ${env.NODE_ENV} mode`);
   });
 

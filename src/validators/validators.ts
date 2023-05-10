@@ -1,7 +1,8 @@
-import { Schema, z } from "zod";
+import { Schema } from "zod";
 import {
   EntitiesMap,
   IdKey,
+  IdType,
   accountCollectionName,
   customerCollectionName,
   idSchema,
@@ -11,6 +12,8 @@ import { accountSchema } from "./accountValidators";
 import { customerSchema } from "./customerValidator";
 import { transactionSchema } from "./transactionValidators";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
+import { toStatusError } from "../errorHandling/statusError";
+import { StatusCodes } from "http-status-codes";
 
 const entitySchemaMap: {
   [key in keyof EntitiesMap]: Schema<Omit<EntitiesMap[key], IdKey>>;
@@ -28,17 +31,12 @@ const entityFieldSchemaMap: {
   [transactionCollectionName]: transactionSchema.partial(),
 };
 
-/**
- * Get a schema by an entity name
- * @param entity name of the entity
- * @returns a zod schema
- * @see {@link entitySchemaMap}
- */
-export const getSchemaByName = <T extends keyof EntitiesMap>(
-  entity: T,
-  isFieldSchema = false
-) => {
-  return isFieldSchema ? entityFieldSchemaMap[entity] : entitySchemaMap[entity];
+const getSchemaByName = <T extends keyof EntitiesMap>(entityName: T) => {
+  return entitySchemaMap[entityName];
+};
+
+const getFieldSchemaByName = <T extends keyof EntitiesMap>(entityName: T) => {
+  return entityFieldSchemaMap[entityName];
 };
 
 /**
@@ -56,19 +54,37 @@ export const getSchemaByName = <T extends keyof EntitiesMap>(
  */
 export const getValidator = <T extends keyof EntitiesMap>(entityName: T) => {
   const errorBuilder = getEntityErrorBuilder(entityName);
+  const errorMessages = "Invalid entity field(s)";
   return {
-    validate: (data: any, action: "create" | "update") => {
-      const isFieldSchema = action === "update";
-      const schema = getSchemaByName(entityName, isFieldSchema);
+    validateEntity: (data: any) => {
+      const schema = getSchemaByName(entityName);
       const parseResult = schema.safeParse(data);
       if (!parseResult.success) {
-        throw errorBuilder.invalidEntityError(
-          action,
+        throw toStatusError(
+          errorMessages,
+          StatusCodes.BAD_REQUEST,
+          parseResult.error.message
+        );
+      }
+      return parseResult.data;
+    },
+
+    validateFields: (data: any) => {
+      const schema = getFieldSchemaByName(entityName);
+      const parseResult = schema.safeParse(data);
+      if (!parseResult.success) {
+        throw toStatusError(
+          errorMessages,
+          StatusCodes.BAD_REQUEST,
           parseResult.error.message
         );
       }
       if (!Object.keys(parseResult.data).length) {
-        throw errorBuilder.invalidEntityError(action, "No data provided!");
+        throw toStatusError(
+          errorMessages,
+          StatusCodes.BAD_REQUEST,
+          "empty object sent"
+        );
       }
       return parseResult.data;
     },
@@ -80,6 +96,6 @@ export const getValidator = <T extends keyof EntitiesMap>(entityName: T) => {
  * @param id id to check
  * @returns true if valid, false otherwise
  */
-export const isValidId = (id: IdKey) => {
+export const isValidId = (id: IdType) => {
   return idSchema.safeParse(id).success;
 };

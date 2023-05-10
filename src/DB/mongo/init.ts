@@ -12,8 +12,9 @@ const client = new MongoClient(env.MONGODB_URI);
 export const connectToDB = async () => {
   try {
     await client.connect();
+    logger.info(`Connected to '${env.MAIN_DB_NAME}' DB`);
   } catch (error) {
-    logger.error(`Error connecting to DB: ${error}`);
+    logger.error(`Failed to connect to '${env.MAIN_DB_NAME}' DB`);
   }
 };
 
