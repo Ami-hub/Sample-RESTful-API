@@ -9,7 +9,7 @@ import { connectToDB, disconnectFromDB } from "./init";
 export const getMongoDalManager = (): DalManager => {
   return {
     connect: async () => {
-      connectToDB();
+      await connectToDB();
       return getMongoDalManager();
     },
     getEntityDalByName: <T extends keyof EntitiesDalMap>(

@@ -6,7 +6,7 @@ import {
 import { Id } from "./general";
 
 /**
- * Represents an tier and details object.
+ * Represents a tier and details object.
  *
  * @property `tier` - The tier level of the customer.
  * @see {@link Tier}.

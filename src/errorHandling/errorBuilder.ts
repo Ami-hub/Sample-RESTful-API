@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { EntitiesMap, IdType } from "../types/general";
 import { CRUDOperation } from "../DB/CRUD";
-import { toStatusError } from "./statusError";
+import { createStatusError } from "./statusError";
 
 /**
  * Creates a custom error.
@@ -21,7 +21,7 @@ export const customError = (
   message: string,
   details: string | undefined = undefined
 ) => {
-  return toStatusError(message, status, details);
+  return createStatusError(message, status, details);
 };
 
 export const getEntityErrorBuilder = <T extends keyof EntitiesMap>(
@@ -32,7 +32,11 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMap>(
     details: string | undefined = undefined
   ) => {
     const message = `Unable to ${relatedOperation} ${relatedEntity}`;
-    return toStatusError(message, StatusCodes.INTERNAL_SERVER_ERROR, details);
+    return createStatusError(
+      message,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      details
+    );
   };
 
   const entityNotFoundError = (
@@ -41,7 +45,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMap>(
     details: string | undefined = undefined
   ) => {
     const message = `Unable to find ${relatedEntity} with ${fieldName} '${value}'`;
-    return toStatusError(message, StatusCodes.NOT_FOUND, details);
+    return createStatusError(message, StatusCodes.NOT_FOUND, details);
   };
 
   const invalidEntityError = (
@@ -49,7 +53,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMap>(
     details: string | undefined = undefined
   ) => {
     const message = `Unable to ${relatedOperation} ${relatedEntity}: invalid entity field(s)!`;
-    return toStatusError(message, StatusCodes.BAD_REQUEST, details);
+    return createStatusError(message, StatusCodes.BAD_REQUEST, details);
   };
 
   return {

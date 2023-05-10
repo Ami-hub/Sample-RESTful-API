@@ -16,7 +16,6 @@ export interface AccountDAL {
    * @example
    * ```ts
    * const accounts = await accountDal.readAll();
-   * console.log(`Found ${accounts.length} accounts`);
    * ```
    */
   readAllAccounts(): Promise<Account[]>;
@@ -28,7 +27,6 @@ export interface AccountDAL {
    * @example
    * ```ts
    * const account = await accountDal.readById(id);
-   * console.log(`Account with id ${id} is: ${account}`);
    * ```
    */
   readAccountById(id: IdType): Promise<Account | null>;
@@ -41,7 +39,6 @@ export interface AccountDAL {
    * ```ts
    * const anAccount = {...};
    * const id = await accountDal.create(anAccount);
-   * console.log(`Account created with id: ${id}`);
    * ```
    *
    */
@@ -58,7 +55,6 @@ export interface AccountDAL {
    * name: "New name",
    * limit: 100000, // new limit
    * });
-   * console.log(`Account updated to: ${account}`);
    * ```
    */
   updateAccount(id: IdType, data: unknown): Promise<Account>;
@@ -70,7 +66,6 @@ export interface AccountDAL {
    * @example
    * ```ts
    * const account = await accountDal.delete(id);
-   * console.log(`Account deleted: ${account}`);
    * ```
    */
   deleteAccount(id: IdType): Promise<Account>;

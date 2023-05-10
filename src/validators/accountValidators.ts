@@ -22,8 +22,10 @@ const productsSchema = z.enum([
  * const account: Account = parseResult.data;
  * ```
  */
-export const accountSchema = z.object({
-  account_id: z.number().min(10000).max(Number.MAX_SAFE_INTEGER),
-  limit: z.number().positive(),
-  products: z.array(productsSchema),
-});
+export const accountSchema = z
+  .object({
+    account_id: z.number().min(10000).max(Number.MAX_SAFE_INTEGER),
+    limit: z.number().positive(),
+    products: z.array(productsSchema),
+  })
+  .strict();

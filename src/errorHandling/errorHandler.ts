@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { toStatusError } from "./statusError";
+import { StatusError, errorToStatusError } from "./statusError";
+import { logger } from "../logging/logger";
 
 export const deferToErrorMiddleware =
   (route: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
@@ -11,14 +12,21 @@ export const deferToErrorMiddleware =
     }
   };
 
-export const errorHandler = <T extends Error>(
+export const errorHandler = <T extends StatusError>(
   err: T,
   _req: Request,
   res: Response,
   _next: NextFunction
 ) => {
-  const statusError = toStatusError(err);
+  logger.debug(`Before: ${err.message}: (${err.status}) - ${err.details}`);
+  const statusError = errorToStatusError(err);
+  logger.debug(
+    `After conversion: ${statusError.message}: (${statusError.status}) - ${statusError.details}`
+  );
 
+  logger.error(
+    `Error: ${statusError.message}: (${statusError.status}) - ${statusError.details}`
+  );
   res.status(statusError.status).json({
     error: statusError.message,
   });

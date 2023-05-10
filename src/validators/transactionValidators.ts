@@ -18,22 +18,26 @@ const tickerSymbol = z.string().regex(/[a-z0-9]+/);
 /**
  * Zod schema for a transaction object.
  */
-export const singleTransactionSchema = z.object({
-  date: z.date(),
-  amount: z.number(),
-  transaction_code: transactionCodeSchema,
-  symbol: tickerSymbol,
-  price: accurateNumberSchema,
-  total: accurateNumberSchema,
-});
+export const singleTransactionSchema = z
+  .object({
+    date: z.date(),
+    amount: z.number(),
+    transaction_code: transactionCodeSchema,
+    symbol: tickerSymbol,
+    price: accurateNumberSchema,
+    total: accurateNumberSchema,
+  })
+  .strict();
 
 /**
  * Zod schema for a transaction document how it is stored in the database.
  */
-export const transactionSchema = z.object({
-  account_id: z.number().min(10000).max(Number.MAX_SAFE_INTEGER),
-  transaction_count: z.number().positive(),
-  bucket_start_date: z.date(),
-  bucket_end_date: z.date(),
-  transactions: z.array(singleTransactionSchema),
-});
+export const transactionSchema = z
+  .object({
+    account_id: z.number().min(10000).max(Number.MAX_SAFE_INTEGER),
+    transaction_count: z.number().positive(),
+    bucket_start_date: z.date(),
+    bucket_end_date: z.date(),
+    transactions: z.array(singleTransactionSchema),
+  })
+  .strict();

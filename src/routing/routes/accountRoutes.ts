@@ -29,15 +29,15 @@ export const getAccountRoutes = (entityDalGetter: EntityDalGetter) => {
   };
 
   const createAccount = async (req: Request, res: Response) => {
-    const account = accountSchema.parse(req.body);
-    const id = await accountDal.createAccount(account);
+    const id = await accountDal.createAccount(req.body);
     res.status(StatusCodes.CREATED).json({ "Inserted id": id.toString() });
   };
 
   const updateAccount = async (req: Request, res: Response) => {
-    const id = idSchema.parse(req.params.id);
-    const account = req.body;
-    const updatedAccount = await accountDal.updateAccount(id, account);
+    const updatedAccount = await accountDal.updateAccount(
+      req.params.id,
+      req.body
+    );
     res.json(updatedAccount);
   };
 

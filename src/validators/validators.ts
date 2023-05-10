@@ -12,7 +12,7 @@ import { accountSchema } from "./accountValidators";
 import { customerSchema } from "./customerValidator";
 import { transactionSchema } from "./transactionValidators";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
-import { toStatusError } from "../errorHandling/statusError";
+import { createStatusError } from "../errorHandling/statusError";
 import { StatusCodes } from "http-status-codes";
 
 const entitySchemaMap: {
@@ -60,30 +60,33 @@ export const getValidator = <T extends keyof EntitiesMap>(entityName: T) => {
       const schema = getSchemaByName(entityName);
       const parseResult = schema.safeParse(data);
       if (!parseResult.success) {
-        throw toStatusError(
+        throw createStatusError(
           errorMessages,
           StatusCodes.BAD_REQUEST,
-          parseResult.error.message
+          !Object.keys(data).length
+            ? `empty object sent`
+            : parseResult.error.message
         );
       }
+
       return parseResult.data;
     },
 
     validateFields: (data: any) => {
       const schema = getFieldSchemaByName(entityName);
       const parseResult = schema.safeParse(data);
-      if (!parseResult.success) {
-        throw toStatusError(
-          errorMessages,
-          StatusCodes.BAD_REQUEST,
-          parseResult.error.message
-        );
-      }
-      if (!Object.keys(parseResult.data).length) {
-        throw toStatusError(
+      if (!Object.keys(data).length) {
+        throw createStatusError(
           errorMessages,
           StatusCodes.BAD_REQUEST,
           "empty object sent"
+        );
+      }
+      if (!parseResult.success) {
+        throw createStatusError(
+          errorMessages,
+          StatusCodes.BAD_REQUEST,
+          parseResult.error.message
         );
       }
       return parseResult.data;

@@ -6,6 +6,10 @@ import { logger } from "../../logging/logger";
 const client = new MongoClient(env.MONGODB_URI);
 
 /**
+ * The interval in which the DB will try to reconnect to the DB if the connection is failed
+ */
+const reconnectingIntervalMs = 15000;
+/**
  * Connects to the DB
  * @NOTE if you have already connected to the DB, this function will do nothing
  */
@@ -15,6 +19,8 @@ export const connectToDB = async () => {
     logger.info(`Connected to '${env.MAIN_DB_NAME}' DB`);
   } catch (error) {
     logger.error(`Failed to connect to '${env.MAIN_DB_NAME}' DB`);
+    logger.error(`reconnecting in ${reconnectingIntervalMs / 1000} seconds...`);
+    setTimeout(connectToDB, reconnectingIntervalMs);
   }
 };
 
