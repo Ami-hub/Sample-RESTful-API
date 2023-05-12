@@ -4,9 +4,7 @@ import { ObjectId } from "mongodb";
 /**
  * Represents a zod schema for an ObjectId string
  */
-export const objectIdStringSchema = z
-  .string()
-  .refine((val) => ObjectId.isValid(val), {
-    message: "Invalid ObjectId!",
-    path: [],
-  });
+export const objectIdStringSchema = z.string().refine(ObjectId.isValid, {
+  message: "Invalid ObjectId!",
+  path: [],
+});

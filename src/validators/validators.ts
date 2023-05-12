@@ -1,4 +1,4 @@
-import { Schema } from "zod";
+import { Schema, ZodAny, ZodObject, ZodRawShape } from "zod";
 import {
   EntitiesMap,
   IdKey,
@@ -56,14 +56,14 @@ export const getValidator = <T extends keyof EntitiesMap>(entityName: T) => {
   const errorBuilder = getEntityErrorBuilder(entityName);
   const errorMessages = "Invalid entity field(s)";
   return {
-    validateEntity: (data: any) => {
+    validateEntity: (data: unknown) => {
       const schema = getSchemaByName(entityName);
       const parseResult = schema.safeParse(data);
       if (!parseResult.success) {
         throw createStatusError(
           errorMessages,
           StatusCodes.BAD_REQUEST,
-          !Object.keys(data).length
+          data && !Object.keys(data).length
             ? `empty object sent`
             : parseResult.error.message
         );
@@ -72,16 +72,16 @@ export const getValidator = <T extends keyof EntitiesMap>(entityName: T) => {
       return parseResult.data;
     },
 
-    validateFields: (data: any) => {
+    validateFields: (data: unknown) => {
       const schema = getFieldSchemaByName(entityName);
-      const parseResult = schema.safeParse(data);
-      if (!Object.keys(data).length) {
+      if (data && !Object.keys(data).length) {
         throw createStatusError(
           errorMessages,
           StatusCodes.BAD_REQUEST,
           "empty object sent"
         );
       }
+      const parseResult = schema.safeParse(data);
       if (!parseResult.success) {
         throw createStatusError(
           errorMessages,
