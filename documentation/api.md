@@ -19,7 +19,7 @@ Returns all the data in the collection.
 #### Example Request
 
 ```powershell
-curl https://www.example.com/api/accounts/
+curl "https://www.example.com/api/accounts/"
 ```
 
 #### Example Response
@@ -59,7 +59,7 @@ Returns the data item with the specified ID.
 #### Example Request
 
 ```powershell
-curl https://www.example.com/api/accounts/5ca4bbc7a2dd94ee5816238c
+curl "https://www.example.com/api/accounts/5ca4bbc7a2dd94ee5816238c"
 ```
 
 #### Example Response
@@ -80,7 +80,7 @@ Creates a new data item.
 #### Example Request
 
 ```powershell
-curl -X POST -H "Content-Type: application/json" -d '{"key1":"value1", "key2":"value2"}' https://www.example.com/api/resource
+curl -X POST -H "Content-Type: application/json" -d '{"key1":"value1", "key2":"value2"}' "https://www.example.com/api/resource"
 ```
 
 ```json
@@ -114,7 +114,7 @@ Updates the data item with the specified ID.
 #### Example Request
 
 ```powershell
-curl -X PUT -H "Content-Type: application/json" -d '{"key1":"value1", "key2":"value2"}' https://www.example.com/api/resource
+curl -X PUT -H "Content-Type: application/json" -d '{"key1":"value1", "key2":"value2"}' "https://www.example.com/api/resource"
 ```
 
 ```json
