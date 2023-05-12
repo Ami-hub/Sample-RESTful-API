@@ -105,8 +105,6 @@ You should see the following message:
 
 - [AmiHub](https://github.com/Ami-hub)
 
-<br>
-
 ## 📝 License
 
 - [MIT License ©](https://github.com/Ami-hub/Sample-RESTful-API/blob/main/LICENSE)
