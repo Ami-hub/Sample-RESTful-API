@@ -1,12 +1,19 @@
 # RESTful API Sample Project
 
-This app implements a RESTful API for the [Sample Analytics Dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-analytics/) in MongoDB. This app is designed to provide easy access to the data stored in the database, allowing you to perform CRUD (Create, Read, Update, Delete) operations, and [even more](documentation/api.md).
+This project implements a [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) in [typescript](https://www.typescriptlang.org/) that provides easy access to the data stored in the database allowing you to perform [CRUD operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete).
+The code designed to be easily modified, extended and maintained.
+
+See the [full API documentation](documentation/api.md) for the information about supported routes.
+
+This project sample data is [Sample Analytics Dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-analytics/) in [MongoDB](https://www.mongodb.com/), but can be easily modified to work with any other dataset in any other database.
+
+#
 
 ## 🔗 Dependencies
 
 - 📒 [node](https://nodejs.org/en/)
 - 📦 [npm](https://www.npmjs.com/)
-- 🍃 [mongo](https://www.mongodb.com/)
+- 🍃 [mongo\*](https://www.mongodb.com/)
 
 <br>
 
