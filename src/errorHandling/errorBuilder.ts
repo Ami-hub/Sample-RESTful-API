@@ -13,7 +13,7 @@ import { createStatusError } from "./statusError";
  * @returns a custom error
  * @example
  * ```ts
- * customError(StatusCodes.NOT_FOUND, "No such resource", `No such resource ${resourceName} not exist`);
+ * customError(StatusCodes.NOT_FOUND, "Not found", "The requested resource (${resourceName}) was not found");
  * ```
  */
 export const customError = (

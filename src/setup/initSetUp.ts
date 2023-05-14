@@ -1,60 +1,90 @@
 import { getAccountRouter } from "../routing/routers/accountRouter";
 import { errorHandler } from "../errorHandling/errorHandler";
 import { ImplementationNames, accountCollectionName } from "../types/general";
-import express, { Express } from "express";
+import express, { Application, Express } from "express";
 import { env } from "../env";
 import { getDalManager } from "../DB/dalManager";
 import { logger } from "../logging/logger";
-import { defaultRoutes, helloRoutes } from "../routing/routes/default";
+import { getDefaultsRoutes } from "../routing/routes/default";
 import {
   httpRequestsLogger,
   httpResponsesLogger,
 } from "../logging/loggerMiddleware";
 
+/**
+ * The base URI for all the API routes
+ */
+export const baseApiUri = "/api";
+
 export const initializeApp = async (
-  app: Express,
+  app: Application,
   implementationName: ImplementationNames
 ) => {
   app.use(express.json());
+  logger.verbose(`Initialized JSON body parser middleware`);
 
-  app.use(httpRequestsLogger);
-  logger.info(`Initialized HTTP requests logger`);
-
-  app.use(httpResponsesLogger);
-  logger.info(`Initialized HTTP responses logger`);
+  await initializeHttpTrafficLoggers(app);
+  logger.verbose(`All HTTP traffic loggers initialized`);
 
   await initializeEntitiesRouters(app, implementationName);
-  logger.info(`All entities routers initialized`);
+  logger.verbose(`All entities routers initialized`);
 
-  app.get("/", helloRoutes);
-  logger.info(`Initialized hello router`);
-
-  app.use(defaultRoutes);
-  logger.info(`Initialized default router`);
+  await initializeDefaultRoutes(app);
+  logger.verbose(`All default routes initialized`);
 
   app.use(errorHandler);
-  logger.info(`Initialized error handler`);
+  logger.verbose(`Initialized error handler`);
+
+  return app;
+};
+
+const initializeHttpTrafficLoggers = async (app: Application) => {
+  app.use(httpRequestsLogger);
+  logger.verbose(`Initialized HTTP requests logger`);
+
+  app.use(httpResponsesLogger);
+  logger.verbose(`Initialized HTTP responses logger`);
+
+  return app;
+};
+const initializeDefaultRoutes = async (app: Application) => {
+  const { notFoundRoutes, welcomeRoutes } = await getDefaultsRoutes();
+  app.use(`${baseApiUri}`, welcomeRoutes);
+  logger.verbose(`Initialized welcome route`);
+  app.use(notFoundRoutes);
+  logger.verbose(`Initialized 'not found' route`);
 
   return app;
 };
 
 const initializeEntitiesRouters = async (
-  app: Express,
+  app: Application,
   implementationName: ImplementationNames
 ) => {
   const dalManager = await getDalManager(implementationName).connect();
   const entityDalGetter = dalManager.getEntityDalByName;
 
-  app.use(`/${accountCollectionName}`, getAccountRouter(entityDalGetter));
-  logger.info(`Initialized ${accountCollectionName} router`);
+  app.use(
+    `${baseApiUri}/${accountCollectionName}`,
+    getAccountRouter(entityDalGetter)
+  );
+  logger.verbose(`Initialized ${accountCollectionName} router`);
 };
 
-export const runApp = async (app: Express) => {
-  app.listen(env.PORT, "0.0.0.0", () => {
-    logger.info(
-      `Server is listening on port ${env.PORT} with pid ${process.pid}`
-    );
-    logger.info(`Running in ${env.NODE_ENV} mode`);
+/**
+ * The host to listen to in production mode (all interfaces)
+ */
+const prodHost = "0.0.0.0";
+
+/**
+ * The host to listen to in development mode
+ */
+const devHost = "localhost";
+
+export const runApp = async (app: Application) => {
+  const host = env.isProd ? prodHost : devHost;
+  app.listen(env.PORT, host, () => {
+    logger.verbose(`Listening on port ${env.PORT}`);
   });
 
   return app;
