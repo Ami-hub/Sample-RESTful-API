@@ -15,8 +15,6 @@ This project sample data is [Sample Analytics Dataset](https://www.mongodb.com/d
 - 📦 [npm](https://www.npmjs.com/)
 - 🍃 [mongo\*](https://www.mongodb.com/)
 
-<br>
-
 #
 
 ## 🚀 Quick start
@@ -27,10 +25,10 @@ This project sample data is [Sample Analytics Dataset](https://www.mongodb.com/d
 $ git clone https://github.com/Ami-hub/Sample-RESTful-API.git
 ```
 
-### 🚶🏽‍♀️ Go to the app directory
+### 🚗 Go to the app directory
 
 ```
-$ cd RESTful-API-Example
+$ cd Sample-RESTful-API
 ```
 
 ### 📦 Install dependencies
@@ -79,8 +77,6 @@ You should see the following message:
 }
 ```
 
-<br>
-
 #
 
 ## 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/api)!
@@ -91,7 +87,7 @@ You should see the following message:
 
 ### ❗Important
 
-- It use the free tier of [render](https://render.com/), so the **first** response may take a about 10 seconds to load.  
+- It use the free tier of [render](https://render.com/), so the **first** response may take a about **1 minute** to load.  
   For more information [click here](https://render.com/docs/free#free-web-services).
   <br>
 
@@ -107,4 +103,4 @@ You should see the following message:
 
 ## 📝 License
 
-- [MIT License ©](https://github.com/Ami-hub/Sample-RESTful-API/blob/main/LICENSE)
+- [MIT License](https://github.com/Ami-hub/Sample-RESTful-API/blob/main/LICENSE)
