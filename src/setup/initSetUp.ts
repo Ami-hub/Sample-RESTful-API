@@ -48,9 +48,14 @@ const initializeHttpTrafficLoggers = async (app: Application) => {
   return app;
 };
 const initializeDefaultRoutes = async (app: Application) => {
-  const { notFoundRoutes, welcomeRoutes } = await getDefaultsRoutes();
+  const { notFoundRoutes, welcomeRoutes, faviconHandler } =
+    await getDefaultsRoutes();
+  app.use(faviconHandler);
+  logger.verbose(`Initialized favicon handler`);
+
   app.use(`${baseApiUri}`, welcomeRoutes);
   logger.verbose(`Initialized welcome route`);
+
   app.use(notFoundRoutes);
   logger.verbose(`Initialized 'not found' route`);
 
