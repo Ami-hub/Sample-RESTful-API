@@ -6,9 +6,9 @@ const { combine, timestamp, printf, colorize } = format;
 const colorizer = colorize({
   all: true,
   colors: {
-    info: "blue",
     error: "red",
     warn: "yellow",
+    info: "blue",
     http: "magenta",
     verbose: "cyan",
     debug: "green",

@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { logger } from "./logger";
 
 const httpResponsesLoggerFormat =
-  "[:method] RESPONSE to   :remote-addr :url => :res[content-length] bytes sent with status :status in :response-time ms";
+  "[:method] RESPONSE to :remote-addr :url => :res[content-length] bytes sent with status :status in :response-time ms";
 
 const stream: StreamOptions = {
   write: (message: string) => {
@@ -31,15 +31,17 @@ export const httpRequestsLogger = (
 ) => {
   const { method, url, body, params, query } = req;
   logger.http(
-    `[${method}] REQUEST  from ${
-      req.ip
-    } ${url} => with the body: ${JSON.stringify(body, null, 4)} ${
-      Object.keys(params).length > 0
-        ? `params: ${JSON.stringify(params, null, 4)}`
+    `[${method}] REQUEST from ${req.ip} ${url} => with ${
+      Object.keys(body).length
+        ? `the body: ${JSON.stringify(body, null, 4)}`
+        : "no body"
+    }${
+      Object.keys(params).length
+        ? `, params: ${JSON.stringify(params, null, 4)}`
         : ""
-    } ${
-      Object.keys(query).length > 0
-        ? `query: ${JSON.stringify(query, null, 4)}`
+    }${
+      Object.keys(query).length
+        ? `, query: ${JSON.stringify(query, null, 4)}`
         : ""
     }`
   );
