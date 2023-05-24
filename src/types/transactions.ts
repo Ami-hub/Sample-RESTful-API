@@ -66,3 +66,9 @@ export type SingleTransaction = z.infer<typeof singleTransactionSchema>;
  *
  */
 export type Transaction = z.infer<typeof transactionSchema> & Id;
+
+/**
+ * Transaction fields that are of type `ObjectId`
+ * @see {@link ObjectId}
+ */
+export const transactionObjectIdFields: (keyof Transaction)[] = ["_id"];

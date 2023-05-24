@@ -1,8 +1,15 @@
-import { EntitiesMap, IdType, IdKey, idKey } from "../../types/general";
+import {
+  EntitiesMap,
+  IdType,
+  IdKey,
+  idKey,
+  objectIdsFieldsMap,
+} from "../../types/general";
 import { getCollection } from "./init";
 import { CRUD } from "../CRUD";
 import { ObjectId } from "mongodb";
 import { isValidId } from "../../validators/validators";
+import { isObjectId } from "../../validators/objectIdValidator";
 
 export const getMongoCRUD = <T extends keyof EntitiesMap>(
   collectionName: T
@@ -22,19 +29,24 @@ export const getMongoCRUD = <T extends keyof EntitiesMap>(
     return result;
   };
 
-  const readByField = async <K extends keyof Omit<EntitiesMap[T], IdKey>>(
+  const readByField = async <K extends keyof EntitiesMap[T]>(
     field: K,
-    value: Omit<EntitiesMap[T], IdKey>[K]
+    value: EntitiesMap[T][K]
   ) => {
-    const result = await collection
-      .find<EntitiesMap[T]>({ [field]: value })
-      .toArray();
+    const isObjectIdField = objectIdsFieldsMap[collectionName].includes(field);
+    const filter = isObjectIdField
+      ? { [field]: new ObjectId(String(value)) }
+      : { [field]: value };
+    const result = await collection.find<EntitiesMap[T]>(filter).toArray();
     return result;
   };
 
   const create = async (data: Omit<EntitiesMap[T], IdKey>) => {
+    throw new Error("Not implemented!");
+
     const result = await collection.insertOne(data);
-    return result.acknowledged ? result.insertedId.toString() : null;
+    if (!result.acknowledged) return null;
+    return readById(result.insertedId.toString());
   };
 
   const update = async (

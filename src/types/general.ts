@@ -1,8 +1,11 @@
 import { objectIdStringSchema } from "../validators/objectIdValidator";
-import { Account } from "./account";
-import { Customer } from "./customer";
+import { Account, accountObjectIdFields } from "./account";
+import {
+  Customer,
+  CustomerObjectIdFields as customerObjectIdFields,
+} from "./customer";
 import { z } from "zod";
-import { Transaction } from "./transactions";
+import { Transaction, transactionObjectIdFields } from "./transactions";
 import { EntitiesDalMap } from "../DB/entitiesDAL/entitiesDAL";
 
 /**
@@ -14,8 +17,6 @@ export const mongoImplementationName = "mongo";
  * The names of all supported implementations
  *
  * Modify this type to add support for more implementations
- * @example
- * export type ImplementationNames = typeof mongoImplementationName | typeof myImplementationName;
  */
 export type ImplementationNames = typeof mongoImplementationName;
 
@@ -77,3 +78,11 @@ export type EntitiesMap = {
 export type EntityDalGetter = <T extends keyof EntitiesDalMap>(
   collectionName: T
 ) => EntitiesDalMap[T];
+
+export const objectIdsFieldsMap: {
+  [T in keyof EntitiesMap]: (keyof EntitiesMap[T])[];
+} = {
+  [accountCollectionName]: accountObjectIdFields,
+  [customerCollectionName]: customerObjectIdFields,
+  [transactionCollectionName]: transactionObjectIdFields,
+};

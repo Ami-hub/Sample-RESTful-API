@@ -42,7 +42,7 @@ export interface AccountDAL {
    * ```
    *
    */
-  createAccount(data: unknown): Promise<IdType>;
+  createAccount(data: unknown): Promise<Account>;
 
   /**
    * Update an account

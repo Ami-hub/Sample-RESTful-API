@@ -45,7 +45,7 @@ export type TierAndDetails = z.infer<typeof tierAndDetailsSchema>;
  * ```ts
  * const customer: Customer =
  * {
- *   _id: myCustomerId,
+ *   _id: new ObjectId("60d0fe4f9b589c3d7c8e6e8f"),
  *   username: "fmiller",
  *   name: "Elizabeth Ray",
  *   address: "9286 Bethany Glens\nVasqueztown, CO 22939",
@@ -61,3 +61,9 @@ export type TierAndDetails = z.infer<typeof tierAndDetailsSchema>;
  * ```
  */
 export type Customer = z.infer<typeof customerSchema> & Id;
+
+/**
+ * Customer fields that are of type `ObjectId`
+ * @see {@link ObjectId}
+ */
+export const CustomerObjectIdFields: (keyof Customer)[] = ["_id", "active"];

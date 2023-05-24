@@ -38,17 +38,14 @@ export interface CRUD<T extends EntitiesMap[keyof EntitiesMap]> {
    * @param value value of the field
    * @returns an entity instance or null if not found
    */
-  readByField<K extends keyof Omit<T, IdKey>>(
-    field: K,
-    value: Omit<T, IdKey>[K]
-  ): Promise<Array<T>>;
+  readByField<K extends keyof T>(field: K, value: T[K]): Promise<Array<T>>;
 
   /**
    * Creates a new entity instance
    * @param data data of the entity instance
    * @returns id of the created entity instance or null if not created
    */
-  create(data: Omit<T, IdKey>): Promise<IdType | null>;
+  create(data: Omit<T, IdKey>): Promise<T | null>;
 
   /**
    * Updates an entity instance
