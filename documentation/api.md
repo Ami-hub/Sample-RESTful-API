@@ -8,7 +8,25 @@ In the following documentation, we will assume that the API is hosted at https:/
 
 ## Authentication
 
-This API does not require any authentication to access the data.
+### `POST /login`
+
+To get access to the API, you need to provide a valid token in the `Authorization` header of your request. The token is a [JSON Web Token](https://jwt.io/introduction) that you can get by logging in with a valid user account. The token will be valid for **12 hours**.
+
+#### Example Request
+
+```powershell
+curl -X POST -H "Content-Type: application/json" -d '{"username":"myUsername", "password":"myPassword"}' "https://www.example.com/api/v1/login"
+```
+
+#### Example Response
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXvCJ9..."
+}
+```
+
+Now, you can use the token to access the API. Just add the token to the `Authorization` header of your request. See examples in the following sections.
 
 ## Endpoints
 
@@ -19,7 +37,7 @@ Returns all the data in the collection.
 #### Example Request
 
 ```powershell
-curl "https://www.example.com/api/accounts/"
+curl -H "Authorization: eyJhb..." "https://www.example.com/api/v1/accounts/"
 ```
 
 #### Example Response
@@ -59,7 +77,7 @@ Returns the data item with the specified ID.
 #### Example Request
 
 ```powershell
-curl "https://www.example.com/api/accounts/5ca4bbc7a2dd94ee5816238c"
+curl -H "Authorization: eyJhb..." "https://www.example.com/api/v1/accounts/5ca4bbc7a2dd94ee5816238c"
 ```
 
 #### Example Response
@@ -75,22 +93,18 @@ curl "https://www.example.com/api/accounts/5ca4bbc7a2dd94ee5816238c"
 
 ### `POST /data`
 
-Creates a new data item.
+Creates a new item.
 
 #### Example Request
 
 ```powershell
-curl -X POST -H "Content-Type: application/json" -d '{"key1":"value1", "key2":"value2"}' "https://www.example.com/api/resource"
-```
-
-```json
-{
+curl -X POST -H "Authorization: eyJhb..." -H "Content-Type: application/json" -d '{
   "country": "United States",
   "state": "New York",
   "city": "New York City",
   "population": 8336817,
   "date": "2021-05-12T00:00:00.000Z"
-}
+}' "https://www.example.com/api/v1/resource"
 ```
 
 #### Example Response
@@ -107,20 +121,24 @@ curl -X POST -H "Content-Type: application/json" -d '{"key1":"value1", "key2":"v
 }
 ```
 
-### `PUT /data/:id`
+### `PATCH /data/:id`
 
-Updates the data item with the specified ID.
+Modifies the item with the specified ID.
 
 #### Example Request
 
 ```powershell
-curl -X PUT -H "Content-Type: application/json" -d '{"key1":"value1", "key2":"value2"}' "https://www.example.com/api/resource"
+curl -X PATCH -H "Authorization: eyJhb..." -H "Content-Type: application/json" -d '{"country": "Narnia"}' "https://www.example.com/api/v1/resource/60a1b1c1eaa3e9ba185af7ca"
 ```
 
 ```json
 {
-  "country": "United States",
+  "_id": "60a1b1c1eaa3e9ba185af7ca",
+  "country": "Narnia",
   "state": "New York",
-  "city": "Alb"
+  "city": "New York City",
+  "population": 8336817,
+  "date": "2021-05-12T00:00:00.000Z",
+  "__v": 0
 }
 ```
