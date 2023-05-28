@@ -4,13 +4,9 @@ import {
   IdKey,
   IdType,
   accountCollectionName,
-  customerCollectionName,
   idSchema,
-  transactionCollectionName,
 } from "../types/general";
 import { accountSchema } from "./accountValidators";
-import { customerSchema } from "./customerValidator";
-import { transactionSchema } from "./transactionValidators";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
 import { createStatusError } from "../errorHandling/statusError";
 import { StatusCodes } from "http-status-codes";
@@ -19,16 +15,12 @@ const entitySchemaMap: {
   [key in keyof EntitiesMap]: Schema<Omit<EntitiesMap[key], IdKey>>;
 } = {
   [accountCollectionName]: accountSchema,
-  [customerCollectionName]: customerSchema,
-  [transactionCollectionName]: transactionSchema,
 };
 
 const entityFieldSchemaMap: {
   [key in keyof EntitiesMap]: Schema<Partial<Omit<EntitiesMap[key], IdKey>>>;
 } = {
   [accountCollectionName]: accountSchema.partial(),
-  [customerCollectionName]: customerSchema.partial(),
-  [transactionCollectionName]: transactionSchema.partial(),
 };
 
 const getSchemaByName = <T extends keyof EntitiesMap>(entityName: T) => {

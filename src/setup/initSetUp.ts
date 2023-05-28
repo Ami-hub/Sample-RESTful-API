@@ -1,32 +1,29 @@
 import { getAccountRouter } from "../routing/routers/accountRouter";
 import { errorHandler } from "../errorHandling/errorHandler";
-import { ImplementationNames, accountCollectionName } from "../types/general";
-import express, { Application, Express } from "express";
+import { accountCollectionName } from "../types/general";
+import express, { Application } from "express";
 import { env } from "../env";
-import { getDalManager } from "../DB/dalManager";
 import { logger } from "../logging/logger";
 import { getDefaultsRoutes } from "../routing/routes/default";
 import {
   httpRequestsLogger,
   httpResponsesLogger,
 } from "../logging/loggerMiddleware";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * The base URI for all the API routes
  */
 export const baseApiUri = "/api";
 
-export const initializeApp = async (
-  app: Application,
-  implementationName: ImplementationNames
-) => {
+export const initializeApp = async (app: Application, prisma: PrismaClient) => {
   app.use(express.json());
   logger.verbose(`Initialized JSON body parser middleware`);
 
   await initializeHttpTrafficLoggers(app);
   logger.verbose(`All HTTP traffic loggers initialized`);
 
-  await initializeEntitiesRouters(app, implementationName);
+  await initializeEntitiesRouters(app, prisma);
   logger.verbose(`All entities routers initialized`);
 
   await initializeDefaultRoutes(app);
@@ -47,6 +44,7 @@ const initializeHttpTrafficLoggers = async (app: Application) => {
 
   return app;
 };
+
 const initializeDefaultRoutes = async (app: Application) => {
   const { notFoundRoutes, welcomeRoutes, faviconHandler } =
     await getDefaultsRoutes();
@@ -64,15 +62,9 @@ const initializeDefaultRoutes = async (app: Application) => {
 
 const initializeEntitiesRouters = async (
   app: Application,
-  implementationName: ImplementationNames
+  prisma: PrismaClient
 ) => {
-  const dalManager = await getDalManager(implementationName).connect();
-  const entityDalGetter = dalManager.getEntityDalByName;
-
-  app.use(
-    `${baseApiUri}/${accountCollectionName}`,
-    getAccountRouter(entityDalGetter)
-  );
+  //app.use(`${baseApiUri}/${accountCollectionName}`, getAccountRouter(prisma));
   logger.verbose(`Initialized ${accountCollectionName} router`);
 };
 
@@ -82,7 +74,7 @@ const initializeEntitiesRouters = async (
 const prodHost = "0.0.0.0";
 
 /**
- * The host to listen to in development mode
+ * The host to listen to in development mode (localhost only)
  */
 const devHost = "localhost";
 

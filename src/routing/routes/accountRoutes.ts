@@ -1,23 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import {
-  EntityDalGetter,
-  accountCollectionName,
-  idSchema,
-} from "../../types/general";
-import { accountSchema } from "../../validators/accountValidators";
-import { AccountDAL } from "../../DB/entitiesDAL/accountDAL";
+import { accountCollectionName, idSchema } from "../../types/general";
+import { PrismaClient, User } from "@prisma/client";
 
-export const getAccountRoutes = (entityDalGetter: EntityDalGetter) => {
-  const accountDal: AccountDAL = entityDalGetter(accountCollectionName);
+export const getAccountRoutes = (prisma: PrismaClient) => {
+  const accountDal = prisma.user;
+
   const getAllAccounts = async (_req: Request, res: Response) => {
-    const accounts = await accountDal.readAllAccounts();
+    const accounts = await prisma[`user`].findMany();
     res.json(accounts);
   };
 
   const getAccountById = async (req: Request, res: Response) => {
     const id = idSchema.parse(req.params.id);
-    const account = await accountDal.readAccountById(id);
+    const account = await accountDal.findFirst({
+      where: { id: id },
+    });
     if (!account) {
       res
         .status(StatusCodes.NOT_FOUND)
@@ -29,21 +27,24 @@ export const getAccountRoutes = (entityDalGetter: EntityDalGetter) => {
   };
 
   const createAccount = async (req: Request, res: Response) => {
-    const id = await accountDal.createAccount(req.body);
-    res.status(StatusCodes.CREATED).json({ "Inserted id": id.toString() });
+    const created = await accountDal.create(req.body);
+    res.status(StatusCodes.CREATED).json(created);
   };
 
   const updateAccount = async (req: Request, res: Response) => {
-    const updatedAccount = await accountDal.updateAccount(
-      req.params.id,
-      req.body
-    );
+    const updatedAccount = await accountDal.update({
+      where: { id: req.params.id },
+      data: req.body,
+    });
     res.json(updatedAccount);
   };
 
   const deleteAccount = async (req: Request, res: Response) => {
     const id = idSchema.parse(req.params.id);
-    const account = await accountDal.deleteAccount(id);
+    const account = await accountDal.delete({
+      where: { id: id },
+    });
+
     res.json(account);
   };
 

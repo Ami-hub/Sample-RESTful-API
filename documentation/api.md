@@ -1,10 +1,10 @@
 # Full API Documentation
 
-This documentation provides a guide for using the RESTful API for the [Sample Analytics Dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-analytics/) in MongoDB. See here all routes and examples of requests and responses.
+This documentation provides a guide for using the RESTful API for the [Sample Mflix Dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) in MongoDB. See here all routes and examples of requests and responses.
 
 ## Base URL
 
-In the following documentation, we will assume that the API is hosted at https://mySampleSite/.
+In the following documentation, we will assume that the API is hosted at https://mySite/.
 
 ## Authentication
 
@@ -15,7 +15,7 @@ To get access to the API, you need to provide a valid token in the `Authorizatio
 #### Example Request
 
 ```powershell
-curl -X POST -H "Content-Type: application/json" -d '{"username":"myUsername", "password":"myPassword"}' "https://www.example.com/api/v1/login"
+curl -X POST -H "Content-Type: application/json" -d '{"email":"my@email.com", "password":"myPassword"}' "https://www.mySite.com/api/v1/login"
 ```
 
 #### Example Response
@@ -37,7 +37,7 @@ Returns all the data in the collection.
 #### Example Request
 
 ```powershell
-curl -H "Authorization: eyJhb..." "https://www.example.com/api/v1/accounts/"
+curl -H "Authorization: eyJhb..." "https://www.mySite.com/api/v1/accounts/"
 ```
 
 #### Example Response
@@ -77,7 +77,7 @@ Returns the data item with the specified ID.
 #### Example Request
 
 ```powershell
-curl -H "Authorization: eyJhb..." "https://www.example.com/api/v1/accounts/5ca4bbc7a2dd94ee5816238c"
+curl -H "Authorization: eyJhb..." "https://www.mySite.com/api/v1/accounts/5ca4bbc7a2dd94ee5816238c"
 ```
 
 #### Example Response
@@ -104,7 +104,7 @@ curl -X POST -H "Authorization: eyJhb..." -H "Content-Type: application/json" -d
   "city": "New York City",
   "population": 8336817,
   "date": "2021-05-12T00:00:00.000Z"
-}' "https://www.example.com/api/v1/resource"
+}' "https://www.mySite.com/api/v1/resource"
 ```
 
 #### Example Response
@@ -128,7 +128,7 @@ Modifies the item with the specified ID.
 #### Example Request
 
 ```powershell
-curl -X PATCH -H "Authorization: eyJhb..." -H "Content-Type: application/json" -d '{"country": "Narnia"}' "https://www.example.com/api/v1/resource/60a1b1c1eaa3e9ba185af7ca"
+curl -X PATCH -H "Authorization: eyJhb..." -H "Content-Type: application/json" -d '{"country": "Narnia"}' "https://www.mySite.com/api/v1/resource/60a1b1c1eaa3e9ba185af7ca"
 ```
 
 ```json

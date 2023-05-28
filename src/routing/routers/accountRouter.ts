@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { getAccountRoutes } from "../routes/accountRoutes";
 import { deferToErrorMiddleware } from "../../errorHandling/errorHandler";
-import { EntityDalGetter } from "../../types/general";
+import { PrismaClient } from "@prisma/client";
 
-export const getAccountRouter = (entityDalGetter: EntityDalGetter) => {
+export const getAccountRouter = (prisma: PrismaClient) => {
   const accountsRouter = Router();
 
-  const accountRoutes = getAccountRoutes(entityDalGetter);
+  const accountRoutes = getAccountRoutes(prisma);
 
   accountsRouter.get("/", deferToErrorMiddleware(accountRoutes.getAllAccounts));
 

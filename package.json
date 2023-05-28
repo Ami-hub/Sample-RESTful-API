@@ -1,32 +1,41 @@
 {
   "name": "site",
   "version": "1.0.0",
-  "description": "A basic express site!",
+  "description": "A basic restful API!",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc -p .",
-    "start": "node dist/index.js",
-    "dev": "nodemon --exec ts-node --transpileOnly src/index.ts",
+    "start": "tsc -p . && node dist/index.js",
+    "dev": "nodemon src/index.ts -w src -w tsconfig.json -w package.json -w .env -w prisma",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "express",
-    "typescript"
+    "typescript",
+    "zod",
+    "prisma",
+    "winston",
+    "morgan",
+    "envalid"
   ],
   "author": "Ami",
   "license": "MIT License",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "dotenv": "^16.0.3",
     "envalid": "^7.3.1",
     "express": "^4.18.2",
     "http-status-codes": "^2.2.0",
+    "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.3.0",
     "morgan": "^1.10.0",
     "winston": "^3.8.2",
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@prisma/client": "^4.14.1",
     "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/morgan": "^1.9.4",
     "nodemon": "^2.0.22",
     "typescript": "^5.0.4"
