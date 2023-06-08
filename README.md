@@ -3,24 +3,9 @@
 This project implements a [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) in [typescript](https://www.typescriptlang.org/) that provides easy access to the data stored in the database, this allowing you to perform [CRUD operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete).
 The code designed to be easily modified, extended and maintained.
 
-See the [full API documentation](documentation/api.md) for the information about supported endpoints and their usage.
+## 📖 Documentation
 
-#
-
-## 🦾 Technologies used
-
-- 🔒 [bcrypt](https://github.com/kelektiv/node.bcrypt.js#readme)
-- 🪗 [express](https://expressjs.com/)
-- 🗝️ [jwt](https://jwt.io/)
-- 🍃 [mongo\*](https://www.mongodb.com/)
-- 📒 [node](https://nodejs.org/en/)
-- 📦 [npm](https://www.npmjs.com/)
-- 📐 [prisma](https://www.prisma.io/)
-- 🌀 [typescript](https://www.typescriptlang.org/)
-- 📝 [winston](https://github.com/winstonjs/winston#readme)
-- 🔪 [zod](https://zod.dev/)
-
-This project sample data is [Sample Mflix Dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) in [MongoDB](https://www.mongodb.com/), but can be easily modified to work with any other dataset in any other database.
+For the information about supported endpoints and their usage, please import to your [this file](https://gist.githubusercontent.com/Ami-hub/6de2c4f52b8c2b9f4a9fce7daa7b2034/raw/a32e1e380eaafbeab16115e8c4cd4052461fccca/Mfix%2520API.postman_collection.json) to your [Postman](https://www.postman.com/) app.
 
 #
 
@@ -74,7 +59,7 @@ $ npm run start
 
 ### 🎉 Done!
 
-You can open your browser and go to http://localhost:${.envPort}/api
+You can open your browser and go to http://localhost:<.envPort>/api/v1/
 
 You should see the following message:
 
@@ -94,13 +79,11 @@ You should see the following message:
 
 ### ❗Important
 
-- It use the free tier of [render](https://render.com/), so the **first** response may take a about **1 minute** to load.  
-  For more information [click here](https://render.com/docs/free#free-web-services).
-  <br>
+- It use the free tier of [render](https://render.com/), so **the first response may take about 1 minute to load**. For more information [click here](https://render.com/docs/free#free-web-services).
 
-- Due to this version is open to the public, `DELETE` and `PATCH` requests are disabled.  
-  For more information about the deployed version see the [render deployed branch]()
-  <br>
+- Due to this version is open to the public, some features like
+  `DELETE` and `PATCH` requests are disabled.  
+   For more information about the deployed version see the [render deployed branch]()
 
 #
 
