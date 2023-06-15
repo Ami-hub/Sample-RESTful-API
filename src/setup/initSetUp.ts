@@ -1,62 +1,47 @@
-import { getAccountRouter } from "../routing/routers/accountRouter";
-import { errorHandler } from "../errorHandling/errorHandler";
-import { ImplementationNames, accountCollectionName } from "../types/general";
-import express, { Application, Express } from "express";
-import { env } from "../env";
-import { getDalManager } from "../DB/dalManager";
-import { logger } from "../logging/logger";
-import { getDefaultsRoutes } from "../routing/routes/default";
 import {
-  httpRequestsLogger,
-  httpResponsesLogger,
-} from "../logging/loggerMiddleware";
+  deferToErrorMiddleware,
+  errorHandler,
+} from "../errorHandling/errorHandler";
+import express, { Application } from "express";
+import { env } from "../env";
+import { logger } from "../logging/logger";
+import { httpTrafficLogger } from "../logging/loggerMiddleware";
+import { welcomeRoutes, notFoundRoutes } from "../routing/routes/default";
+import { DalGetter } from "../DB/dalManager";
 
 /**
  * The base URI for all the API routes
  */
-export const baseApiUri = "/api";
+export const baseApiUri = "/api/v1";
 
-export const initializeApp = async (
-  app: Application,
-  implementationName: ImplementationNames
-) => {
-  app.use(express.json());
-  logger.verbose(`Initialized JSON body parser middleware`);
+export const initializeApp = async (app: Application, dalGetter: DalGetter) => {
+  app.use(
+    express.json({
+      inflate: false,
+    })
+  );
+  logger.verbose(`JSON body parser middleware initialized`);
 
-  await initializeHttpTrafficLoggers(app);
-  logger.verbose(`All HTTP traffic loggers initialized`);
+  app.use(httpTrafficLogger);
+  logger.verbose(`HTTP traffic logger initialized`);
 
-  await initializeEntitiesRouters(app, implementationName);
-  logger.verbose(`All entities routers initialized`);
+  await initializeEntitiesRouters(app, dalGetter);
+  logger.verbose(`Entities routers initialized`);
 
   await initializeDefaultRoutes(app);
-  logger.verbose(`All default routes initialized`);
+  logger.verbose(`Default routes initialized`);
 
   app.use(errorHandler);
-  logger.verbose(`Initialized error handler`);
+  logger.verbose(`Error handler initialized`);
 
   return app;
 };
 
-const initializeHttpTrafficLoggers = async (app: Application) => {
-  app.use(httpRequestsLogger);
-  logger.verbose(`Initialized HTTP requests logger`);
-
-  app.use(httpResponsesLogger);
-  logger.verbose(`Initialized HTTP responses logger`);
-
-  return app;
-};
 const initializeDefaultRoutes = async (app: Application) => {
-  const { notFoundRoutes, welcomeRoutes, faviconHandler } =
-    await getDefaultsRoutes();
-  app.use(faviconHandler);
-  logger.verbose(`Initialized favicon handler`);
-
-  app.use(`${baseApiUri}`, welcomeRoutes);
+  app.get(`${baseApiUri}`, welcomeRoutes);
   logger.verbose(`Initialized welcome route`);
 
-  app.use(notFoundRoutes);
+  app.use(deferToErrorMiddleware(notFoundRoutes));
   logger.verbose(`Initialized 'not found' route`);
 
   return app;
@@ -64,16 +49,17 @@ const initializeDefaultRoutes = async (app: Application) => {
 
 const initializeEntitiesRouters = async (
   app: Application,
-  implementationName: ImplementationNames
+  dalGetter: DalGetter
 ) => {
-  const dalManager = await getDalManager(implementationName).connect();
-  const entityDalGetter = dalManager.getEntityDalByName;
-
-  app.use(
-    `${baseApiUri}/${accountCollectionName}`,
-    getAccountRouter(entityDalGetter)
+  const theaterDAL = dalGetter.get("theaters");
+  app.get(
+    `${baseApiUri}/theaters`,
+    deferToErrorMiddleware(async (req, res, next) => {
+      logger.debug("I am in theaters route");
+      const allTheaters = await theaterDAL.getAll();
+      res.send(allTheaters);
+    })
   );
-  logger.verbose(`Initialized ${accountCollectionName} router`);
 };
 
 /**

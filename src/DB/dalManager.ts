@@ -1,35 +1,66 @@
-import { ImplementationNames, mongoImplementationName } from "../types/general";
-import { EntitiesDalMap } from "./entitiesDAL/entitiesDAL";
-import { getMongoDalManager } from "./mongo/mongoDalManager";
+import { EntitiesMap } from "../types/general";
+import { connectToDB, disconnectFromDB, isConnected } from "./db";
+import { EntityDAL, getEntityDAL } from "./entityDAL";
 
+export interface DalGetter {
+  get: <T extends keyof EntitiesMap>(entityName: T) => EntityDAL<T>;
+}
+
+/**
+ * Manager for the DALs in the system
+ *
+ * @example
+ * ```ts
+ * const dalManager: DalManager = await getDalManager();
+ * await dalManager.connect();
+ *
+ * const theatersDAL = dalManager.dalGetter.get("theaters");
+ *
+ * const theaters = await theatersDAL.getAll();
+ * console.log(`I got ${theaters.length} theaters!`);
+ *
+ * await dalManager.disconnect();
+ * ```
+ */
 export interface DalManager {
   /**
    * Connect to the database
-   * @returns a promise that resolves to the connected DAL manager
    * @NOTE if you have already connected to the DB, this function will do nothing
-
    */
-  connect(): Promise<DalManager>;
+  connect(): Promise<void>;
+
+  /**
+   * Checks if the DB is connected
+   * @returns true if the DB is connected, false otherwise
+   * @example
+   * ```ts
+   * const dalManager: DalManager = await getDalManager();
+   * await dalManager.connect();
+   * const isConnected = await dalManager.isConnected();
+   * console.log(`Am I connected? ${isConnected}`);
+   * // prints: Am I connected? true
+   * await dalManager.disconnect();
+   * console.log(`Am I connected? ${isConnected}`);
+   * // prints: Am I connected? false
+   * ```
+   */
+  isConnected(): Promise<boolean>;
 
   /**
    * Get an entity dal by a collection name name
    * @param collectionName name of the collection
-   * @returns an entity dal
+   * @returns the matching entity dal
    * @example
    * ```ts
-   * const dalManager =
-   *     await getDalManager(mongoImplementationName).connect();
-   *
-   * const entityDalGetter = dalManager.getEntityDalByName;
-   * const accountsDal = entityDalGetter(accountCollectionName);
+   * const moviesDAL = dalManager.dalGetter.get("movies");
    *
    * const accounts = await accountsDal.readAllAccounts();
    * console.log(`I have ${accounts.length} accounts`);
+   *
+   * await dalManager.disconnect();
    * ```
    */
-  getEntityDalByName<T extends keyof EntitiesDalMap>(
-    collectionName: T
-  ): EntitiesDalMap[T];
+  dalGetter: DalGetter;
 
   /**
    * Disconnect from the database
@@ -37,15 +68,20 @@ export interface DalManager {
   disconnect(): Promise<void>;
 }
 
-const dalManagerMap: {
-  [key in ImplementationNames]: () => DalManager;
-} = {
-  [mongoImplementationName]: getMongoDalManager,
-};
+// ########################################
+//             Implementation
+// ########################################
 
-export const getDalManager = (
-  implementationName: ImplementationNames
-): DalManager => {
-  const dalManagerCreator = dalManagerMap[implementationName];
-  return dalManagerCreator();
+/**
+ * Get a mongoDB implementation of the DalManager interface
+ */
+export const getDalManager = async (): Promise<DalManager> => {
+  return {
+    connect: connectToDB,
+    isConnected: isConnected,
+    dalGetter: {
+      get: getEntityDAL,
+    },
+    disconnect: disconnectFromDB,
+  };
 };

@@ -1,13 +1,22 @@
 import { MongoClient } from "mongodb";
-import { env } from "../../env";
-import { EntitiesMap } from "../../types/general";
-import { logger } from "../../logging/logger";
+import { env } from "../env";
+import { EntitiesMap } from "../types/general";
+import { logger } from "../logging/logger";
 
 /**
  * The client that connects to the DB
  * @NOTE This project uses only one client for the DB!
  */
-const client = new MongoClient(env.MONGODB_URI);
+const client = new MongoClient(env.MONGODB_URI, {
+  maxPoolSize: env.MAX_POOL_SIZE,
+  minPoolSize: env.MIN_POOL_SIZE,
+  connectTimeoutMS: 30000,
+  maxIdleTimeMS: env.MAX_IDLE_TIME_MS,
+  writeConcern: {
+    w: env.WRITE_CONCERN,
+    wtimeout: env.WRITE_CONCERN_TIMEOUT,
+  },
+});
 
 /**
  * The interval in which the DB will try to reconnect to the DB if the connection is failed
@@ -41,7 +50,7 @@ export const connectToDB = async (retry: boolean = false) => {
  *
  * @returns true if the DB is connected, false otherwise
  */
-export const isConnected = () => {
+export const isConnected = async () => {
   try {
     getDbInstance().command({ ping: 1 });
     return true;

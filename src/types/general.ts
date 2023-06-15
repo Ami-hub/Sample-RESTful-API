@@ -1,24 +1,6 @@
-import { objectIdStringSchema } from "../validators/objectIdValidator";
-import { Account, accountObjectIdFields } from "./account";
-import {
-  Customer,
-  CustomerObjectIdFields as customerObjectIdFields,
-} from "./customer";
+import { stringObjectIdSchema } from "../validators/objectId";
 import { z } from "zod";
-import { Transaction, transactionObjectIdFields } from "./transactions";
-import { EntitiesDalMap } from "../DB/entitiesDAL/entitiesDAL";
-
-/**
- * The name of the mongo implementation
- */
-export const mongoImplementationName = "mongo";
-
-/**
- * The names of all supported implementations
- *
- * Modify this type to add support for more implementations
- */
-export type ImplementationNames = typeof mongoImplementationName;
+import { Theater, theaterObjectIdFields } from "./theater";
 
 /**
  * The key name of the unique identifier for each entity
@@ -33,7 +15,7 @@ export type IdKey = typeof idKey;
 /**
  * The schema of the unique identifier for each entity
  */
-export const idSchema = objectIdStringSchema;
+export const idSchema = stringObjectIdSchema;
 
 /**
  * The type of the unique identifier for each entity
@@ -48,41 +30,13 @@ export type IdType = z.infer<typeof idSchema>;
 export type Id = { [idKey]: IdType };
 
 /**
- * The name of the accounts collection
- */
-export const accountCollectionName = "accounts";
-
-/**
- * The name of the customers collection
- */
-export const customerCollectionName = "customers";
-
-/**
  * The name of the transactions collection
  */
-export const transactionCollectionName = "transactions";
+export const theatersCollectionName = "theaters";
 
 /**
  * A map of all entities collection names and their types
  */
 export type EntitiesMap = {
-  [accountCollectionName]: Account;
-  [customerCollectionName]: Customer;
-  [transactionCollectionName]: Transaction;
-};
-
-/**
- * A map of all entities collection names and their DALs
- * @see {@link EntitiesDalMap}
- */
-export type EntityDalGetter = <T extends keyof EntitiesDalMap>(
-  collectionName: T
-) => EntitiesDalMap[T];
-
-export const objectIdsFieldsMap: {
-  [T in keyof EntitiesMap]: (keyof EntitiesMap[T])[];
-} = {
-  [accountCollectionName]: accountObjectIdFields,
-  [customerCollectionName]: customerObjectIdFields,
-  [transactionCollectionName]: transactionObjectIdFields,
+  [theatersCollectionName]: Theater;
 };

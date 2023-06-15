@@ -1,23 +1,13 @@
-import {
-  EntitiesMap,
-  IdKey,
-  IdType,
-  ImplementationNames,
-  mongoImplementationName,
-} from "../types/general";
-import { getMongoCRUD } from "./mongo/mongoCRUD";
+import { ObjectId } from "mongodb";
+import { EntitiesMap, IdKey, IdType, idKey } from "../types/general";
+import { isValidId } from "../validators/validators";
+import { getCollection } from "./db";
 
 /**
  * Supported CRUD operations
  */
 export type CRUDOperation = "read" | "create" | "update" | "delete";
 
-/**
- * Gets a CRUD instance
- * @param entityName name of the entity
- * @param implementationName name of the implementation
- * @returns a CRUD instance
- */
 export interface CRUD<T extends EntitiesMap[keyof EntitiesMap]> {
   /**
    * Gets all entity instances
@@ -63,25 +53,75 @@ export interface CRUD<T extends EntitiesMap[keyof EntitiesMap]> {
   delete(id: IdType): Promise<T | null>;
 }
 
-const crudMap: {
-  [key in ImplementationNames]: <T extends keyof EntitiesMap>(
-    collectionName: T
-  ) => CRUD<EntitiesMap[T]>;
-} = {
-  [mongoImplementationName]: getMongoCRUD,
-};
+// ########################################
+//             Implementation
+// ########################################
 
-/**
- * Gets a CRUD implementation
- * @param collectionName name of the collection
- * @param implementationName name of the implementation
- * @returns a CRUD implementation
- * @throws if the implementation name is invalid
- */
 export const getCRUD = <T extends keyof EntitiesMap>(
-  implementationName: ImplementationNames,
   collectionName: T
 ): CRUD<EntitiesMap[T]> => {
-  const crudCreator = crudMap[implementationName];
-  return crudCreator(collectionName);
+  const collection = getCollection(collectionName);
+
+  const readAll = async () => {
+    const result = await collection
+      .find<EntitiesMap[T]>({})
+      .limit(10) // TODO: remember to remove this
+      .toArray();
+    return result;
+  };
+
+  const readById = async (id: IdType) => {
+    if (!isValidId(id)) return null;
+    const result = await collection.findOne<EntitiesMap[T]>({
+      [idKey]: new ObjectId(id),
+    });
+    return result;
+  };
+
+  const readByField = async <K extends keyof EntitiesMap[T]>(
+    field: K,
+    value: EntitiesMap[T][K]
+  ) => {
+    const isObjectIdField = false; // TODO: check if field is ObjectId
+    const filter = isObjectIdField
+      ? { [field]: new ObjectId(String(value)) }
+      : { [field]: value };
+    const result = await collection.find<EntitiesMap[T]>(filter).toArray();
+    return result;
+  };
+
+  const create = async (data: Omit<EntitiesMap[T], IdKey>) => {
+    const result = await collection.insertOne(data);
+    if (!result.acknowledged) return null;
+    return readById(result.insertedId.toString());
+  };
+
+  const update = async (
+    id: IdType,
+    data: Partial<Omit<EntitiesMap[T], IdKey>>
+  ) => {
+    const toUpdate = await readById(id);
+    if (!toUpdate) return null;
+    const result = await collection.updateOne(
+      { [idKey]: new ObjectId(id) },
+      { $set: data }
+    );
+    return result.acknowledged ? toUpdate : null;
+  };
+
+  const deleteOne = async (id: IdType) => {
+    const toDelete = await readById(id);
+    if (!toDelete) return null;
+    const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
+    return result.acknowledged ? toDelete : null;
+  };
+
+  return {
+    readAll,
+    readById,
+    readByField,
+    create,
+    update,
+    delete: deleteOne,
+  };
 };

@@ -1,37 +1,25 @@
-import morgan, { StreamOptions } from "morgan";
 import { Request, Response, NextFunction } from "express";
 import { logger } from "./logger";
-
-const httpResponsesLoggerFormat =
-  "[:method] RESPONSE to :remote-addr :url => :res[content-length] bytes sent with status :status in :response-time ms";
-
-const stream: StreamOptions = {
-  write: (message: string) => {
-    logger.http(message);
-  },
-};
+import { randomUUID } from "crypto";
 
 /**
- * Morgan middleware for logging HTTP responses.
- */
-export const httpResponsesLogger = morgan(httpResponsesLoggerFormat, {
-  stream: stream,
-});
-
-/**
- * Morgan middleware for logging HTTP requests.
+ * A middleware for logging HTTP traffic.
+ *
  * @param req HTTP request object
  * @param res HTTP response object
  * @param next next middleware function
  */
-export const httpRequestsLogger = (
+export const httpTrafficLogger = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  const startTime = performance.now();
+  const reqId = randomUUID();
   const { method, url, body, params, query } = req;
+
   logger.http(
-    `[${method}] REQUEST from ${req.ip} ${url} => with ${
+    `[${method}] REQUEST ${reqId} from ${req.ip} ${url} => with ${
       Object.keys(body).length
         ? `the body: ${JSON.stringify(body, null, 4)}`
         : "no body"
@@ -45,5 +33,17 @@ export const httpRequestsLogger = (
         : ""
     }`
   );
+
   next();
+  const executionTime = performance.now() - startTime;
+  const contentLength = res.get("Content-Length") || "?";
+  const { statusCode } = res;
+
+  logger.http(
+    `[${method}] RESPONSE ${reqId} to ${
+      req.ip
+    } ${url} => ${contentLength} bytes sent with status ${statusCode} in ${executionTime.toFixed(
+      3
+    )} ms with headers: ${JSON.stringify(res.getHeaders(), null, 4)}`
+  );
 };
