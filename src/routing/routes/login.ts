@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from "express";
 import { env } from "../../env";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
-import { PrismaClient } from "@prisma/client";
 
 /**
  * The time in which the access token expires
@@ -44,35 +43,19 @@ export const authMiddleware = (
   }
 };
 
-export const login =
-  (prisma: PrismaClient) => async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    const user = await prisma.user.findFirst({
-      where: { email: email },
-    });
-    if (!user) {
-      res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ error: "Invalid credentials" });
-      return;
-    }
-    const isPasswordValid = await comparePasswords(password, user.password);
-    if (!isPasswordValid) {
-      res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ error: "Invalid credentials" });
-      return;
-    }
-    const accessToken = createAccessToken({ id: user.id });
-    res.json({ accessToken });
-  };
-
-const comparePasswords = async (password: string, hash: string) => {
-  return await bcrypt.compare(password, hash);
+export const login = () => async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const user: any = null; // TODO: implement!
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid credentials" });
+    return;
+  }
+  const accessToken = createAccessToken({ id: user.id });
+  res.json({ accessToken });
 };
 
-const hashPassword = async (password: string): Promise<string> => {
+const getPasswordHash = async (password: string): Promise<string> => {
   const salt = await bcrypt.genSalt();
-  const hashedPassword = await bcrypt.hash(password, salt);
-  return hashedPassword;
+  return await bcrypt.hash(password, salt);
 };
