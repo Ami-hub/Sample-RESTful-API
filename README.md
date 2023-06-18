@@ -39,19 +39,26 @@ npm i
 
 ### ⚙️ Set up the environment variables
 
-🐧 Linux:
+1. Create a `.env` file based on the `.env.example` file:  
+   🐧 Linux:
 
-```
-cp .env.example .env
-```
+   ```
+   cp .env.example .env
+   ```
 
-🪟 Windows:
+   🪟 Windows:
 
-```
-copy .env.example .env
-```
+   ```
+   copy .env.example .env
+   ```
 
-Change variable's values by your needs in the .env file.
+2. Modify the `.env` file to match your needs and environment, e.g.:
+
+   ```env
+   PORT=3001
+   MONGODB_URI=mongodb+srv://Ami:123@cluster0.1a2b3c4.mongodb.net/
+   ...
+   ```
 
 ### 🛠️ Build the app
 
