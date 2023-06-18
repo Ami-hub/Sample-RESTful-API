@@ -1,19 +1,21 @@
 import express, { Application } from "express";
 import { initializeApp, runApp } from "./setup/initSetUp";
 import { logger } from "./logging/logger";
-import { env } from "./env";
-import { PrismaClient } from "@prisma/client";
+import { env } from "./setup/env";
+import { getDbConnector } from "./DB/databaseConnector";
 
 const main = async () => {
-  const app: Application = express();
-  const prisma: PrismaClient = new PrismaClient();
-  await prisma.$connect();
+  logger.info(`Starting in ${env.NODE_ENV} mode...`);
 
-  await initializeApp(app, prisma);
-  logger.info(`The app was initialized successfully`);
+  const app: Application = express();
+  const dbConnector = await getDbConnector();
+  await dbConnector.connect();
+
+  await initializeApp(app);
+  logger.info(`Initializing done!`);
 
   await runApp(app);
-  logger.info(`Server is up and running on ${env.NODE_ENV} mode!`);
+  logger.info(`Server is up and running!`);
 };
 
 main();

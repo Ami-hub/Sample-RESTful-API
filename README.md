@@ -1,11 +1,19 @@
 # RESTful API Sample Project
 
-This project implements a [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) in [typescript](https://www.typescriptlang.org/) that provides easy access to the data stored in the database, this allowing you to perform [CRUD operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete).
-The code designed to be easily modified, extended and maintained.
+Sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) for [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) based on [Node.js](https://nodejs.org/en/) ([typescript](https://www.typescriptlang.org/)), [mongoDB](https://www.mongodb.com/)
+and [Express](https://expressjs.com/). Provides an easy way to perform [CRUD operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) on the data. Feel free to use it as a template for your own projects or as a reference for learning.
 
 ## 📖 Documentation
 
 For the documentation about supported endpoints and their usage, please import [this collection](https://gist.githubusercontent.com/Ami-hub/6de2c4f52b8c2b9f4a9fce7daa7b2034/raw/a32e1e380eaafbeab16115e8c4cd4052461fccca/Mfix%2520API.postman_collection.json) to your [Postman](https://www.postman.com/) app. The collection contains all the information you need to use the API, including detailed examples.
+
+#
+
+## 📚 Prerequisites
+
+- [Node.js](https://nodejs.org/en/) (v14.17.0 or higher)
+- [MongoDB](https://www.mongodb.com/) (v4.4.6 or higher)
+- TODO - add instructions to import the sample data
 
 #
 
@@ -14,52 +22,64 @@ For the documentation about supported endpoints and their usage, please import [
 ### ⬇️ Clone the repo from github
 
 ```
-$ git clone https://github.com/Ami-hub/Sample-RESTful-API.git
+git clone https://github.com/Ami-hub/Sample-RESTful-API.git
 ```
 
 ### 🚗 Go to the app directory
 
 ```
-$ cd Sample-RESTful-API
+cd Sample-RESTful-API
 ```
 
 ### 📦 Install dependencies
 
 ```
-$ npm i
+npm i
 ```
 
 ### ⚙️ Set up the environment variables
 
-Linux:
+1. Create a `.env` file based on the `.env.example` file:  
+   🐧 Linux:
 
-```
-$ cp .env.example .env
-```
+   ```
+   cp .env.example .env
+   ```
 
-Windows:
+   🪟 Windows:
 
-```
-$ copy .env.example .env
-```
+   ```
+   copy .env.example .env
+   ```
 
-Now fill in the values by your needs in the .env file.
+2. Modify the `.env` file to match your needs and environment, e.g.:
+
+   ```env
+   PORT=3001
+   MONGODB_URI=mongodb+srv://Ami:123@cluster0.1a2b3c4.mongodb.net/
+   ...
+   ```
 
 ### 🛠️ Build the app
 
 ```
-$ npm run build
+npm run build
 ```
 
 ### 👟 Run the app
 
 ```
-$ npm run start
+npm run start
 ```
 
 ### 🎉 Done!
 
+<<<<<<< HEAD
+You can open your browser and go to `http://localhost:<.envPort>/api/v1/` to see the welcome message.
+=======
 You can open your browser and go to http://localhost:<.envPort>/api/v1/
+
+> > > > > > > main
 
 You should see the following message:
 

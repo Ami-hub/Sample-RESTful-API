@@ -8,20 +8,6 @@ export interface StatusError extends Error {
   details?: string;
 }
 
-const findKeyInAnyDepth = (obj: any, key: string): any => {
-  for (const k in obj) {
-    if (k === key) {
-      return obj[k];
-    } else if (typeof obj[k] === "object") {
-      const result = findKeyInAnyDepth(obj[k], key);
-      if (result !== undefined) {
-        return result;
-      }
-    }
-  }
-  return undefined;
-};
-
 /**
  * Converts an error to a status error.
  *

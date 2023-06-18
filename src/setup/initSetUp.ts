@@ -1,71 +1,61 @@
-import { getAccountRouter } from "../routing/routers/accountRouter";
-import { errorHandler } from "../errorHandling/errorHandler";
-import { accountCollectionName } from "../types/general";
-import express, { Application } from "express";
-import { env } from "../env";
-import { logger } from "../logging/logger";
-import { getDefaultsRoutes } from "../routing/routes/default";
 import {
-  httpRequestsLogger,
-  httpResponsesLogger,
-} from "../logging/loggerMiddleware";
-import { PrismaClient } from "@prisma/client";
+  deferToErrorMiddleware,
+  errorHandler,
+} from "../errorHandling/errorHandler";
+import express, { Application } from "express";
+import { logger } from "../logging/logger";
+import { httpTrafficLoggerMiddleware } from "../logging/loggerMiddleware";
+import { welcomeRoutes, notFoundRoutes } from "../routing/routes/default";
+import { getEntityDAL } from "../DB/entityDAL";
+import { env } from "./env";
 
 /**
  * The base URI for all the API routes
  */
-export const baseApiUri = "/api";
+export const baseApiUri = "/api/v1";
 
-export const initializeApp = async (app: Application, prisma: PrismaClient) => {
-  app.use(express.json());
-  logger.verbose(`Initialized JSON body parser middleware`);
+export const initializeApp = async (app: Application) => {
+  app.use(
+    express.json({
+      inflate: false,
+    })
+  );
+  logger.verbose(`JSON body parser middleware initialized`);
 
-  await initializeHttpTrafficLoggers(app);
-  logger.verbose(`All HTTP traffic loggers initialized`);
+  app.use(httpTrafficLoggerMiddleware);
+  logger.verbose(`HTTP traffic logger initialized`);
 
-  await initializeEntitiesRouters(app, prisma);
-  logger.verbose(`All entities routers initialized`);
+  await initializeEntitiesRouters(app);
+  logger.verbose(`Entities routers initialized`);
 
   await initializeDefaultRoutes(app);
-  logger.verbose(`All default routes initialized`);
+  logger.verbose(`Default routes initialized`);
 
   app.use(errorHandler);
-  logger.verbose(`Initialized error handler`);
-
-  return app;
-};
-
-const initializeHttpTrafficLoggers = async (app: Application) => {
-  app.use(httpRequestsLogger);
-  logger.verbose(`Initialized HTTP requests logger`);
-
-  app.use(httpResponsesLogger);
-  logger.verbose(`Initialized HTTP responses logger`);
+  logger.verbose(`Error handler initialized`);
 
   return app;
 };
 
 const initializeDefaultRoutes = async (app: Application) => {
-  const { notFoundRoutes, welcomeRoutes, faviconHandler } =
-    await getDefaultsRoutes();
-  app.use(faviconHandler);
-  logger.verbose(`Initialized favicon handler`);
-
-  app.use(`${baseApiUri}`, welcomeRoutes);
+  app.get(`${baseApiUri}`, welcomeRoutes);
   logger.verbose(`Initialized welcome route`);
 
-  app.use(notFoundRoutes);
+  app.use(deferToErrorMiddleware(notFoundRoutes));
   logger.verbose(`Initialized 'not found' route`);
 
   return app;
 };
 
-const initializeEntitiesRouters = async (
-  app: Application,
-  prisma: PrismaClient
-) => {
-  //app.use(`${baseApiUri}/${accountCollectionName}`, getAccountRouter(prisma));
-  logger.verbose(`Initialized ${accountCollectionName} router`);
+const initializeEntitiesRouters = async (app: Application) => {
+  const theaterDAL = getEntityDAL("theaters");
+  app.get(
+    `${baseApiUri}/theaters`,
+    deferToErrorMiddleware(async (_req, res, _next) => {
+      const allTheaters = await theaterDAL.getAll();
+      res.send(allTheaters);
+    })
+  );
 };
 
 /**

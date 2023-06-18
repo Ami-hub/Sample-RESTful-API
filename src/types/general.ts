@@ -1,6 +1,6 @@
-import { objectIdStringSchema } from "../validators/objectIdValidator";
-import { Account, accountObjectIdFields } from "./account";
+import { stringObjectIdSchema } from "../validators/objectId";
 import { z } from "zod";
+import { Theater, theaterObjectIdFields } from "./theater";
 
 /**
  * The key name of the unique identifier for each entity
@@ -15,7 +15,7 @@ export type IdKey = typeof idKey;
 /**
  * The schema of the unique identifier for each entity
  */
-export const idSchema = objectIdStringSchema;
+export const idSchema = stringObjectIdSchema;
 
 /**
  * The type of the unique identifier for each entity
@@ -30,13 +30,13 @@ export type IdType = z.infer<typeof idSchema>;
 export type Id = { [idKey]: IdType };
 
 /**
- * The name of the accounts collection
+ * The name of the transactions collection
  */
-export const accountCollectionName = "accounts";
+export const theatersCollectionName = "theaters";
 
 /**
  * A map of all entities collection names and their types
  */
 export type EntitiesMap = {
-  [accountCollectionName]: Account;
+  [theatersCollectionName]: Theater;
 };

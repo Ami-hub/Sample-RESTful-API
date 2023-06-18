@@ -1,34 +1,33 @@
-import winston, { createLogger, format, transports } from "winston";
-import { env } from "../env";
+import { createLogger, format, transports } from "winston";
+import { env } from "../setup/env";
 
-const { combine, timestamp, printf, colorize } = format;
+const timestampFormat = format.timestamp();
 
-const colorizer = colorize({
-  all: true,
-  colors: {
-    error: "red",
-    warn: "yellow",
-    info: "blue",
-    http: "magenta",
-    verbose: "cyan",
-    debug: "green",
-    silly: "gray",
-  },
-});
-
-const formatter = printf((info) => {
-  const { timestamp, level, message, ...args } = info;
-
-  return `${timestamp} ${level.toUpperCase()}: ${message} ${
-    Object.keys(args).length ? JSON.stringify(args, null, 4) : ""
-  }`;
-});
-
-const loggerFormat: winston.Logform.Format = combine(
-  timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
-  formatter,
-  colorizer
+const consoleLoggerFormat = format.combine(
+  timestampFormat,
+  format.printf(
+    (info) =>
+      `[${info.timestamp}] ${info.level.toUpperCase()}: ${JSON.stringify(
+        info.message,
+        null,
+        4
+      )}\n`
+  ),
+  format.colorize({
+    all: true,
+    colors: {
+      error: "red",
+      warn: "yellow",
+      info: "blue",
+      http: "magenta",
+      verbose: "cyan",
+      debug: "green",
+      silly: "gray",
+    },
+  })
 );
+
+const filesLoggerFormat = format.combine(timestampFormat, format.json());
 
 const logLevelForTest = "error";
 const logLevelForDev = "silly";
@@ -40,11 +39,25 @@ const loggerLevel = env.isProd
   ? logLevelForTest
   : logLevelForDev;
 
+const logsDirName = "logs";
+
 /**
  * Winston logger instance.
  */
 export const logger = createLogger({
   level: loggerLevel,
-  transports: [new transports.Console()],
-  format: loggerFormat,
+  transports: [
+    new transports.Console({ format: consoleLoggerFormat }),
+    new transports.File({
+      dirname: logsDirName,
+      filename: "error.log",
+      level: "error",
+      format: filesLoggerFormat,
+    }),
+    new transports.File({
+      dirname: logsDirName,
+      filename: "all.log",
+      format: filesLoggerFormat,
+    }),
+  ],
 });

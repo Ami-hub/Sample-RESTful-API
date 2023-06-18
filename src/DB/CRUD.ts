@@ -1,16 +1,14 @@
-import { EntitiesMap, IdKey, IdType } from "../types/general";
+import { ObjectId } from "mongodb";
+import { EntitiesMap, IdKey, IdType, idKey } from "../types/general";
+import { isValidId } from "../validators/validators";
+import { getCollection } from "./databaseConnector";
+import { logger } from "../logging/logger";
 
 /**
  * Supported CRUD operations
  */
 export type CRUDOperation = "read" | "create" | "update" | "delete";
 
-/**
- * Gets a CRUD instance
- * @param entityName name of the entity
- * @param implementationName name of the implementation
- * @returns a CRUD instance
- */
 export interface CRUD<T extends EntitiesMap[keyof EntitiesMap]> {
   /**
    * Gets all entity instances
@@ -56,15 +54,88 @@ export interface CRUD<T extends EntitiesMap[keyof EntitiesMap]> {
   delete(id: IdType): Promise<T | null>;
 }
 
-/**
- * Gets a CRUD implementation
- * @param collectionName name of the collection
- * @param implementationName name of the implementation
- * @returns a CRUD implementation
- * @throws if the implementation name is invalid
- */
+// ########################################
+//             Implementation
+// ########################################
+
 export const getCRUD = <T extends keyof EntitiesMap>(
   collectionName: T
 ): CRUD<EntitiesMap[T]> => {
-  throw new Error("Function not implemented.");
+  const collection = getCollection(collectionName);
+
+  const readAll = async () => {
+    logger.debug(`read all: ${collectionName}`);
+
+    const result = await collection
+      .find<EntitiesMap[T]>({})
+      .limit(10) // TODO: remember to remove this
+      .toArray();
+    return result;
+  };
+
+  const readById = async (id: IdType) => {
+    logger.debug(`readById: ${collectionName} - ${id}`);
+    if (!isValidId(id)) return null;
+    const result = await collection.findOne<EntitiesMap[T]>({
+      [idKey]: new ObjectId(id),
+    });
+    return result;
+  };
+
+  const readByField = async <K extends keyof EntitiesMap[T]>(
+    field: K,
+    value: EntitiesMap[T][K]
+  ) => {
+    logger.debug(
+      `readByField: ${collectionName} - ${field.toString()} - ${value}`
+    );
+    const isObjectIdField = false; // TODO: check if field is ObjectId
+    const filter = isObjectIdField
+      ? { [field]: new ObjectId(String(value)) }
+      : { [field]: value };
+    const result = await collection.find<EntitiesMap[T]>(filter).toArray();
+    return result;
+  };
+
+  const create = async (data: Omit<EntitiesMap[T], IdKey>) => {
+    logger.debug(
+      `create: ${collectionName} - ${JSON.stringify(data, null, 4)}`
+    );
+    const result = await collection.insertOne(data);
+    if (!result.acknowledged) return null;
+    return readById(result.insertedId.toString());
+  };
+
+  const update = async (
+    id: IdType,
+    data: Partial<Omit<EntitiesMap[T], IdKey>>
+  ) => {
+    logger.debug(
+      `update: ${collectionName} - ${id} - ${JSON.stringify(data, null, 4)}`
+    );
+    const toUpdate = await readById(id);
+    if (!toUpdate) return null;
+    const result = await collection.updateOne(
+      { [idKey]: new ObjectId(id) },
+      { $set: data }
+    );
+    return result.acknowledged ? toUpdate : null;
+  };
+
+  const deleteOne = async (id: IdType) => {
+    logger.debug(`delete: ${collectionName} - ${id}`);
+    const toDelete = await readById(id);
+    if (!toDelete) return null;
+    const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
+    return result.acknowledged ? toDelete : null;
+  };
+
+  return {
+    readAll,
+    readById,
+    readByField,
+    create,
+    update,
+    delete: deleteOne,
+  };
 };
