@@ -64,7 +64,7 @@ const initializeEntitiesRouters = async (app: Application) => {
 const prodHost = "0.0.0.0";
 
 /**
- * The host to listen to in development mode
+ * The host to listen to in development mode (localhost only)
  */
 const devHost = "localhost";
 

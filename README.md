@@ -74,7 +74,12 @@ npm run start
 
 ### 🎉 Done!
 
+<<<<<<< HEAD
 You can open your browser and go to `http://localhost:<.envPort>/api/v1/` to see the welcome message.
+=======
+You can open your browser and go to http://localhost:<.envPort>/api/v1/
+
+> > > > > > > main
 
 You should see the following message:
 
