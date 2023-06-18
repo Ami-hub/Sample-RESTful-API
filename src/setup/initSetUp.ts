@@ -3,18 +3,18 @@ import {
   errorHandler,
 } from "../errorHandling/errorHandler";
 import express, { Application } from "express";
-import { env } from "../env";
 import { logger } from "../logging/logger";
-import { httpTrafficLogger } from "../logging/loggerMiddleware";
+import { httpTrafficLoggerMiddleware } from "../logging/loggerMiddleware";
 import { welcomeRoutes, notFoundRoutes } from "../routing/routes/default";
-import { DalGetter } from "../DB/dalManager";
+import { getEntityDAL } from "../DB/entityDAL";
+import { env } from "./env";
 
 /**
  * The base URI for all the API routes
  */
 export const baseApiUri = "/api/v1";
 
-export const initializeApp = async (app: Application, dalGetter: DalGetter) => {
+export const initializeApp = async (app: Application) => {
   app.use(
     express.json({
       inflate: false,
@@ -22,10 +22,10 @@ export const initializeApp = async (app: Application, dalGetter: DalGetter) => {
   );
   logger.verbose(`JSON body parser middleware initialized`);
 
-  app.use(httpTrafficLogger);
+  app.use(httpTrafficLoggerMiddleware);
   logger.verbose(`HTTP traffic logger initialized`);
 
-  await initializeEntitiesRouters(app, dalGetter);
+  await initializeEntitiesRouters(app);
   logger.verbose(`Entities routers initialized`);
 
   await initializeDefaultRoutes(app);
@@ -47,15 +47,11 @@ const initializeDefaultRoutes = async (app: Application) => {
   return app;
 };
 
-const initializeEntitiesRouters = async (
-  app: Application,
-  dalGetter: DalGetter
-) => {
-  const theaterDAL = dalGetter.get("theaters");
+const initializeEntitiesRouters = async (app: Application) => {
+  const theaterDAL = getEntityDAL("theaters");
   app.get(
     `${baseApiUri}/theaters`,
-    deferToErrorMiddleware(async (req, res, next) => {
-      logger.debug("I am in theaters route");
+    deferToErrorMiddleware(async (_req, res, _next) => {
       const allTheaters = await theaterDAL.getAll();
       res.send(allTheaters);
     })

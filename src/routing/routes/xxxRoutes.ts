@@ -1,33 +1,32 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { idSchema } from "../../types/general";
+import { EntitiesMap, idSchema } from "../../types/general";
+import { getEntityDAL } from "../../DB/entityDAL";
 
-export const getXxxRoutes = (
-  entityDalGetter: any // TODO: set accurate type
-) => {
-  const collectionName = "xxx";
-  const xxxDAL = entityDalGetter.get(collectionName);
+export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
+  const xxxDAL = getEntityDAL(collectionName);
+
   const getAll = async (_req: Request, res: Response) => {
-    const accounts = await xxxDAL.readAllAccounts();
-    res.json(accounts);
+    const entities = await xxxDAL.getAll();
+    res.json(entities);
   };
 
   const getById = async (req: Request, res: Response) => {
     const id = idSchema.parse(req.params.id);
-    const account = await xxxDAL.readAccountById(id);
-    if (!account) {
+    const entity = await xxxDAL.getById(id);
+    if (!entity) {
       res
         .status(StatusCodes.NOT_FOUND)
         .json({ error: `No such ${collectionName} '${id.toString()}'` });
       return;
     }
 
-    res.json(account);
+    res.json(entity);
   };
 
   const create = async (req: Request, res: Response) => {
-    const id = await xxxDAL.create(req.body);
-    res.status(StatusCodes.CREATED).json({ "Inserted id": id.toString() });
+    const created = await xxxDAL.create(req.body);
+    res.status(StatusCodes.CREATED).json(created);
   };
 
   const update = async (req: Request, res: Response) => {
@@ -37,8 +36,8 @@ export const getXxxRoutes = (
 
   const deleteOne = async (req: Request, res: Response) => {
     const id = idSchema.parse(req.params.id);
-    const account = await xxxDAL.delete(id);
-    res.json(account);
+    const deleted = await xxxDAL.delete(id);
+    res.json(deleted);
   };
 
   return {

@@ -3,47 +3,41 @@ import { logger } from "./logger";
 import { randomUUID } from "crypto";
 
 /**
- * A middleware for logging HTTP traffic.
- *
- * @param req HTTP request object
- * @param res HTTP response object
- * @param next next middleware function
+ * Middleware for logging HTTP traffic
  */
-export const httpTrafficLogger = (
+export const httpTrafficLoggerMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const startTime = performance.now();
-  const reqId = randomUUID();
-  const { method, url, body, params, query } = req;
+  const requestId = randomUUID();
 
-  logger.http(
-    `[${method}] REQUEST ${reqId} from ${req.ip} ${url} => with ${
-      Object.keys(body).length
-        ? `the body: ${JSON.stringify(body, null, 4)}`
-        : "no body"
-    }${
-      Object.keys(params).length
-        ? `, params: ${JSON.stringify(params, null, 4)}`
-        : ""
-    }${
-      Object.keys(query).length
-        ? `, query: ${JSON.stringify(query, null, 4)}`
-        : ""
-    }`
-  );
+  logger.http({
+    type: `request`,
+    requestId: requestId,
+    method: req.method,
+    sourceIP: req.ip,
+    url: req.url,
+    headers: req.headers,
+    query: req.query,
+    params: req.params,
+    body: req.body,
+  });
 
   next();
   const executionTime = performance.now() - startTime;
-  const contentLength = res.get("Content-Length") || "?";
-  const { statusCode } = res;
+  const contentLength = res.get("Content-Length") || "?"; // TODO - check if this is the correct way to get the content length
 
-  logger.http(
-    `[${method}] RESPONSE ${reqId} to ${
-      req.ip
-    } ${url} => ${contentLength} bytes sent with status ${statusCode} in ${executionTime.toFixed(
-      3
-    )} ms with headers: ${JSON.stringify(res.getHeaders(), null, 4)}`
-  );
+  logger.http({
+    type: `response`,
+    requestId: requestId,
+    method: req.method,
+    destinationIP: req.ip,
+    url: req.url,
+    headers: res.getHeaders(),
+    status: res.statusCode,
+    contentLength: contentLength,
+    processingTimeMs: executionTime,
+  });
 };

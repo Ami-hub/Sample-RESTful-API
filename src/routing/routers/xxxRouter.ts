@@ -1,23 +1,22 @@
 import { Router } from "express";
 import { getXxxRoutes } from "../routes/xxxRoutes";
 import { deferToErrorMiddleware } from "../../errorHandling/errorHandler";
+import { EntitiesMap } from "../../types/general";
 
-export const getXxxRouter = (
-  entityDalGetter: any // TODO: set accurate type
-) => {
-  const accountsRouter = Router();
+export const getXxxRouter = (collectionName: keyof EntitiesMap) => {
+  const xxxRouter = Router();
 
-  const xxxRoutes = getXxxRoutes(entityDalGetter);
+  const xxxRoutes = getXxxRoutes(collectionName);
 
-  accountsRouter.get("/", deferToErrorMiddleware(xxxRoutes.getAll));
+  xxxRouter.get("/", deferToErrorMiddleware(xxxRoutes.getAll));
 
-  accountsRouter.get("/:id", deferToErrorMiddleware(xxxRoutes.getById));
+  xxxRouter.get("/:id", deferToErrorMiddleware(xxxRoutes.getById));
 
-  accountsRouter.post("/", deferToErrorMiddleware(xxxRoutes.create));
+  xxxRouter.post("/", deferToErrorMiddleware(xxxRoutes.create));
 
-  accountsRouter.put("/:id", deferToErrorMiddleware(xxxRoutes.update));
+  xxxRouter.put("/:id", deferToErrorMiddleware(xxxRoutes.update));
 
-  accountsRouter.delete("/:id", deferToErrorMiddleware(xxxRoutes.delete));
+  xxxRouter.delete("/:id", deferToErrorMiddleware(xxxRoutes.delete));
 
-  return accountsRouter;
+  return xxxRouter;
 };

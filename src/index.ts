@@ -1,16 +1,17 @@
 import express, { Application } from "express";
 import { initializeApp, runApp } from "./setup/initSetUp";
 import { logger } from "./logging/logger";
-import { env } from "./env";
-import { getDalManager } from "./DB/dalManager";
+import { env } from "./setup/env";
+import { getDbConnector } from "./DB/databaseConnector";
 
 const main = async () => {
   logger.info(`Starting in ${env.NODE_ENV} mode...`);
+
   const app: Application = express();
+  const dbConnector = await getDbConnector();
+  await dbConnector.connect();
 
-  const dalManager = await getDalManager();
-
-  await initializeApp(app, dalManager.dalGetter);
+  await initializeApp(app);
   logger.info(`Initializing done!`);
 
   await runApp(app);

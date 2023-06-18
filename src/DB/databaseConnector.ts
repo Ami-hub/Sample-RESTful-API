@@ -1,7 +1,42 @@
 import { MongoClient } from "mongodb";
-import { env } from "../env";
-import { EntitiesMap } from "../types/general";
+import { env } from "../setup/env";
 import { logger } from "../logging/logger";
+import { EntitiesMap } from "../types/general";
+import { EntityDAL, getEntityDAL } from "./entityDAL";
+
+export interface databaseConnector {
+  /**
+   * Connect to the database
+   * @NOTE if you have already connected to the DB, this function will do nothing
+   */
+  connect(): Promise<void>;
+
+  /**
+   * Checks if the DB is connected
+   * @returns true if the DB is connected, false otherwise
+   * @example
+   * ```ts
+   * const dalManager: DalManager = await getDalManager();
+   * await dalManager.connect();
+   * const isConnected = await dalManager.isConnected();
+   * console.log(`Am I connected? ${isConnected}`);
+   * // prints: Am I connected? true
+   * await dalManager.disconnect();
+   * console.log(`Am I connected? ${isConnected}`);
+   * // prints: Am I connected? false
+   * ```
+   */
+  isConnected(): Promise<boolean>;
+
+  /**
+   * Disconnect from the database
+   */
+  disconnect(): Promise<void>;
+}
+
+// ########################################
+//             Implementation
+// ########################################
 
 /**
  * The client that connects to the DB
@@ -10,7 +45,7 @@ import { logger } from "../logging/logger";
 const client = new MongoClient(env.MONGODB_URI, {
   maxPoolSize: env.MAX_POOL_SIZE,
   minPoolSize: env.MIN_POOL_SIZE,
-  connectTimeoutMS: 30000,
+  connectTimeoutMS: env.CONNECT_DB_TIMEOUT_MS,
   maxIdleTimeMS: env.MAX_IDLE_TIME_MS,
   writeConcern: {
     w: env.WRITE_CONCERN,
@@ -21,7 +56,7 @@ const client = new MongoClient(env.MONGODB_URI, {
 /**
  * The interval in which the DB will try to reconnect to the DB if the connection is failed
  */
-const reconnectingIntervalMs = 15000;
+const reconnectingIntervalMs = 15000; // TODO move to .env
 /**
  * Connects to the DB
  * @param retry if true, will try to reconnect to the DB if the connection is failed
@@ -62,6 +97,23 @@ export const isConnected = async () => {
 const getDbInstance = () => {
   return client.db(env.MAIN_DB_NAME);
 };
+/**
+ * Disconnects from the DB
+ */
+export const disconnectFromDB = async () => {
+  await client.close();
+};
+
+/**
+ * Get a mongoDB implementation of the DalManager interface
+ */
+export const getDbConnector = async (): Promise<databaseConnector> => {
+  return {
+    connect: connectToDB,
+    isConnected: isConnected,
+    disconnect: disconnectFromDB,
+  };
+};
 
 /**
  * Gets a collection from the DB
@@ -72,11 +124,4 @@ export const getCollection = <T extends keyof EntitiesMap>(
   collectionName: T
 ) => {
   return getDbInstance().collection(collectionName);
-};
-
-/**
- * Disconnects from the DB
- */
-export const disconnectFromDB = async () => {
-  await client.close();
 };

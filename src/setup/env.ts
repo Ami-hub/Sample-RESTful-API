@@ -15,7 +15,6 @@ const validEnv = cleanEnv(process.env, {
   MIN_POOL_SIZE: num(),
   MAX_IDLE_TIME_MS: num(),
   WRITE_CONCERN: makeValidator((input: string) => {
-    // WRITE_CONCERN must be 0, 1, 2, or 'majority'
     if (input === "majority") return input;
     const num = Number(input);
     if (num === 0 || num === 1 || num === 2) return num;

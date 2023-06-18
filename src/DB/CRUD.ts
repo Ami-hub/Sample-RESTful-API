@@ -1,7 +1,8 @@
 import { ObjectId } from "mongodb";
 import { EntitiesMap, IdKey, IdType, idKey } from "../types/general";
 import { isValidId } from "../validators/validators";
-import { getCollection } from "./db";
+import { getCollection } from "./databaseConnector";
+import { logger } from "../logging/logger";
 
 /**
  * Supported CRUD operations
@@ -63,6 +64,8 @@ export const getCRUD = <T extends keyof EntitiesMap>(
   const collection = getCollection(collectionName);
 
   const readAll = async () => {
+    logger.debug(`read all: ${collectionName}`);
+
     const result = await collection
       .find<EntitiesMap[T]>({})
       .limit(10) // TODO: remember to remove this
@@ -71,6 +74,7 @@ export const getCRUD = <T extends keyof EntitiesMap>(
   };
 
   const readById = async (id: IdType) => {
+    logger.debug(`readById: ${collectionName} - ${id}`);
     if (!isValidId(id)) return null;
     const result = await collection.findOne<EntitiesMap[T]>({
       [idKey]: new ObjectId(id),
@@ -82,6 +86,9 @@ export const getCRUD = <T extends keyof EntitiesMap>(
     field: K,
     value: EntitiesMap[T][K]
   ) => {
+    logger.debug(
+      `readByField: ${collectionName} - ${field.toString()} - ${value}`
+    );
     const isObjectIdField = false; // TODO: check if field is ObjectId
     const filter = isObjectIdField
       ? { [field]: new ObjectId(String(value)) }
@@ -91,6 +98,9 @@ export const getCRUD = <T extends keyof EntitiesMap>(
   };
 
   const create = async (data: Omit<EntitiesMap[T], IdKey>) => {
+    logger.debug(
+      `create: ${collectionName} - ${JSON.stringify(data, null, 4)}`
+    );
     const result = await collection.insertOne(data);
     if (!result.acknowledged) return null;
     return readById(result.insertedId.toString());
@@ -100,6 +110,9 @@ export const getCRUD = <T extends keyof EntitiesMap>(
     id: IdType,
     data: Partial<Omit<EntitiesMap[T], IdKey>>
   ) => {
+    logger.debug(
+      `update: ${collectionName} - ${id} - ${JSON.stringify(data, null, 4)}`
+    );
     const toUpdate = await readById(id);
     if (!toUpdate) return null;
     const result = await collection.updateOne(
@@ -110,6 +123,7 @@ export const getCRUD = <T extends keyof EntitiesMap>(
   };
 
   const deleteOne = async (id: IdType) => {
+    logger.debug(`delete: ${collectionName} - ${id}`);
     const toDelete = await readById(id);
     if (!toDelete) return null;
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
