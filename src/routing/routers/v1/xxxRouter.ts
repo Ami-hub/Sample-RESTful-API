@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { getXxxRoutes } from "../routes/xxxRoutes";
-import { deferToErrorMiddleware } from "../../errorHandling/errorHandler";
-import { EntitiesMap } from "../../types/general";
+import { getXxxRoutes } from "../../routes/v1/xxxRoutes";
+import { deferToErrorMiddleware } from "../../../errorHandling/errorHandler";
+import { EntitiesMap } from "../../../types/general";
 
 export const getXxxRouter = (collectionName: keyof EntitiesMap) => {
   const xxxRouter = Router();

@@ -1,17 +1,12 @@
 import { sign, verify } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { env } from "../../env";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
-
-/**
- * The time in which the access token expires
- */
-const expiresIn = "15m";
+import { env } from "../../../setup/env";
 
 export const createAccessToken = (user: object) => {
   return sign(user, env.JWT_SECRET, {
-    expiresIn: expiresIn,
+    expiresIn: `${env.JWT_EXPIRES_MINUTES}m`,
   });
 };
 
@@ -25,12 +20,12 @@ export const authMiddleware = (
 ) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ error: "No token provided" });
+    res.status(StatusCodes.UNAUTHORIZED).json({ error: "missing token" });
     return;
   }
   const token = authHeader.split(" ")[1];
   if (!token) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ error: "No token provided" });
+    res.status(StatusCodes.UNAUTHORIZED).json({ error: "missing token" });
     return;
   }
 

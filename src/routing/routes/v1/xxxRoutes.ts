@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { EntitiesMap, idSchema } from "../../types/general";
-import { getEntityDAL } from "../../DB/entityDAL";
+import { EntitiesMap, idSchema } from "../../../types/general";
+import { getEntityDAL } from "../../../DB/entityDAL";
 
 export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
   const xxxDAL = getEntityDAL(collectionName);
