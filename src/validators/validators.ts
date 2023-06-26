@@ -1,7 +1,6 @@
 import { Schema } from "zod";
 import {
   EntitiesMap,
-  IdKey,
   IdType,
   idSchema,
   theatersCollectionName,
@@ -24,7 +23,7 @@ const entitySchemasMap: {
  *
  * @param entityName name of the entity
  * @returns a validator function
- * @see {@link entitySchemaMap}
+ * @see {@link entitySchemasMap}
  * @example
  * ```ts
  * const theater = { ... };
@@ -37,10 +36,7 @@ export const getValidator = <T extends keyof EntitiesMap>(entityName: T) => {
   const errorBuilder: any = getEntityErrorBuilder(entityName); // TODO: set accurate type
   const errorMessages = "Invalid entity field(s)";
 
-  const baseValidator = (
-    data: unknown,
-    schema: Schema<Partial<EntitiesMap[T]> | EntitiesMap[T]>
-  ) => {
+  const baseValidator = <E>(data: unknown, schema: Schema<E>): E => {
     const parseResult = schema.safeParse(data);
     if (!parseResult.success) {
       throw errorBuilder.invalidFieldStat(
@@ -55,12 +51,12 @@ export const getValidator = <T extends keyof EntitiesMap>(entityName: T) => {
   return {
     validateEntity: (data: unknown) => {
       const schema = entitySchemasMap[entityName]().entitySchema;
-      return baseValidator(data, schema) as EntitiesMap[T];
+      return baseValidator(data, schema);
     },
 
     validateFields: (data: unknown) => {
       const schema = entitySchemasMap[entityName]().partialSchema;
-      return baseValidator(data, schema) as Partial<EntitiesMap[T]>;
+      return baseValidator(data, schema);
     },
   };
 };

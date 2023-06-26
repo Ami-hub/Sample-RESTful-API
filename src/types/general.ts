@@ -1,6 +1,6 @@
 import { stringObjectIdSchema } from "../validators/objectId";
 import { z } from "zod";
-import { Theater, theaterObjectIdFields } from "./theater";
+import { Theater } from "./theater";
 
 /**
  * The key name of the unique identifier for each entity
@@ -30,6 +30,12 @@ export type IdType = z.infer<typeof idSchema>;
 export type Id = { [idKey]: IdType };
 
 /**
+ * The type of an entity with a unique identifier
+ * @see {@link Id}
+ */
+export type WithId<T extends EntitiesMap[keyof EntitiesMap]> = T & Id;
+
+/**
  * The name of the transactions collection
  */
 export const theatersCollectionName = "theaters";
@@ -39,4 +45,23 @@ export const theatersCollectionName = "theaters";
  */
 export type EntitiesMap = {
   [theatersCollectionName]: Theater;
+};
+
+/**
+ * Filter type for the read operation
+ */
+export type Filter<
+  T extends EntitiesMap[keyof EntitiesMap],
+  E extends WithId<T> = WithId<T>,
+  K extends keyof E = keyof E
+> = K extends keyof E
+  ? {
+      key: K;
+      value: E[K];
+    }
+  : never;
+
+const filterTest: Filter<Theater> = {
+  key: "_id",
+  value: "123",
 };

@@ -7,25 +7,24 @@ import { theaterSchema } from "../validators/theater";
  *
  * @example
  * ```ts
-    const transaction: Transaction = {
-      location: {
-        address: {
-          street1: "340 W Market",
-          city: "Bloomington",
-          state: "MN",
-          zipcode: "55425",
-        },
-        geo: {
-          type: "Point",
-          coordinates: [-93.24565, 44.85466],
-        },
+  const theater: Theater = {
+    location: {
+      address: {
+        street1: "450 Powell St",
+        city: "San Francisco",
+        state: "CA",
+        zipcode: "94102",
       },
-    };
+      geo: {
+        type: "Point",
+        coordinates: [-122.408575, 37.787265],
+      },
+    },
+  }
  * ```
- *
  */
-
 export type Theater = z.infer<typeof theaterSchema>;
+
 /**
  * Transaction fields that are of type `ObjectId`
  * @see {@link ObjectId}

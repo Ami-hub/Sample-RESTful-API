@@ -1,8 +1,8 @@
 import { sign, verify } from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import { env } from "../../../setup/env";
+import { FastifyReply, FastifyRequest } from "fastify";
 
 export const createAccessToken = (user: object) => {
   return sign(user, env.JWT_SECRET, {
@@ -14,41 +14,22 @@ export const verifyAccessToken = (token: string) =>
   verify(token, env.JWT_SECRET);
 
 export const authMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
+  request: FastifyRequest,
+  reply: FastifyReply,
+  done: (err?: Error) => void
 ) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ error: "missing token" });
-    return;
-  }
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ error: "missing token" });
-    return;
-  }
-
-  try {
-    const decoded = verifyAccessToken(token);
-    (req as any)[`user`] = decoded; // TODO: get rid of any 🤮
-    next();
-  } catch (err) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid token" });
-  }
+  throw new Error("authMiddleware not implemented");
 };
 
-export const login = () => async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user: any = null; // TODO: implement!
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ error: "Invalid credentials" });
-    return;
-  }
-  const accessToken = createAccessToken({ id: user.id });
-  res.json({ accessToken });
-};
+export const login =
+  () =>
+  async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: (err?: Error) => void
+  ) => {
+    throw new Error("login route not implemented");
+  };
 
 const getPasswordHash = async (password: string): Promise<string> => {
   const salt = await bcrypt.genSalt();

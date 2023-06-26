@@ -9,25 +9,6 @@ export interface StatusError extends Error {
 }
 
 /**
- * Converts an error to a status error.
- *
- * @param error The error to convert.
- * @param details
- * @returns The status error.
- */
-export const errorToStatusError = <T extends StatusError>(
-  error: T,
-  details: string | undefined = undefined
-): StatusError => {
-  return {
-    name: error.name,
-    message: error.message,
-    status: error.status ?? StatusCodes.INTERNAL_SERVER_ERROR,
-    details: error.details,
-  };
-};
-
-/**
  * Builds a status error.
  *
  * @param message The error to convert.

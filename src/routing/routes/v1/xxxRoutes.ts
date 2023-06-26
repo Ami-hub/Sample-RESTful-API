@@ -1,43 +1,66 @@
-import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { EntitiesMap, idSchema } from "../../../types/general";
 import { getEntityDAL } from "../../../DB/entityDAL";
+import { FastifyReply, FastifyRequest } from "fastify";
 
 export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
   const xxxDAL = getEntityDAL(collectionName);
 
-  const getAll = async (_req: Request, res: Response) => {
+  const getAll = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: (err?: Error) => void
+  ) => {
     const entities = await xxxDAL.getAll();
-    res.json(entities);
+    reply.send(entities);
   };
 
-  const getById = async (req: Request, res: Response) => {
-    const id = idSchema.parse(req.params.id);
+  const getById = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: (err?: Error) => void
+  ) => {
+    const id = idSchema.parse((request.params as any).id); // TODO: add validation
     const entity = await xxxDAL.getById(id);
     if (!entity) {
-      res
+      reply
         .status(StatusCodes.NOT_FOUND)
-        .json({ error: `No such ${collectionName} '${id.toString()}'` });
+        .send({ error: `No such ${collectionName} '${id.toString()}'` });
       return;
     }
 
-    res.json(entity);
+    reply.send(entity);
   };
 
-  const create = async (req: Request, res: Response) => {
-    const created = await xxxDAL.create(req.body);
-    res.status(StatusCodes.CREATED).json(created);
+  const create = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: (err?: Error) => void
+  ) => {
+    const created = await xxxDAL.create(request.body);
+    reply.status(StatusCodes.CREATED).send(created);
   };
 
-  const update = async (req: Request, res: Response) => {
-    const updated = await xxxDAL.update(req.params.id, req.body);
-    res.json(updated);
+  const update = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: (err?: Error) => void
+  ) => {
+    const updated = await xxxDAL.update(
+      (request.params as any).id, // TODO: add validation
+      request.body
+    );
+    reply.send(updated);
   };
 
-  const deleteOne = async (req: Request, res: Response) => {
-    const id = idSchema.parse(req.params.id);
+  const deleteOne = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: (err?: Error) => void
+  ) => {
+    const id = idSchema.parse((request.params as any).id); // TODO: add validation
     const deleted = await xxxDAL.delete(id);
-    res.json(deleted);
+    reply.send(deleted);
   };
 
   return {

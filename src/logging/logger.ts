@@ -1,5 +1,7 @@
 import { createLogger, format, transports } from "winston";
 import { env } from "../setup/env";
+import { FastifyBaseLogger, FastifyLoggerOptions } from "fastify";
+import { PinoLoggerOptions } from "fastify/types/logger";
 
 const timestampFormat = format.timestamp();
 
@@ -7,11 +9,7 @@ const consoleLoggerFormat = format.combine(
   timestampFormat,
   format.printf(
     (info) =>
-      `[${info.timestamp}] ${info.level.toUpperCase()}: ${JSON.stringify(
-        info.message,
-        null,
-        4
-      )}\n`
+      `[${info.timestamp}] ${info.level.toUpperCase()}: ${info.message}\n`
   ),
   format.colorize({
     all: true,
@@ -61,3 +59,41 @@ export const logger = createLogger({
     }),
   ],
 });
+
+export const fastifyWinstonLogger: FastifyLoggerOptions & PinoLoggerOptions = {
+  stream: {
+    write: (fastifyLog: string) => {
+      const fastifyLogAsJson = JSON.parse(fastifyLog);
+      if ("req" in fastifyLogAsJson) {
+        logger.http(
+          JSON.stringify(
+            {
+              requestId: fastifyLogAsJson.reqId,
+              request: fastifyLogAsJson.req,
+            },
+            null,
+            4
+          )
+        );
+        return;
+      }
+      if ("res" in fastifyLogAsJson) {
+        logger.http(
+          JSON.stringify(
+            {
+              requestId: fastifyLogAsJson.reqId,
+              response: {
+                ...fastifyLogAsJson.res,
+                handlingTimeMs: fastifyLogAsJson.responseTime,
+              },
+            },
+            null,
+            4
+          )
+        );
+        return;
+      }
+      logger.silly(JSON.stringify(fastifyLogAsJson, null, 4));
+    },
+  },
+};
