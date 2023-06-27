@@ -75,7 +75,7 @@ npm run start
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:<.env.Port>/api/v1/` to see the welcome message.
+You can open your browser and go to `http://localhost:<.env.Port>/api/v1` to see the welcome message.
 
 You should see the following message:
 
@@ -126,9 +126,9 @@ cd Sample-RESTful-API
 2. Modify the `.env` file to match your needs and environment, e.g.:
 
    ```env
+   ENABLE_LISTENING_TO_ALL_INTERFACES=true # Must be set to true when using docker
    MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
    DB_BASE_NAME=sample_mflix
-   PORT=8081
    LOG_LEVEL=debug
    ...
    ```
@@ -149,7 +149,7 @@ npm run docker-start
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:<.env.Port>/api/v1/` to see the welcome message.
+You can open your browser and go to `http://localhost:<.env.Port>/api/v1` to see the welcome message.
 
 You should see the following message:
 

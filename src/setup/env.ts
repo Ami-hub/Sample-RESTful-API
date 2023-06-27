@@ -23,6 +23,8 @@ const validEnv = cleanEnv(process.env, {
 
   CONNECT_DB_TIMEOUT_MS: num({ default: 15000 }),
 
+  ENABLE_LISTENING_TO_ALL_INTERFACES: bool({ default: false }),
+
   JWT_SECRET: str({
     default: btoa(randomBytes(64).toString("hex")),
   }),
@@ -65,6 +67,8 @@ const validEnv = cleanEnv(process.env, {
  * @property `LOG_LEVEL` - The log level of the application.
  *
  * @property `PORT` - The exposed port of the application.
+ *
+ * @property `ENABLE_LISTENING_TO_ALL_INTERFACES` - Whether to listening to all network interfaces or not.
  *
  * @property `MONGODB_URI` - The MongoDB URI.
  *

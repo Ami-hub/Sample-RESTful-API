@@ -40,20 +40,10 @@ const initializeEntitiesRouters = async (app: FastifyInstance) => {
   });
 };
 
-/**
- * The host to listen to in production mode (all interfaces)
- */
-const prodHost = "0.0.0.0";
-
-/**
- * The host to listen to in development mode (localhost only)
- */
-const devHost = "localhost";
-
 export const startListen = async (app: FastifyInstance) => {
   try {
     await app.listen({
-      host: env.isProd ? prodHost : devHost,
+      host: env.ENABLE_LISTENING_TO_ALL_INTERFACES ? "0.0.0.0" : "localhost",
       port: env.PORT,
     });
   } catch (error) {
