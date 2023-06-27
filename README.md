@@ -1,7 +1,7 @@
 # RESTful API Sample Project
 
-Sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) for [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) based on [Node.js](https://nodejs.org/en/) ([typescript](https://www.typescriptlang.org/)), [mongoDB](https://www.mongodb.com/)
-and [Express](https://expressjs.com/). Provides an easy way to perform [CRUD operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) on the data. Feel free to use it as a template for your own projects or as a reference for learning.
+Sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) based on the data of [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) using [typescript](https://www.typescriptlang.org/), [mongoDB](https://www.mongodb.com/),
+and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times. Feel free to use it as a template for your own projects or as a reference for learning.
 
 ## 📖 Documentation
 
@@ -76,7 +76,6 @@ npm run start
 ### 🎉 Done!
 
 You can open your browser and go to `http://localhost:<.envPort>/api/v1/` to see the welcome message.
-You can open your browser and go to http://localhost:<.envPort>/api/v1/
 
 You should see the following message:
 
