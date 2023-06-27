@@ -56,7 +56,6 @@ export const startListen = async (app: FastifyInstance) => {
       host: env.isProd ? prodHost : devHost,
       port: env.PORT,
     });
-    logger.info(`Listening on port ${env.PORT}`);
   } catch (error) {
     logger.error(`Error while starting the server: ${error}`);
     process.exit(1);
