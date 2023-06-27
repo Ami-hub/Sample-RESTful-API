@@ -55,8 +55,9 @@ npm i
 2. Modify the `.env` file to match your needs and environment, e.g.:
 
    ```env
-   PORT=3001
-   MONGODB_URI=mongodb+srv://Ami:123@cluster0.1a2b3c4.mongodb.net/
+   MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
+   DB_BASE_NAME=sample_mflix
+   LOG_LEVEL=silly
    ...
    ```
 
@@ -74,12 +75,8 @@ npm run start
 
 ### 🎉 Done!
 
-<<<<<<< HEAD
 You can open your browser and go to `http://localhost:<.envPort>/api/v1/` to see the welcome message.
-=======
 You can open your browser and go to http://localhost:<.envPort>/api/v1/
-
-> > > > > > > main
 
 You should see the following message:
 

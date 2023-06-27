@@ -2,9 +2,14 @@ import { MongoClient } from "mongodb";
 import { env } from "../setup/env";
 import { logger } from "../logging/logger";
 import { EntitiesMap } from "../types/general";
-import { EntityDAL, getEntityDAL } from "./entityDAL";
 
-export interface databaseConnector {
+const CURRENT_DB_NAME = env.isProd
+  ? env.DB_BASE_NAME
+  : env.isDev
+  ? env.DB_BASE_NAME + "_dev"
+  : env.DB_BASE_NAME + "_test";
+
+export interface DatabaseConnector {
   /**
    * Connect to the database
    * @NOTE if you have already connected to the DB, this function will do nothing
@@ -54,29 +59,24 @@ const client = new MongoClient(env.MONGODB_URI, {
 });
 
 /**
- * The interval in which the DB will try to reconnect to the DB if the connection is failed
- */
-const reconnectingIntervalMs = 15000; // TODO move to .env
-/**
  * Connects to the DB
- * @param retry if true, will try to reconnect to the DB if the connection is failed
  * @NOTE if you have already connected to the DB, this function will do nothing
  */
-export const connectToDB = async (retry: boolean = false) => {
-  logger.verbose(`Trying to connect to '${env.MAIN_DB_NAME}' DB`);
+export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
+  logger.verbose(`Trying to connect to '${env.DB_BASE_NAME}' DB...`);
   try {
     await client.connect();
-    logger.info(`Connected to '${env.MAIN_DB_NAME}' DB`);
+    logger.info(`Connected to '${env.DB_BASE_NAME}' DB`);
   } catch (error) {
-    logger.error(`Failed to connect to '${env.MAIN_DB_NAME}' DB ${
-      retry ? `retrying in ${reconnectingIntervalMs / 1000} seconds...` : ""
+    logger.error(`Failed to connect to '${env.DB_BASE_NAME}' DB ${
+      retry
+        ? `retrying in ${env.RECONNECTING_INTERVAL_MS / 1000} seconds...`
+        : process.exit(1)
     }
     `);
-    if (retry) {
-      setTimeout(() => {
-        logger.verbose(`try to reconnect to '${env.MAIN_DB_NAME}' DB...`);
-      }, reconnectingIntervalMs);
-    }
+    setTimeout(() => {
+      logger.verbose(`try to reconnect to '${env.DB_BASE_NAME}' DB...`);
+    }, env.RECONNECTING_INTERVAL_MS);
   }
 };
 
@@ -95,8 +95,9 @@ export const isConnected = async () => {
 };
 
 const getDbInstance = () => {
-  return client.db(env.MAIN_DB_NAME);
+  return client.db(CURRENT_DB_NAME);
 };
+
 /**
  * Disconnects from the DB
  */
@@ -107,7 +108,7 @@ export const disconnectFromDB = async () => {
 /**
  * Get a mongoDB implementation of the DalManager interface
  */
-export const getDbConnector = async (): Promise<databaseConnector> => {
+export const getDbConnector = async (): Promise<DatabaseConnector> => {
   return {
     connect: connectToDB,
     isConnected: isConnected,

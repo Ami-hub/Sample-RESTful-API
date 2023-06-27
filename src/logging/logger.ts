@@ -1,11 +1,11 @@
 import { createLogger, format, transports } from "winston";
 import { env } from "../setup/env";
-import { FastifyBaseLogger, FastifyLoggerOptions } from "fastify";
-import { PinoLoggerOptions } from "fastify/types/logger";
+
+const LOGS_DIR_NAME = "logs";
 
 const timestampFormat = format.timestamp();
 
-const consoleLoggerFormat = format.combine(
+const logsFormatForConsole = format.combine(
   timestampFormat,
   format.printf(
     (info) =>
@@ -25,44 +25,33 @@ const consoleLoggerFormat = format.combine(
   })
 );
 
-const filesLoggerFormat = format.combine(timestampFormat, format.json());
-
-const logLevelForTest = "error";
-const logLevelForDev = "silly";
-const logLevelForProd = "info";
-
-const loggerLevel = env.isProd
-  ? logLevelForProd
-  : env.isTest
-  ? logLevelForTest
-  : logLevelForDev;
-
-const logsDirName = "logs";
+const logsFormatForFiles = format.combine(timestampFormat, format.json());
 
 /**
  * Winston logger instance.
  */
 export const logger = createLogger({
-  level: loggerLevel,
+  level: env.LOG_LEVEL,
   transports: [
-    new transports.Console({ format: consoleLoggerFormat }),
+    new transports.Console({ format: logsFormatForConsole }),
     new transports.File({
-      dirname: logsDirName,
+      dirname: LOGS_DIR_NAME,
       filename: "error.log",
       level: "error",
-      format: filesLoggerFormat,
+      format: logsFormatForFiles,
     }),
     new transports.File({
-      dirname: logsDirName,
+      dirname: LOGS_DIR_NAME,
       filename: "all.log",
-      format: filesLoggerFormat,
+      format: logsFormatForFiles,
     }),
   ],
 });
 
-export const fastifyWinstonLogger: FastifyLoggerOptions & PinoLoggerOptions = {
+export const fastifyWinstonLogger = {
   stream: {
     write: (fastifyLog: string) => {
+      logger.silly(fastifyLog);
       const fastifyLogAsJson = JSON.parse(fastifyLog);
       if ("req" in fastifyLogAsJson) {
         logger.http(
@@ -77,6 +66,7 @@ export const fastifyWinstonLogger: FastifyLoggerOptions & PinoLoggerOptions = {
         );
         return;
       }
+
       if ("res" in fastifyLogAsJson) {
         logger.http(
           JSON.stringify(
@@ -93,7 +83,7 @@ export const fastifyWinstonLogger: FastifyLoggerOptions & PinoLoggerOptions = {
         );
         return;
       }
-      logger.silly(JSON.stringify(fastifyLogAsJson, null, 4));
+      logger.info(fastifyLogAsJson.msg);
     },
   },
 };
