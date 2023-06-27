@@ -75,7 +75,81 @@ npm run start
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:<.envPort>/api/v1/` to see the welcome message.
+You can open your browser and go to `http://localhost:<.env.Port>/api/v1/` to see the welcome message.
+
+You should see the following message:
+
+```json
+{
+  "message": "Welcome to the API"
+}
+```
+
+<br>
+
+#
+
+<br>
+
+## 🐳 Quick start with [Docker](https://www.docker.com/)
+
+Make sure you have [Docker](https://www.docker.com/) and [ts-node](https://www.npmjs.com/package/ts-node)
+on your computer.
+
+### ⬇️ Clone the repo from github
+
+```
+git clone https://github.com/Ami-hub/Sample-RESTful-API.git
+```
+
+### 🚗 Go to the app directory
+
+```
+cd Sample-RESTful-API
+```
+
+### ⚙️ Set up the environment variables
+
+1. Create a `.env` file based on the `.env.example` file:  
+   🐧 Linux:
+
+   ```
+   cp .env.example .env
+   ```
+
+   🪟 Windows:
+
+   ```
+   copy .env.example .env
+   ```
+
+2. Modify the `.env` file to match your needs and environment, e.g.:
+
+   ```env
+   MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
+   DB_BASE_NAME=sample_mflix
+   PORT=8081
+   LOG_LEVEL=debug
+   ...
+   ```
+
+### 🖼️ Build the docker image
+
+```
+npm run docker-build
+```
+
+### 👟 Run the app using docker
+
+Make sure there is no other app running on the port you set in the `.env` file!
+
+```
+npm run docker-start
+```
+
+### 🎉 Done!
+
+You can open your browser and go to `http://localhost:<.env.Port>/api/v1/` to see the welcome message.
 
 You should see the following message:
 
