@@ -8,9 +8,7 @@ import {
 } from "../types/general";
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
-
-const DEFAULT_ENTITIES_AMOUNT_PER_REQUEST = 15; // TODO: consider add to env
-const DEFAULT_SKIP = 0; // TODO: consider add to env
+import { env } from "../setup/env";
 
 /**
  * Supported CRUD operations
@@ -28,11 +26,9 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
   /**
    * Gets all entity instances
    * @param filters filters to apply (do intersection between them)
-   * @param limit max amount of entities to return
-   * @param skip amount of entities to skip
+   * @param limit max amount of entities to return, default is in env
+   * @param skip amount of entities to skip, default is 0
    * @returns an array of entity instances
-   * @see {@link DEFAULT_ENTITIES_AMOUNT_PER_REQUEST}
-   * @see {@link DEFAULT_SKIP}
    * @example
    * ```ts
       const usersFound = await getCRUD("users").read([{ 
@@ -86,8 +82,8 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
 
   const read = async (
     filters: Array<Filter<N>> = [{}],
-    limit: number = DEFAULT_ENTITIES_AMOUNT_PER_REQUEST,
-    skip: number = DEFAULT_SKIP
+    limit: number = env.DEFAULT_READ_LIMIT,
+    skip: number = 0
   ) => {
     logger.debug(
       `Reading ${limit} ${collectionName} start from ${skip} with filters: ${JSON.stringify(

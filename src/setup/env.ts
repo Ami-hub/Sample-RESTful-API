@@ -21,6 +21,10 @@ const validEnv = cleanEnv(process.env, {
 
   PORT: port({ default: 3000 }),
 
+  DEFAULT_READ_LIMIT: num({ default: 15 }),
+
+  MAX_READ_LIMIT: num({ default: 50 }),
+
   CONNECT_DB_TIMEOUT_MS: num({ default: 15000 }),
 
   ENABLE_LISTENING_TO_ALL_INTERFACES: bool({ default: false }),
@@ -69,6 +73,10 @@ const validEnv = cleanEnv(process.env, {
  * @property `PORT` - The exposed port of the application.
  *
  * @property `ENABLE_LISTENING_TO_ALL_INTERFACES` - Whether to listening to all network interfaces or not.
+ *
+ * @property `DEFAULT_READ_LIMIT` - The default amount of entities to return per request.
+ 
+* @property `MAX_READ_LIMIT` - The maximum amount of entities to return per request.
  *
  * @property `MONGODB_URI` - The MongoDB URI.
  *

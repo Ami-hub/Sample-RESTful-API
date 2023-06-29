@@ -4,14 +4,16 @@ import { EntitiesMapDB, IdType, idKey } from "../types/general";
 import { getCRUD } from "./CRUD";
 
 export interface EntityDAL<T extends keyof EntitiesMapDB> {
-  getByField(
-    fieldName: string,
-    fieldValue: any,
+  get(
+    skip?: number,
     limit?: number,
-    skip?: number
+    filter?: {
+      key: string;
+      value: any;
+    }
   ): Promise<EntitiesMapDB[T][]>;
 
-  getById(id: IdType): Promise<EntitiesMapDB[T] | null>;
+  getOneById(id: IdType): Promise<EntitiesMapDB[T] | null>;
 
   create(data: unknown): Promise<EntitiesMapDB[T]>;
 
@@ -43,20 +45,20 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   const entityCrud = getCRUD(entityName);
   const errorBuilder = getEntityErrorBuilder(entityName);
 
-  const getByField = async (
-    fieldName: string,
-    fieldValue: any,
+  const get = async (
+    skip?: number,
     limit?: number,
-    skip?: number
+    filter?:
+      | {
+          key: string;
+          value: any;
+        }
+      | undefined
   ) => {
-    return await entityCrud.read(
-      [{ key: fieldName, value: fieldValue }],
-      limit,
-      skip
-    );
+    return await entityCrud.read([filter || {}], limit, skip);
   };
 
-  const getById = async (id: IdType) => {
+  const getOneById = async (id: IdType) => {
     if (!ObjectId.isValid(id))
       throw errorBuilder.entityNotFoundError(idKey, id);
 
@@ -97,8 +99,8 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   };
 
   return {
-    getByField,
-    getById,
+    get,
+    getOneById,
     create,
     update,
     delete: deleteOne,

@@ -3,7 +3,8 @@ import { env } from "../setup/env";
 import { logger } from "../logging/logger";
 import { EntitiesMapDB } from "../types/general";
 /**
-const CURRENT_DB_NAME = env.isProd
+ // TODO return to this
+const CURRENT_DB_NAME = env.isProd 
   ? env.DB_BASE_NAME
   : env.isDev
   ? env.DB_BASE_NAME + "_dev"
