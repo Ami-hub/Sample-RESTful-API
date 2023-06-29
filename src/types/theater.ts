@@ -5,65 +5,54 @@ const theaterJSONSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
-    theater: {
+    name: {
+      type: "string",
+    },
+    location: {
       type: "object",
       additionalProperties: false,
       properties: {
-        location: {
+        address: {
           type: "object",
           additionalProperties: false,
           properties: {
-            address: {
-              type: "object",
-              additionalProperties: false,
-              properties: {
-                street1: {
-                  type: "string",
-                },
-                city: {
-                  type: "string",
-                },
-                state: {
-                  type: "string",
-                },
-                zipcode: {
-                  type: "string",
-                },
-              },
-              required: ["street1", "city", "state", "zipcode"],
+            zipCode: {
+              type: "string",
             },
-            geo: {
-              type: "object",
-              additionalProperties: false,
-              properties: {
-                type: {
-                  type: "string",
-                },
-                coordinates: {
-                  type: "array",
-                  additionalItems: false,
-                  items: [
-                    {
-                      type: "number",
-                    },
-                    {
-                      type: "number",
-                    },
-                  ],
-                  minItems: 2,
-                  maxItems: 2,
-                },
-              },
-              required: ["type", "coordinates"],
+            street: {
+              type: "string",
+            },
+            city: {
+              type: "string",
+            },
+            state: {
+              type: "string",
+            },
+            country: {
+              type: "string",
             },
           },
-          required: ["address", "geo"],
+          required: ["street", "city", "state", "zipCode", "country"],
+        },
+        geoCoordinates: {
+          type: "array",
+          additionalItems: false,
+          items: [
+            {
+              type: "number",
+            },
+            {
+              type: "number",
+            },
+          ],
+          minItems: 2,
+          maxItems: 2,
         },
       },
-      required: ["location"],
+      required: ["address", "geoCoordinates"],
     },
   },
-  required: ["theater"],
+  required: ["location", "name"],
 } as const;
 
 export const getTheaterJSONSchema = () => theaterJSONSchema;
@@ -73,20 +62,19 @@ export const getTheaterJSONSchema = () => theaterJSONSchema;
  * @see {@link theaterSchema}
  * @example
  * ```ts
-  const theater: Theater = {
-    location: {
-      address: {
-        street1: "450 Powell St",
-        city: "San Francisco",
-        state: "CA",
-        zipcode: "94102",
+    const theater: Theater = {
+      name: "AMC Metreon 16",
+      location: {
+        address: {
+          street: "450 Powell St",
+          city: "San Francisco",
+          state: "CA",
+          country: "USA",
+          zipCode: "94103",
+        },
+        geoCoordinates: [-122.408575, 37.787265],
       },
-      geo: {
-        type: "Point",
-        coordinates: [-122.408575, 37.787265],
-      },
-    },
-  }
+    };
  * ```
  */
 export type Theater = FromSchema<typeof theaterJSONSchema>;

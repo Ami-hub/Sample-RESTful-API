@@ -1,7 +1,6 @@
 import { FromSchema } from "json-schema-to-ts";
 import { Theater } from "./theater";
 import { User } from "./user";
-import { Session } from "./sessions";
 
 /**
  * The key name of the unique identifier for each entity
@@ -75,7 +74,6 @@ export const sessionsCollectionName = "sessions";
 export type EntitiesMapDBWithoutId = {
   [theatersCollectionName]: Theater;
   [usersCollectionName]: User;
-  [sessionsCollectionName]: Session;
 };
 
 /**

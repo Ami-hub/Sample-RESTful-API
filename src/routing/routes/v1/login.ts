@@ -5,8 +5,9 @@ import { env } from "../../../setup/env";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { logger } from "../../../logging/logger";
 import { Application } from "../../..";
-import { getCRUD } from "../../../DB/CRUD";
-import { getUserJSONSchema } from "../../../types/user";
+import { WithId, idKey } from "../../../types/general";
+import { getCollection } from "../../../DB/databaseConnector";
+import { ObjectId } from "mongodb";
 
 export const createAccessToken = (user: object) => {
   return sign(user, env.JWT_SECRET, {
@@ -51,54 +52,75 @@ export const initLoginRoute = async (app: Application) => {
     "/login",
     {
       schema: {
-        body: getUserJSONSchema(),
+        body: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            email: { type: "string", format: "email" },
+            password: { type: "string" },
+          },
+          required: ["email", "password"],
+        } as const,
       },
     },
     async (request, reply) => {
-      logger.debug(`ip: ${request.ip} - body: ${JSON.stringify(request.body)}`);
+      const requestIP = request.ip;
+
+      logger.debug(
+        `Email ${request.body.email} is trying to login from ip ${requestIP}`
+      );
 
       const { email, password } = request.body;
 
-      const userCrud = getCRUD("users");
+      const userCollection = getCollection("users");
 
-      const userFound = (
-        await userCrud.read(
-          [
-            {
-              key: "email",
-              value: email,
-            },
-          ],
-          1
-        )
-      )[0];
-
-      logger.debug(`userFound: ${JSON.stringify(userFound)}`);
-
-      if (!userFound) {
-        return reply
-          .code(StatusCodes.UNAUTHORIZED)
-          .send({ error: "Invalid credentials" });
-      }
-
-      const isPasswordValid = await bcrypt.compare(
-        password,
-        userFound["password"]
+      const user = await userCollection.findOne<WithId<"users">>(
+        { email },
+        { projection: { name: 1, password: 1 } }
       );
+
+      if (!user) {
+        logger.debug(`Email ${email} not found from ip ${requestIP}`);
+        reply
+          .code(StatusCodes.UNAUTHORIZED)
+          .send({ error: "Invalid credentials" });
+        return;
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
+        logger.debug(
+          `Invalid password for email ${email} from ip ${requestIP}`
+        );
         return reply
           .code(StatusCodes.UNAUTHORIZED)
           .send({ error: "Invalid credentials" });
       }
 
-      const accessToken = createAccessToken({ userId: userFound._id, email });
-
-      logger.debug(`userFound ${userFound} created accessToken ${accessToken}`);
-      await getCRUD("sessions").create({
-        userId: userFound._id,
-        accessToken,
+      const accessToken = createAccessToken({
+        userId: user[idKey],
+        email,
       });
-      logger.debug(`session created`);
+
+      logger.debug(
+        `User ${user.email} logged in from ip ${requestIP} successfully`
+      );
+
+      const updateResult = await userCollection.updateOne(
+        { [idKey]: new ObjectId(user[idKey]) },
+        { $push: { sessions: { accessToken } } }
+      );
+
+      if (!updateResult.acknowledged) {
+        logger.error(
+          `Failed to update user sessions for user ${user.email} from ip ${requestIP}`
+        );
+        reply
+          .code(StatusCodes.INTERNAL_SERVER_ERROR)
+          .send({ error: "Internal server error" });
+        return;
+      }
+
       reply.code(StatusCodes.OK).send({ accessToken });
     }
   );
