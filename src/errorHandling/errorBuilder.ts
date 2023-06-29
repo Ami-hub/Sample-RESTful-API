@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { EntitiesMap, IdType } from "../types/general";
+import { EntitiesMapDB, IdType } from "../types/general";
 import { CRUDOperation } from "../DB/CRUD";
 import { createStatusError } from "./statusError";
 
@@ -24,7 +24,7 @@ export const customError = (
   return createStatusError(message, status, details);
 };
 
-export const getEntityErrorBuilder = <T extends keyof EntitiesMap>(
+export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
   relatedEntity: T
 ) => {
   const generalError = (

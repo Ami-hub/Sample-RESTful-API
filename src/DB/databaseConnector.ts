@@ -1,13 +1,16 @@
 import { MongoClient } from "mongodb";
 import { env } from "../setup/env";
 import { logger } from "../logging/logger";
-import { EntitiesMap } from "../types/general";
-
+import { EntitiesMapDB } from "../types/general";
+/**
 const CURRENT_DB_NAME = env.isProd
   ? env.DB_BASE_NAME
   : env.isDev
   ? env.DB_BASE_NAME + "_dev"
   : env.DB_BASE_NAME + "_test";
+*/
+
+const CURRENT_DB_NAME = env.DB_BASE_NAME;
 
 export interface DatabaseConnector {
   /**
@@ -121,7 +124,7 @@ export const getDbConnector = async (): Promise<DatabaseConnector> => {
  * @param collectionName name of the collection
  * @returns a collection from the DB
  */
-export const getCollection = <T extends keyof EntitiesMap>(
+export const getCollection = <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
   return getDbInstance().collection(collectionName);

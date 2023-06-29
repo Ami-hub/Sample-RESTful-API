@@ -1,15 +1,29 @@
-import fastify from "fastify";
+import Fastify from "fastify";
+import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import { initializeApp, startListen } from "./setup/initSetUp";
 import { fastifyWinstonLogger, logger } from "./logging/logger";
 import { env } from "./setup/env";
 import { getDbConnector } from "./DB/databaseConnector";
+import { getCRUD } from "./DB/CRUD";
 
-const main = async () => {
-  const app = fastify({
-    maxRequestsPerSocket: 1000,
-    logger: fastifyWinstonLogger,
-  });
+/**
+ * The main application instance
+ * @see https://www.fastify.io/docs/latest/TypeScript/
+ */
+const app = Fastify({
+  maxRequestsPerSocket: 1000,
+  logger: fastifyWinstonLogger,
+}).withTypeProvider<JsonSchemaToTsProvider>();
 
+/**
+ * Fastify instance including the type provider
+ */
+export type Application = typeof app;
+
+/**
+ * The first function to run when the application starts
+ */
+const start = async () => {
   logger.info(`Starting in ${env.NODE_ENV} mode...`);
 
   const dbConnector = await getDbConnector();
@@ -22,4 +36,4 @@ const main = async () => {
   logger.info(`Server is up and running!`);
 };
 
-main();
+start();

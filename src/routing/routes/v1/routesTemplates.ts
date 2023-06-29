@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import { EntitiesMap, idSchema } from "../../../types/general";
+import { EntitiesMapDB, idSchema } from "../../../types/general";
 import { getEntityDAL } from "../../../DB/entityDAL";
 import { FastifyReply, FastifyRequest } from "fastify";
 
-export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
+export const getXxxRoutes = (collectionName: keyof EntitiesMapDB) => {
   const xxxDAL = getEntityDAL(collectionName);
 
   const getAll = async (
@@ -11,8 +11,9 @@ export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
     reply: FastifyReply,
     done: (err?: Error) => void
   ) => {
-    const entities = await xxxDAL.getAll();
+    const entities = await xxxDAL.get();
     reply.send(entities);
+    done();
   };
 
   const getById = async (
@@ -20,7 +21,7 @@ export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
     reply: FastifyReply,
     done: (err?: Error) => void
   ) => {
-    const id = idSchema.parse((request.params as any).id); // TODO: add validation
+    const id = (request.params as any).id;
     const entity = await xxxDAL.getById(id);
     if (!entity) {
       reply
@@ -30,6 +31,7 @@ export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
     }
 
     reply.send(entity);
+    done();
   };
 
   const create = async (
@@ -47,10 +49,11 @@ export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
     done: (err?: Error) => void
   ) => {
     const updated = await xxxDAL.update(
-      (request.params as any).id, // TODO: add validation
+      (request.params as any).id,
       request.body
     );
     reply.send(updated);
+    done();
   };
 
   const deleteOne = async (
@@ -58,9 +61,10 @@ export const getXxxRoutes = (collectionName: keyof EntitiesMap) => {
     reply: FastifyReply,
     done: (err?: Error) => void
   ) => {
-    const id = idSchema.parse((request.params as any).id); // TODO: add validation
+    const id = (request.params as any).id;
     const deleted = await xxxDAL.delete(id);
     reply.send(deleted);
+    done();
   };
 
   return {

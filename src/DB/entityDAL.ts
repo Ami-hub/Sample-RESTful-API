@@ -1,18 +1,23 @@
+import { ObjectId } from "mongodb";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
-import { EntitiesMap, IdType } from "../types/general";
-import { getValidator } from "../validators/validators";
+import { EntitiesMapDB, IdType, idKey } from "../types/general";
 import { getCRUD } from "./CRUD";
 
-export interface EntityDAL<T extends keyof EntitiesMap> {
-  getAll(): Promise<EntitiesMap[T][]>;
+export interface EntityDAL<T extends keyof EntitiesMapDB> {
+  getByField(
+    fieldName: string,
+    fieldValue: any,
+    limit?: number,
+    skip?: number
+  ): Promise<EntitiesMapDB[T][]>;
 
-  getById(id: IdType): Promise<EntitiesMap[T] | null>;
+  getById(id: IdType): Promise<EntitiesMapDB[T] | null>;
 
-  create(data: unknown): Promise<EntitiesMap[T]>;
+  create(data: unknown): Promise<EntitiesMapDB[T]>;
 
-  update(id: IdType, data: unknown): Promise<EntitiesMap[T]>;
+  update(id: IdType, data: unknown): Promise<EntitiesMapDB[T]>;
 
-  delete(id: IdType): Promise<EntitiesMap[T]>;
+  delete(id: IdType): Promise<EntitiesMapDB[T]>;
 }
 
 // ########################################
@@ -32,33 +37,50 @@ export interface EntityDAL<T extends keyof EntitiesMap> {
  * console.log(`I have ${movies.length} movies!`);
  * ```
  */
-export const getEntityDAL = <T extends keyof EntitiesMap>(
+export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   entityName: T
 ): EntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
   const errorBuilder = getEntityErrorBuilder(entityName);
-  const entityValidator = getValidator(entityName);
 
-  const getAll = async () => {
-    return await entityCrud.readAll();
+  const getByField = async (
+    fieldName: string,
+    fieldValue: any,
+    limit?: number,
+    skip?: number
+  ) => {
+    return await entityCrud.read(
+      [{ key: fieldName, value: fieldValue }],
+      limit,
+      skip
+    );
   };
 
   const getById = async (id: IdType) => {
-    return await entityCrud.readById(id);
+    if (!ObjectId.isValid(id))
+      throw errorBuilder.entityNotFoundError(idKey, id);
+
+    const res = await entityCrud.read(
+      [{ key: idKey, value: new ObjectId(id) }],
+      1
+    );
+    if (!res.length) throw errorBuilder.entityNotFoundError(idKey, id);
+
+    return res[0];
   };
 
-  const create = async (data: unknown) => {
-    const valid = entityValidator.validateEntity(data);
-    const id = await entityCrud.create(valid);
+  // TODO: fix any
+  const create = async (data: any) => {
+    const id = await entityCrud.create(data);
     if (!id) {
       throw errorBuilder.generalError("create");
     }
     return id;
   };
 
-  const update = async (id: IdType, data: unknown) => {
-    const valid = entityValidator.validateFields(data);
-    const updated = await entityCrud.update(id, valid);
+  // TODO: fix any
+  const update = async (id: IdType, data: any) => {
+    const updated = await entityCrud.update(id, data);
 
     if (!updated) {
       throw errorBuilder.generalError("update");
@@ -75,7 +97,7 @@ export const getEntityDAL = <T extends keyof EntitiesMap>(
   };
 
   return {
-    getAll,
+    getByField,
     getById,
     create,
     update,

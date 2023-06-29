@@ -1,10 +1,76 @@
-import { z } from "zod";
-import { theaterSchema } from "../validators/theater";
+import { FromSchema } from "json-schema-to-ts";
+
+const theaterJSONSchema = {
+  $schema: "http://json-schema.org/draft-07/schema#",
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    theater: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        location: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            address: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                street1: {
+                  type: "string",
+                },
+                city: {
+                  type: "string",
+                },
+                state: {
+                  type: "string",
+                },
+                zipcode: {
+                  type: "string",
+                },
+              },
+              required: ["street1", "city", "state", "zipcode"],
+            },
+            geo: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                type: {
+                  type: "string",
+                },
+                coordinates: {
+                  type: "array",
+                  additionalItems: false,
+                  items: [
+                    {
+                      type: "number",
+                    },
+                    {
+                      type: "number",
+                    },
+                  ],
+                  minItems: 2,
+                  maxItems: 2,
+                },
+              },
+              required: ["type", "coordinates"],
+            },
+          },
+          required: ["address", "geo"],
+        },
+      },
+      required: ["location"],
+    },
+  },
+  required: ["theater"],
+} as const;
+
+export const getTheaterJSONSchema = () => theaterJSONSchema;
 
 /**
- * Type for a theater object.
- * @see https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/#sample_mflix.theaters
- *
+ * Type of the theater entity
+ * @see {@link theaterSchema}
  * @example
  * ```ts
   const theater: Theater = {
@@ -23,7 +89,7 @@ import { theaterSchema } from "../validators/theater";
   }
  * ```
  */
-export type Theater = z.infer<typeof theaterSchema>;
+export type Theater = FromSchema<typeof theaterJSONSchema>;
 
 /**
  * Transaction fields that are of type `ObjectId`

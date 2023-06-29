@@ -1,6 +1,7 @@
-import { stringObjectIdSchema } from "../validators/objectId";
-import { z } from "zod";
+import { FromSchema } from "json-schema-to-ts";
 import { Theater } from "./theater";
+import { User } from "./user";
+import { Session } from "./sessions";
 
 /**
  * The key name of the unique identifier for each entity
@@ -15,12 +16,15 @@ export type IdKey = typeof idKey;
 /**
  * The schema of the unique identifier for each entity
  */
-export const idSchema = stringObjectIdSchema;
+export const idSchema = {
+  type: "string",
+  pattern: "^[0-9a-fA-F]{24}$",
+} as const;
 
 /**
  * The type of the unique identifier for each entity
  */
-export type IdType = z.infer<typeof idSchema>;
+export type IdType = FromSchema<typeof idSchema>;
 
 /**
  * The unique identifier for each entity
@@ -30,10 +34,20 @@ export type IdType = z.infer<typeof idSchema>;
 export type Id = { [idKey]: IdType };
 
 /**
- * The type of an entity with a unique identifier
+ * The entity with the unique identifier
  * @see {@link Id}
  */
-export type WithId<T extends EntitiesMap[keyof EntitiesMap]> = T & Id;
+export type WithId<T extends keyof EntitiesMapDBWithoutId> =
+  EntitiesMapDBWithoutId[T] & Id;
+
+/**
+ * The entity without the unique identifier
+ * @see {@link IdKey}
+ */
+export type WithoutId<T extends keyof EntitiesMapDB> = Omit<
+  EntitiesMapDB[T],
+  IdKey
+>;
 
 /**
  * The name of the transactions collection
@@ -41,27 +55,52 @@ export type WithId<T extends EntitiesMap[keyof EntitiesMap]> = T & Id;
 export const theatersCollectionName = "theaters";
 
 /**
+ * The name of the movies collection
+ */
+export const moviesCollectionName = "movies";
+
+/**
+ * The name of the users collection
+ */
+export const usersCollectionName = "users";
+
+/**
+ * The name of the sessions collection
+ */
+export const sessionsCollectionName = "sessions";
+
+/**
  * A map of all entities collection names and their types
  */
-export type EntitiesMap = {
+export type EntitiesMapDBWithoutId = {
   [theatersCollectionName]: Theater;
+  [usersCollectionName]: User;
+  [sessionsCollectionName]: Session;
+};
+
+/**
+ * A map of all entities collection names and their types how they are stored in the database
+ */
+export type EntitiesMapDB = {
+  [T in keyof EntitiesMapDBWithoutId]: WithId<T>;
 };
 
 /**
  * Filter type for the read operation
- */
-export type Filter<
-  T extends EntitiesMap[keyof EntitiesMap],
-  E extends WithId<T> = WithId<T>,
-  K extends keyof E = keyof E
-> = K extends keyof E
-  ? {
-      key: K;
-      value: E[K];
-    }
-  : never;
 
-const filterTest: Filter<Theater> = {
-  key: "_id",
-  value: "123",
-};
+ @lastImplementation 
+ I gave up on this implementation:
+ ```ts
+export type Filter<T extends keyof EntitiesMapDB> = Partial<{
+  [K in keyof EntitiesMapDB[T]]: {
+    [key in keyof EntitiesMapDB[T]]: EntitiesMapDB[T][key];
+  }[K];
+}>;
+```
+*/
+export type Filter<T extends keyof EntitiesMapDB> =
+  | {
+      key: string;
+      value: any;
+    }
+  | {};
