@@ -48,7 +48,21 @@ export const logger = createLogger({
   ],
 });
 
+const winstonToPinoLogLevelMap: Record<string, string> = {
+  error: "error",
+  warn: "warn",
+  info: "info",
+  http: "info",
+  verbose: "debug",
+  debug: "debug",
+  silly: "trace",
+};
+
+const getPinoLogLevel = (winstonLogLevel: string) =>
+  winstonToPinoLogLevelMap[winstonLogLevel] || "info";
+
 export const fastifyWinstonLogger = {
+  level: getPinoLogLevel(env.LOG_LEVEL),
   stream: {
     write: (fastifyLog: string) => {
       logger.silly(fastifyLog);

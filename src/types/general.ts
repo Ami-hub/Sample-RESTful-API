@@ -1,6 +1,7 @@
 import { FromSchema } from "json-schema-to-ts";
 import { Theater } from "./theater";
 import { User } from "./user";
+import { WithId } from "mongodb";
 
 /**
  * The key name of the unique identifier for each entity
@@ -31,22 +32,6 @@ export type IdType = FromSchema<typeof idSchema>;
  * @see {@link idKey}
  */
 export type Id = { [idKey]: IdType };
-
-/**
- * The entity with the unique identifier
- * @see {@link Id}
- */
-export type WithId<T extends keyof EntitiesMapDBWithoutId> =
-  EntitiesMapDBWithoutId[T] & Id;
-
-/**
- * The entity without the unique identifier
- * @see {@link IdKey}
- */
-export type WithoutId<T extends keyof EntitiesMapDB> = Omit<
-  EntitiesMapDB[T],
-  IdKey
->;
 
 /**
  * The name of the transactions collection
@@ -80,7 +65,7 @@ export type EntitiesMapDBWithoutId = {
  * A map of all entities collection names and their types how they are stored in the database
  */
 export type EntitiesMapDB = {
-  [T in keyof EntitiesMapDBWithoutId]: WithId<T>;
+  [T in keyof EntitiesMapDBWithoutId]: WithId<EntitiesMapDBWithoutId[T]>;
 };
 
 /**

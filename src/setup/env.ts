@@ -10,7 +10,7 @@ const validEnv = cleanEnv(process.env, {
   DB_BASE_NAME: str(),
 
   LOG_LEVEL: str({
-    choices: ["error", "warn", "info", "verbose", "debug", "silly"],
+    choices: ["error", "warn", "info", "http", "verbose", "debug", "silly"],
     default: "info",
   }),
 

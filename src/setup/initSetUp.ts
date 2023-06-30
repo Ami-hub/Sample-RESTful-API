@@ -4,8 +4,8 @@ import { getEntityDAL } from "../DB/entityDAL";
 import { env } from "./env";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { StatusCodes } from "http-status-codes";
-import { authMiddleware, initLoginRoute } from "../routing/routes/v1/login";
 import { Application } from "..";
+import { initLoginRoute } from "../routes/v1/auth/login";
 
 // ######################################
 const loginJsonSchemaBody = {
@@ -66,7 +66,10 @@ export const initializeApp = async (app: Application) => {
   );
   logger.verbose(`Initialized welcome route`);
 
-  app.setErrorHandler(errorHandler);
+  app.setSchemaErrorFormatter((errors, dataVar) => {
+    logger.error(`Schema validation error: ${JSON.stringify(errors)}`);
+    return new Error(`Schema validation error: ${JSON.stringify(errors)}`);
+  });
   logger.verbose(`Error handler initialized`);
 
   return app;
