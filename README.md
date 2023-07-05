@@ -1,6 +1,12 @@
 # RESTful API Sample Project
 
-Sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) based on the data of [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) using [typescript](https://www.typescriptlang.org/), [mongoDB](https://www.mongodb.com/),
+<div style="text-align: center;">
+  <img src="https://i.ibb.co/bFHnVP6/sample-api-logo.png" alt="sample-api-logo" width="55%">
+</div>
+
+#
+
+A sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) based on the data of [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) using [typescript](https://www.typescriptlang.org/), [mongoDB](https://www.mongodb.com/),
 and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times. Feel free to use it as a template for your own projects or as a reference for learning.
 
 ## 📖 Documentation
@@ -9,15 +15,13 @@ For the documentation about supported endpoints and their usage, please import [
 
 #
 
+## 🚀 Quick start
+
 ## 📚 Prerequisites
 
-- [Node.js](https://nodejs.org/en/) (v14.17.0 or higher)
-- [MongoDB](https://www.mongodb.com/) (v4.4.6 or higher)
+- [Node.js](https://nodejs.org/en/)
+- [MongoDB](https://www.mongodb.com/)
 - TODO - add instructions to import the sample data
-
-#
-
-## 🚀 Quick start
 
 ### ⬇️ Clone the repo from github
 
@@ -93,8 +97,11 @@ You should see the following message:
 
 ## 🐳 Quick start with [Docker](https://www.docker.com/)
 
-Make sure you have [Docker](https://www.docker.com/) and [ts-node](https://www.npmjs.com/package/ts-node)
-on your computer.
+## 📚 Prerequisites
+
+- [Docker](https://www.docker.com/)
+- [Npm](https://www.npmjs.com/) with [ts-node](https://www.npmjs.com/package/ts-node)
+- TODO - add instructions to import the sample data
 
 ### ⬇️ Clone the repo from github
 
