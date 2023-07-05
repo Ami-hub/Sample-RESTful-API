@@ -1,27 +1,29 @@
-# RESTful API Sample Project
+# ❤️‍🔥 RESTful API Sample Project
+
+A sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) based on the data of [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) using [typescript](https://www.typescriptlang.org/), [mongoDB](https://www.mongodb.com/),
+and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times. Feel free to use it as a template for your own projects or as a reference for learning.
 
 <div style="text-align: center;">
   <img src="https://i.ibb.co/bFHnVP6/sample-api-logo.png" alt="sample-api-logo" width="55%">
 </div>
 
-#
-
-A sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) based on the data of [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) using [typescript](https://www.typescriptlang.org/), [mongoDB](https://www.mongodb.com/),
-and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times. Feel free to use it as a template for your own projects or as a reference for learning.
-
-## 📖 Documentation
+# 📖 Documentation
 
 For the documentation about supported endpoints and their usage, please import [this collection](https://gist.githubusercontent.com/Ami-hub/6de2c4f52b8c2b9f4a9fce7daa7b2034/raw/a32e1e380eaafbeab16115e8c4cd4052461fccca/Mfix%2520API.postman_collection.json) to your [Postman](https://www.postman.com/) app. The collection contains all the information you need to use the API, including detailed examples.
 
-#
+<br>
+<br>
 
-## 🚀 Quick start
+# 🚀 Quick start or [quick start with Docker](./docker/dockerStart.md)
 
 ## 📚 Prerequisites
 
 - [Node.js](https://nodejs.org/en/)
-- [MongoDB](https://www.mongodb.com/)
-- TODO - add instructions to import the sample data
+- [MongoDB](https://www.mongodb.com/) cluster with [mflix sample data](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) loaded (see how to [load sample data](https://www.mongodb.com/docs/guides/atlas/sample-data/))
+
+<br>
+
+## 🚀 Let's get started!
 
 ### ⬇️ Clone the repo from github
 
@@ -90,85 +92,9 @@ You should see the following message:
 ```
 
 <br>
-
-#
-
 <br>
 
-## 🐳 Quick start with [Docker](https://www.docker.com/)
-
-## 📚 Prerequisites
-
-- [Docker](https://www.docker.com/)
-- [Npm](https://www.npmjs.com/) with [ts-node](https://www.npmjs.com/package/ts-node)
-- TODO - add instructions to import the sample data
-
-### ⬇️ Clone the repo from github
-
-```
-git clone https://github.com/Ami-hub/Sample-RESTful-API.git
-```
-
-### 🚗 Go to the app directory
-
-```
-cd Sample-RESTful-API
-```
-
-### ⚙️ Set up the environment variables
-
-1. Create a `.env` file based on the `.env.example` file:  
-   🐧 Linux:
-
-   ```
-   cp .env.example .env
-   ```
-
-   🪟 Windows:
-
-   ```
-   copy .env.example .env
-   ```
-
-2. Modify the `.env` file to match your needs and environment, e.g.:
-
-   ```env
-   ENABLE_LISTENING_TO_ALL_INTERFACES=true # Must be set to true when using docker
-   MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
-   DB_BASE_NAME=sample_mflix
-   LOG_LEVEL=debug
-   ...
-   ```
-
-### 🖼️ Build the docker image
-
-```
-npm run docker-build
-```
-
-### 👟 Run the app using docker
-
-Make sure there is no other app running on the port you set in the `.env` file!
-
-```
-npm run docker-start
-```
-
-### 🎉 Done!
-
-You can open your browser and go to `http://localhost:<.env.Port>/api/v1` to see the welcome message.
-
-You should see the following message:
-
-```json
-{
-  "message": "Welcome to the API"
-}
-```
-
-#
-
-## 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/api)!
+# 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/api)!
 
 ### 🌟 Essence
 
@@ -182,12 +108,16 @@ You should see the following message:
   `DELETE` and `PATCH` requests are disabled.  
    For more information about the deployed version see the [render deployed branch]()
 
-#
+<br>
+<br>
 
-## ✍🏽 Authors
+# ✍🏽 Authors
 
 - [AmiHub](https://github.com/Ami-hub)
 
-## 🪪 License
+<br>
+<br>
+
+# 🪪 License
 
 - [MIT License](https://github.com/Ami-hub/Sample-RESTful-API/blob/main/LICENSE)
