@@ -6,6 +6,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { StatusCodes } from "http-status-codes";
 import { Application } from "..";
 import { initLoginRoute } from "../routes/v1/auth/login";
+import { idSchema } from "../types/general";
 
 // ######################################
 const loginJsonSchemaBody = {
@@ -31,28 +32,6 @@ export const initializeApp = async (app: Application) => {
   // Middleware to check authorization header
   //app.addHook("preHandler", authMiddleware);
 
-  const schema = {
-    body: {
-      $schema: "http://json-schema.org/draft-07/schema#",
-      type: "object",
-      additionalProperties: true,
-    },
-    querystring: {
-      $schema: "http://json-schema.org/draft-07/schema#",
-      type: "object",
-      additionalProperties: true,
-    },
-    params: {
-      $schema: "http://json-schema.org/draft-07/schema#",
-      type: "object",
-      additionalProperties: true,
-    },
-  };
-
-  app.post("/the/url", { schema }, async (request, reply) => {
-    reply.send(`valid body: ${JSON.stringify(request.body)}`);
-  });
-
   await initializeEntitiesRouters(app);
   logger.verbose(`Entities routers initialized`);
 
@@ -66,10 +45,7 @@ export const initializeApp = async (app: Application) => {
   );
   logger.verbose(`Initialized welcome route`);
 
-  app.setSchemaErrorFormatter((errors, dataVar) => {
-    logger.error(`Schema validation error: ${JSON.stringify(errors)}`);
-    return new Error(`Schema validation error: ${JSON.stringify(errors)}`);
-  });
+  app.setErrorHandler(errorHandler);
   logger.verbose(`Error handler initialized`);
 
   return app;
@@ -77,9 +53,30 @@ export const initializeApp = async (app: Application) => {
 
 const initializeEntitiesRouters = async (app: Application) => {
   const theaterDAL = getEntityDAL("theaters");
+
   app.get(`${baseApiUri}/theaters`, async (request, reply) => {
     reply.send(await theaterDAL.get());
   });
+
+  app.get(
+    `${baseApiUri}/theaters/:id/`,
+    {
+      schema: {
+        params: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            id: idSchema,
+          },
+          required: ["id"],
+        } as const,
+      },
+    },
+    async (request, reply) => {
+      const id = request.params.id;
+      reply.send(await theaterDAL.getOneById(id));
+    }
+  );
 };
 
 export const startListen = async (app: Application) => {

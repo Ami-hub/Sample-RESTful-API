@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import { EntitiesMapDB, idSchema } from "../../../types/general";
-import { getEntityDAL } from "../../../DB/entityDAL";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { env } from "../../../setup/env";
+import { getEntityDAL } from "../../DB/entityDAL";
+import { env } from "../../setup/env";
+import { EntitiesMapDB } from "../../types/general";
 
 export const getXxxRoutes = (collectionName: keyof EntitiesMapDB) => {
   const xxxDAL = getEntityDAL(collectionName);

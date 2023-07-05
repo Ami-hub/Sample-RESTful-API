@@ -1,7 +1,6 @@
 import { FromSchema } from "json-schema-to-ts";
 import { Theater } from "./theater";
 import { User } from "./user";
-import { WithId } from "mongodb";
 
 /**
  * The key name of the unique identifier for each entity
@@ -65,25 +64,37 @@ export type EntitiesMapDBWithoutId = {
  * A map of all entities collection names and their types how they are stored in the database
  */
 export type EntitiesMapDB = {
-  [T in keyof EntitiesMapDBWithoutId]: WithId<EntitiesMapDBWithoutId[T]>;
+  [T in keyof EntitiesMapDBWithoutId]: EntitiesMapDBWithoutId[T] & Id;
 };
 
 /**
- * Filter type for the read operation
+ * Filter type
 
- @lastImplementation 
- I gave up on this implementation:
- ```ts
-export type Filter<T extends keyof EntitiesMapDB> = Partial<{
-  [K in keyof EntitiesMapDB[T]]: {
-    [key in keyof EntitiesMapDB[T]]: EntitiesMapDB[T][key];
-  }[K];
-}>;
-```
+type FilterHelper<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+  ? U extends object
+  ? FilterHelper<U>[]
+      : T[P]
+    : T[P] extends object
+    ? FilterHelper<T[P]>
+    : T[P];
+  };
+
+type Filter<
+  T extends EntitiesMapDBWithoutId[keyof EntitiesMapDBWithoutId]
+  > = {
+    [P in keyof (T & Id)]?: (T & Id)[P] extends (infer U)[]
+    ? U extends object
+    ? FilterHelper<U>[]
+    : (T & Id)[P]
+    : (T & Id)[P] extends object
+    ? FilterHelper<(T & Id)[P]>
+    : (T & Id)[P];
+  };
 */
-export type Filter<T extends keyof EntitiesMapDB> =
-  | {
-      key: string;
-      value: any;
-    }
-  | {};
+
+export type Filter<
+  T extends EntitiesMapDBWithoutId[keyof EntitiesMapDBWithoutId]
+> = {
+  [key: string]: any;
+};

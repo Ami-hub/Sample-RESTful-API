@@ -1,16 +1,14 @@
 import { ObjectId } from "mongodb";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
-import { EntitiesMapDB, IdType, idKey } from "../types/general";
+import { EntitiesMapDB, Filter, IdType, idKey } from "../types/general";
 import { getCRUD } from "./CRUD";
+import { logger } from "../logging/logger";
 
 export interface EntityDAL<T extends keyof EntitiesMapDB> {
   get(
     skip?: number,
     limit?: number,
-    filter?: {
-      key: string;
-      value: any;
-    }
+    filter?: Filter<EntitiesMapDB[T]>
   ): Promise<EntitiesMapDB[T][]>;
 
   getOneById(id: IdType): Promise<EntitiesMapDB[T] | null>;
@@ -48,12 +46,7 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   const get = async (
     skip?: number,
     limit?: number,
-    filter?:
-      | {
-          key: string;
-          value: any;
-        }
-      | undefined
+    filter?: Filter<EntitiesMapDB[T]>
   ) => {
     return await entityCrud.read([filter || {}], limit, skip);
   };
@@ -63,10 +56,16 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
       throw errorBuilder.entityNotFoundError(idKey, id);
 
     const res = await entityCrud.read(
-      [{ key: idKey, value: new ObjectId(id) }],
+      [
+        {
+          [idKey]: new ObjectId(id),
+        },
+      ],
       1
     );
     if (!res.length) throw errorBuilder.entityNotFoundError(idKey, id);
+
+    logger.info(`getOneById: ${res[0]}`);
 
     return res[0];
   };

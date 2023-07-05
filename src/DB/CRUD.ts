@@ -2,9 +2,9 @@ import { ObjectId } from "mongodb";
 import {
   EntitiesMapDB,
   EntitiesMapDBWithoutId,
-  Filter,
   IdType,
   idKey,
+  Filter,
 } from "../types/general";
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
@@ -25,7 +25,7 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
 
   /**
    * Gets all entity instances
-   * @param filters filters to apply (do intersection between them)
+   * @param filters filters to apply (intersection between filters)
    * @param limit max amount of entities to return, default is in env
    * @param skip amount of entities to skip, default is 0
    * @returns an array of entity instances
@@ -47,7 +47,7 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
       ```
     */
   read(
-    filters?: Array<Filter<N>>,
+    filters?: Array<Filter<EntitiesMapDB[N]>>,
     limit?: number,
     skip?: number
   ): Promise<Array<EntitiesMapDB[N]>>;
@@ -81,7 +81,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
   const collection = getCollection(collectionName);
 
   const read = async (
-    filters: Array<Filter<N>> = [{}],
+    filters: Filter<EntitiesMapDB[N]>[],
     limit: number = env.DEFAULT_READ_LIMIT,
     skip: number = 0
   ) => {
@@ -93,12 +93,10 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
       )}`
     );
 
-    const mongoFilters = filters.map((filter) =>
-      "key" in filter ? { [filter.key]: filter.value } : filter
-    );
     const result = await collection
       .aggregate<EntitiesMapDB[N]>([
-        { $match: { $and: mongoFilters } }, // TODO: consider split to multiple $match (better performance if there are indexes)
+        // Filters are in this format: { $match: { key: value } }, { $match: { key2: value2 } }
+        ...filters.map((filter) => ({ $match: filter })),
         { $skip: skip },
         { $limit: limit },
       ])
@@ -115,7 +113,14 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     const result = await collection.insertOne(data);
     if (!result.acknowledged) return null;
 
-    const created = await read([{ key: idKey, value: result.insertedId }], 1);
+    const created = await read(
+      [
+        {
+          [idKey]: result.insertedId,
+        },
+      ],
+      1
+    );
     if (!created.length) {
       logger.error(
         `created ${collectionName} - ${JSON.stringify(
@@ -142,8 +147,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     const toUpdate = await read(
       [
         {
-          key: idKey,
-          value: asObjectId,
+          [idKey]: asObjectId,
         },
       ],
       1
@@ -163,8 +167,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     const toDelete = await read(
       [
         {
-          key: idKey,
-          value: asObjectId,
+          _id: asObjectId,
         },
       ],
       1
