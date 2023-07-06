@@ -3,7 +3,6 @@
 ## 📚 Prerequisites
 
 - [Docker](https://www.docker.com/)
-- [Npm](https://www.npmjs.com/) with [ts-node](https://www.npmjs.com/package/ts-node) installed globally
 - [MongoDB](https://www.mongodb.com/) cluster with [mflix sample data](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) loaded (see how to [load sample data](https://www.mongodb.com/docs/guides/atlas/sample-data/))
 
 #
