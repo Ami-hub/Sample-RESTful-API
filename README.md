@@ -14,7 +14,7 @@ For the documentation about supported endpoints and their usage, please import [
 <br>
 <br>
 
-# 🚀 Quick start or [quick start with Docker](./docker/dockerStart.md)
+# 🚀 Quick start or [quick start with Docker](./documentation/dockerStart.md)
 
 ## 📚 Prerequisites
 
