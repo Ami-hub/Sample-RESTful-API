@@ -81,7 +81,7 @@ npm run start
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:<.env.Port>/api/v1` to see the welcome message.
+You can open your browser and go to `http://localhost:3000/api/v1` (or whatever port you chose) to see the welcome message.
 
 You should see the following message:
 

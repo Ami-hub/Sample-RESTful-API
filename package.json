@@ -6,8 +6,6 @@
   "scripts": {
     "build": "tsc -p . && echo Build complete!",
     "start": "node dist/src/index.js",
-    "docker-build": "ts-node ./dockerScripts/docker-build.ts",
-    "docker-start": "ts-node ./dockerScripts/docker-start.ts",
     "dev": "nodemon src/index.ts -w src -w tsconfig.json -w package.json -w .env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

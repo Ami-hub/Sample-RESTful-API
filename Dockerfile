@@ -1,10 +1,10 @@
-FROM node:17
+FROM node:18-alpine3.14
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm i
+RUN npm ci
 
 COPY src ./src
 
