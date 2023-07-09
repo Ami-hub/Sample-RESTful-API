@@ -2,7 +2,7 @@ import { initializeApp, startListen } from "./setup/initSetUp";
 import { logger } from "./logging/logger";
 import { env } from "./setup/env";
 import { getDbConnector } from "./DB/databaseConnector";
-import { Application, getApplicationInstance } from "./application";
+import { Application, getApplicationInstance } from "./types/application";
 
 /**
  * The first function to run when the application starts

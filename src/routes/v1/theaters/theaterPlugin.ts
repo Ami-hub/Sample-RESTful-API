@@ -7,7 +7,7 @@ import {
   getPaginationOptionsJSONSchema,
 } from "../../../types/general";
 import { getTheaterJSONSchema } from "../../../types/theater";
-import { Application } from "../../../application";
+import { Application } from "../../../types/application";
 
 export const getTheaterPlugin = async <T extends keyof EntitiesMapDB>(
   collectionName: T

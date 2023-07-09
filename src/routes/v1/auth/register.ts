@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { logger } from "../../../logging/logger";
 import { getCollection } from "../../../DB/databaseConnector";
 import { getUserJSONSchema } from "../../../types/user";
-import { Application } from "../../../application";
+import { Application } from "../../../types/application";
 
 const generatePasswordHash = async (password: string) => {
   const salt = await bcrypt.genSalt();

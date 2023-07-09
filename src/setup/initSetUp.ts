@@ -6,7 +6,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { StatusCodes } from "http-status-codes";
 import { initLoginRoute } from "../routes/v1/auth/login";
 import { getIdJSONSchemaAsQueryParam } from "../types/general";
-import { Application } from "../application";
+import { Application } from "../types/application";
 import { getTheaterPlugin } from "../routes/v1/theaters/theaterPlugin";
 
 // ######################################

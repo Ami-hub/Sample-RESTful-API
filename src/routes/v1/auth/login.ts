@@ -7,7 +7,7 @@ import { Id, idKey } from "../../../types/general";
 import { getCollection } from "../../../DB/databaseConnector";
 import { ObjectId, WithId } from "mongodb";
 import { FromSchema } from "json-schema-to-ts";
-import { Application } from "../../../application";
+import { Application } from "../../../types/application";
 
 export const createAccessToken = (user: object) =>
   sign(user, env.JWT_SECRET, {
