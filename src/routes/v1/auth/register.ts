@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import { logger } from "../../../logging/logger";
-import { Application } from "../../..";
 import { getCollection } from "../../../DB/databaseConnector";
 import { getUserJSONSchema } from "../../../types/user";
+import { Application } from "../../../application";
 
 const generatePasswordHash = async (password: string) => {
   const salt = await bcrypt.genSalt();

@@ -12,13 +12,45 @@ export const idKey = "_id";
  */
 export type IdKey = typeof idKey;
 
-/**
- * The schema of the unique identifier for each entity
- */
-export const idSchema = {
+const idSchema = {
   type: "string",
   pattern: "^[0-9a-fA-F]{24}$",
 } as const;
+
+/**
+ * The schema of the unique identifier for each entity
+ */
+export const GetIdJSONSchema = () => idSchema;
+
+const idJSONSchemaAsQueryParam = {
+  type: "object",
+  required: ["id"],
+  additionalProperties: false,
+  properties: {
+    id: idSchema,
+  },
+} as const;
+
+/**
+ * The schema of the unique identifier for each entity in an object
+ */
+export const getIdJSONSchemaAsQueryParam = () => idJSONSchemaAsQueryParam;
+
+const paginationOptions = {
+  querystring: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      limit: { type: "number" },
+      offset: { type: "number" },
+    },
+  } as const,
+};
+
+/**
+ * The schema of the pagination options, used for getting a subset of entities
+ */
+export const getPaginationOptionsJSONSchema = () => paginationOptions;
 
 /**
  * The type of the unique identifier for each entity

@@ -3,11 +3,11 @@ import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import { env } from "../../../setup/env";
 import { logger } from "../../../logging/logger";
-import { Application } from "../../..";
 import { Id, idKey } from "../../../types/general";
 import { getCollection } from "../../../DB/databaseConnector";
 import { ObjectId, WithId } from "mongodb";
 import { FromSchema } from "json-schema-to-ts";
+import { Application } from "../../../application";
 
 export const createAccessToken = (user: object) =>
   sign(user, env.JWT_SECRET, {

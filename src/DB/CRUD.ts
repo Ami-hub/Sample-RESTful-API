@@ -19,9 +19,9 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
   /**
    * Creates a new entity instance
    * @param data data of the entity instance
-   * @returns id of the created entity instance or null if not created
+   * @returns id of the created entity instance or undefined if not created
    */
-  create(data: EntitiesMapDBWithoutId[N]): Promise<EntitiesMapDB[N] | null>;
+  create(data: EntitiesMapDBWithoutId[N]): Promise<IdType | undefined>;
 
   /**
    * Gets all entity instances
@@ -56,19 +56,19 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
    * Updates an entity instance
    * @param id id of the entity instance
    * @param data data of the entity instance
-   * @returns the updated entity instance or null if not found
+   * @returns whether the entity instance was updated or not
    */
   update(
     id: IdType,
     data: Partial<EntitiesMapDBWithoutId[N]>
-  ): Promise<EntitiesMapDB[N] | null>;
+  ): Promise<boolean>;
 
   /**
    * Deletes an entity instance
    * @param id id of the entity instance
-   * @returns the deleted entity instance or null it did not delete
+   * @returns whether the entity instance was deleted or not
    */
-  delete(id: IdType): Promise<EntitiesMapDB[N] | null>;
+  delete(id: IdType): Promise<boolean>;
 }
 
 // ########################################
@@ -85,14 +85,6 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     limit: number = env.DEFAULT_READ_LIMIT,
     skip: number = 0
   ) => {
-    logger.debug(
-      `Reading ${limit} ${collectionName} start from ${skip} with filters: ${JSON.stringify(
-        filters,
-        null,
-        4
-      )}`
-    );
-
     const result = await collection
       .aggregate<EntitiesMapDB[N]>([
         // Filters are in this format: { $match: { key: value } }, { $match: { key2: value2 } }
@@ -111,28 +103,9 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
       `create: ${collectionName} - ${JSON.stringify(data, null, 4)}`
     );
     const result = await collection.insertOne(data);
-    if (!result.acknowledged) return null;
+    if (!result.acknowledged) return undefined;
 
-    const created = await read(
-      [
-        {
-          [idKey]: result.insertedId,
-        },
-      ],
-      1
-    );
-    if (!created.length) {
-      logger.error(
-        `created ${collectionName} - ${JSON.stringify(
-          data,
-          null,
-          4
-        )} but could not find it in the DB!`
-      );
-      return null;
-    }
-
-    return created[0];
+    return result.insertedId.toString();
   };
 
   const update = async (
@@ -142,39 +115,19 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     logger.debug(
       `update: ${collectionName} - ${id} - ${JSON.stringify(data, null, 4)}`
     );
-    if (!ObjectId.isValid(id)) return null;
-    const asObjectId = new ObjectId(id);
-    const toUpdate = await read(
-      [
-        {
-          [idKey]: asObjectId,
-        },
-      ],
-      1
-    );
-    if (!toUpdate.length) return null;
+    if (!ObjectId.isValid(id)) return false;
     const result = await collection.updateOne(
-      { [idKey]: asObjectId },
+      { [idKey]: new ObjectId(id) },
       { $set: data }
     );
-    return result.acknowledged ? toUpdate[0] : null;
+    return result.acknowledged;
   };
 
   const deleteOne = async (id: IdType) => {
     logger.debug(`delete: ${collectionName} - ${id}`);
-    if (!ObjectId.isValid(id)) return null;
-    const asObjectId = new ObjectId(id);
-    const toDelete = await read(
-      [
-        {
-          _id: asObjectId,
-        },
-      ],
-      1
-    );
-    if (!toDelete.length) return null;
-    const result = await collection.deleteOne({ [idKey]: asObjectId });
-    return result.acknowledged ? toDelete[0] : null;
+    if (!ObjectId.isValid(id)) return false;
+    const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
+    return result.acknowledged;
   };
 
   return {

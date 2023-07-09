@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { getEntityDAL } from "../../DB/entityDAL";
-import { env } from "../../setup/env";
-import { EntitiesMapDB } from "../../types/general";
+import { getEntityDAL } from "../../../DB/entityDAL";
+import { env } from "../../../setup/env";
+import { EntitiesMapDB } from "../../../types/general";
 
-export const getXxxRoutes = (collectionName: keyof EntitiesMapDB) => {
+export const getTheaterController = (collectionName: keyof EntitiesMapDB) => {
   const xxxDAL = getEntityDAL(collectionName);
 
   const getAll = async (

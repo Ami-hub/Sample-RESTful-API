@@ -4,9 +4,10 @@ import { getEntityDAL } from "../DB/entityDAL";
 import { env } from "./env";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { StatusCodes } from "http-status-codes";
-import { Application } from "..";
 import { initLoginRoute } from "../routes/v1/auth/login";
-import { idSchema } from "../types/general";
+import { getIdJSONSchemaAsQueryParam } from "../types/general";
+import { Application } from "../application";
+import { getTheaterPlugin } from "../routes/v1/theaters/theaterPlugin";
 
 // ######################################
 const loginJsonSchemaBody = {
@@ -53,30 +54,11 @@ export const initializeApp = async (app: Application) => {
 
 const initializeEntitiesRouters = async (app: Application) => {
   const theaterDAL = getEntityDAL("theaters");
+  const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam();
 
-  app.get(`${baseApiUri}/theaters`, async (request, reply) => {
-    reply.send(await theaterDAL.get());
+  app.register(await getTheaterPlugin("theaters"), {
+    prefix: `${baseApiUri}/theaters`,
   });
-
-  app.get(
-    `${baseApiUri}/theaters/:id/`,
-    {
-      schema: {
-        params: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            id: idSchema,
-          },
-          required: ["id"],
-        } as const,
-      },
-    },
-    async (request, reply) => {
-      const id = request.params.id;
-      reply.send(await theaterDAL.getOneById(id));
-    }
-  );
 };
 
 export const startListen = async (app: Application) => {
