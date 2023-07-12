@@ -13,6 +13,10 @@ const CURRENT_DB_NAME = env.isProd
 
 const CURRENT_DB_NAME = env.DB_BASE_NAME;
 
+const getDbInstance = () => {
+  return client.db(CURRENT_DB_NAME);
+};
+
 export interface DatabaseConnector {
   /**
    * Connect to the database
@@ -49,7 +53,6 @@ export interface DatabaseConnector {
 
 /**
  * The client that connects to the DB
- * @NOTE This project uses only one client for the DB!
  */
 const client = new MongoClient(env.MONGODB_URI, {
   maxPoolSize: env.MAX_POOL_SIZE,
@@ -64,7 +67,7 @@ const client = new MongoClient(env.MONGODB_URI, {
 
 /**
  * Connects to the DB
- * @NOTE if you have already connected to the DB, this function will do nothing
+ * @param retry whether to retry connecting to the DB if the connection is failed
  */
 export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
   if (await isConnected()) {
@@ -72,21 +75,25 @@ export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
     return;
   }
 
-  logger.verbose(`Trying to connect to '${env.DB_BASE_NAME}' DB...`);
-  try {
-    await client.connect();
-    logger.info(`Connected to '${env.DB_BASE_NAME}' DB`);
-  } catch (error) {
-    logger.error(`Failed to connect to '${env.DB_BASE_NAME}' DB ${
-      retry
-        ? `retrying in ${env.RECONNECTING_INTERVAL_MS / 1000} seconds...`
-        : process.exit(1)
+  while (true) {
+    try {
+      logger.verbose(`Trying to connect to '${env.DB_BASE_NAME}' DB...`);
+      await client.connect();
+      logger.info(`Connected to '${env.DB_BASE_NAME}' DB`);
+      return;
+    } catch (error) {
+      logger.error(`Failed to connect to '${env.DB_BASE_NAME}' DB!`);
+      if (!retry) process.exit(1);
+
+      logger.verbose(
+        `Retrying to connect to '${env.DB_BASE_NAME}' DB in ${
+          env.RECONNECTING_INTERVAL_MS / 1000
+        } seconds...`
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, env.RECONNECTING_INTERVAL_MS)
+      );
     }
-      `);
-    setTimeout(() => {
-      connectToDB();
-      logger.verbose(`try to reconnect to '${env.DB_BASE_NAME}' DB...`);
-    }, env.RECONNECTING_INTERVAL_MS);
   }
 };
 
@@ -102,10 +109,6 @@ export const isConnected = async () => {
   } catch (error) {
     return false;
   }
-};
-
-const getDbInstance = () => {
-  return client.db(CURRENT_DB_NAME);
 };
 
 /**
