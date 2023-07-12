@@ -135,6 +135,7 @@ const validEnv = cleanEnv(process.env, {
 
   /**
    * Whether to enable reconnecting to the DB if the connection is failed.
+   * @default true
    */
   ENABLE_RECONNECTING: bool({
     default: true,
