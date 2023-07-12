@@ -1,5 +1,5 @@
 import { FromSchema } from "json-schema-to-ts";
-import { Theater } from "./theater";
+import { Theater, getTheaterJSONSchema } from "./theater";
 import { User } from "./user";
 
 /**
@@ -20,7 +20,7 @@ const idSchema = {
 /**
  * The schema of the unique identifier for each entity
  */
-export const GetIdJSONSchema = () => idSchema;
+export const getIdJSONSchema = () => idSchema;
 
 const idJSONSchemaAsQueryParam = {
   type: "object",
@@ -97,6 +97,19 @@ export type EntitiesMapDBWithoutId = {
  */
 export type EntitiesMapDB = {
   [T in keyof EntitiesMapDBWithoutId]: EntitiesMapDBWithoutId[T] & Id;
+};
+
+const entityJSONSchemaMap = {
+  theaters: getTheaterJSONSchema(),
+  users: getTheaterJSONSchema(),
+};
+
+export type EntityJSONSchemaMap = typeof entityJSONSchemaMap;
+
+export const getEntityJSONSchema = <T extends keyof EntitiesMapDB>(
+  entityName: T
+): EntityJSONSchemaMap[T] => {
+  return entityJSONSchemaMap[entityName];
 };
 
 /**

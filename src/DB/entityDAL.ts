@@ -1,6 +1,13 @@
 import { ObjectId } from "mongodb";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
-import { EntitiesMapDB, Filter, IdType, idKey } from "../types/general";
+import {
+  EntitiesMapDB,
+  EntityJSONSchemaMap,
+  Filter,
+  IdType,
+  getEntityJSONSchema,
+  idKey,
+} from "../types/general";
 import { getCRUD } from "./CRUD";
 import { logger } from "../logging/logger";
 
@@ -27,6 +34,10 @@ import { logger } from "../logging/logger";
  * ```
  */
 export interface EntityDAL<T extends keyof EntitiesMapDB> {
+  getSchema(): EntityJSONSchemaMap[T];
+
+  getPartialSchema(): unknown; // TODO: implement type
+
   get(
     offset?: number,
     limit?: number,
@@ -51,16 +62,18 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
 ): EntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
   const errorBuilder = getEntityErrorBuilder(entityName);
+  const entitySchema = getEntityJSONSchema(entityName);
 
   const get = async (
     offset?: number,
     limit?: number,
     filters?: Filter<EntitiesMapDB[T]>[]
   ) => {
-    logger.info(
+    logger.debug(
       `get from ${entityName}: offset=${offset}, limit=${limit}, filter=${filters}`
     );
-    return await entityCrud.read(filters || [{}], limit, offset);
+    const entities = await entityCrud.read(filters || [{}], limit, offset);
+    return entities;
   };
 
   const getById = async (id: IdType) => {
@@ -83,11 +96,11 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   };
 
   const create = async (data: EntitiesMapDB[T]) => {
-    const id = await entityCrud.create(data);
-    if (!id) {
+    const createdId = await entityCrud.create(data);
+    if (!createdId) {
       throw errorBuilder.generalError("create");
     }
-    return await getById(id);
+    return await getById(createdId);
   };
 
   const update = async (id: IdType, data: Partial<EntitiesMapDB[T]>) => {
@@ -110,6 +123,8 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   };
 
   return {
+    getSchema: () => entitySchema,
+    getPartialSchema: () => {}, // TODO: implement
     get,
     getById,
     create,

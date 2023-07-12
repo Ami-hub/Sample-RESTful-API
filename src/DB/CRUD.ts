@@ -94,14 +94,12 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
       ])
       .toArray();
 
-    logger.debug(`Found ${result.length} entities from ${collectionName}`);
+    logger.info(`found ${result.length} entities from ${collectionName}`);
     return result;
   };
 
   const create = async (data: EntitiesMapDBWithoutId[N]) => {
-    logger.debug(
-      `create: ${collectionName} - ${JSON.stringify(data, null, 4)}`
-    );
+    logger.info(`create: ${collectionName} - ${JSON.stringify(data, null, 4)}`);
     const result = await collection.insertOne(data);
     if (!result.acknowledged) return undefined;
 
@@ -112,7 +110,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     id: IdType,
     data: Partial<EntitiesMapDBWithoutId[N]>
   ) => {
-    logger.debug(
+    logger.info(
       `update: ${collectionName} - ${id} - ${JSON.stringify(data, null, 4)}`
     );
     if (!ObjectId.isValid(id)) return false;
@@ -124,7 +122,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
   };
 
   const deleteOne = async (id: IdType) => {
-    logger.debug(`delete: ${collectionName} - ${id}`);
+    logger.info(`delete: ${collectionName} - ${id}`);
     if (!ObjectId.isValid(id)) return false;
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
     return result.acknowledged;

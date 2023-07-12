@@ -61,13 +61,16 @@ const winstonToPinoLogLevelMap: Record<string, string> = {
 const getPinoLogLevel = (winstonLogLevel: string) =>
   winstonToPinoLogLevelMap[winstonLogLevel] || "info";
 
+const isRequestLog = (fastifyLogParsed: object) => "req" in fastifyLogParsed;
+
+const isResponseLog = (fastifyLogParsed: object) => "res" in fastifyLogParsed;
+
 export const fastifyWinstonLogger = {
   level: getPinoLogLevel(env.LOG_LEVEL),
   stream: {
     write: (fastifyLog: string) => {
-      logger.silly(fastifyLog);
       const fastifyLogAsJson = JSON.parse(fastifyLog);
-      if ("req" in fastifyLogAsJson) {
+      if (isRequestLog(fastifyLogAsJson)) {
         logger.http(
           JSON.stringify(
             {
@@ -81,15 +84,13 @@ export const fastifyWinstonLogger = {
         return;
       }
 
-      if ("res" in fastifyLogAsJson) {
+      if (isResponseLog(fastifyLogAsJson)) {
         logger.http(
           JSON.stringify(
             {
               requestId: fastifyLogAsJson.reqId,
-              response: {
-                ...fastifyLogAsJson.res,
-                handlingTimeMs: fastifyLogAsJson.responseTime,
-              },
+              response: fastifyLogAsJson.res,
+              handlingTimeMs: fastifyLogAsJson.responseTime,
             },
             null,
             4
