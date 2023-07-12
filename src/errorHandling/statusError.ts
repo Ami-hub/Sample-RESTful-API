@@ -1,30 +1,30 @@
 import { StatusCodes } from "http-status-codes";
 
 /**
- * An error with a status code.
+ * An error with a status code
  */
-export interface StatusError extends Error {
-  status: StatusCodes;
+export interface ErrorWithStatus extends Error {
+  statusCode: StatusCodes;
   details?: string;
 }
 
 /**
- * Builds a status error.
+ * Builds an error with status code
  *
- * @param message The error to convert.
- * @param status The status code to use.
- * @param details
- * @returns The status error.
+ * @param message an error message
+ * @param statusCode the status code to use
+ * @param details some details about the error
+ * @returns an error with status code
  */
-export const createStatusError = (
+export const createErrorWithStatus = (
   message: string,
-  status: StatusCodes,
+  statusCode: StatusCodes,
   details: string | undefined = undefined
-): StatusError => {
+): ErrorWithStatus => {
   return {
     name: "Error",
     message,
-    status,
+    statusCode,
     details,
   };
 };

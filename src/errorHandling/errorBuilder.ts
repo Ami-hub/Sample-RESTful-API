@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { EntitiesMapDB, IdType } from "../types/general";
 import { CRUDOperation } from "../DB/CRUD";
-import { createStatusError } from "./statusError";
+import { createErrorWithStatus } from "./statusError";
 
 /**
  * Creates a custom error.
@@ -21,7 +21,7 @@ export const customError = (
   message: string,
   details: string | undefined = undefined
 ) => {
-  return createStatusError(message, status, details);
+  return createErrorWithStatus(message, status, details);
 };
 
 export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
@@ -32,7 +32,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
     details: string | undefined = undefined
   ) => {
     const message = `Unable to ${relatedOperation} ${relatedEntity}`;
-    return createStatusError(
+    return createErrorWithStatus(
       message,
       StatusCodes.INTERNAL_SERVER_ERROR,
       details
@@ -45,7 +45,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
     details: string | undefined = undefined
   ) => {
     const message = `Unable to find ${relatedEntity} with ${fieldName} '${value}'`;
-    return createStatusError(message, StatusCodes.NOT_FOUND, details);
+    return createErrorWithStatus(message, StatusCodes.NOT_FOUND, details);
   };
 
   const invalidEntityError = (
@@ -53,7 +53,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
     details: string | undefined = undefined
   ) => {
     const message = `Unable to ${relatedOperation} ${relatedEntity}: invalid entity field(s)!`;
-    return createStatusError(message, StatusCodes.BAD_REQUEST, details);
+    return createErrorWithStatus(message, StatusCodes.BAD_REQUEST, details);
   };
 
   return {
