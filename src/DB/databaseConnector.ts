@@ -67,6 +67,11 @@ const client = new MongoClient(env.MONGODB_URI, {
  * @NOTE if you have already connected to the DB, this function will do nothing
  */
 export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
+  if (await isConnected()) {
+    logger.verbose(`Already connected to '${env.DB_BASE_NAME}' DB`);
+    return;
+  }
+
   logger.verbose(`Trying to connect to '${env.DB_BASE_NAME}' DB...`);
   try {
     await client.connect();
@@ -77,8 +82,9 @@ export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
         ? `retrying in ${env.RECONNECTING_INTERVAL_MS / 1000} seconds...`
         : process.exit(1)
     }
-    `);
+      `);
     setTimeout(() => {
+      connectToDB();
       logger.verbose(`try to reconnect to '${env.DB_BASE_NAME}' DB...`);
     }, env.RECONNECTING_INTERVAL_MS);
   }
