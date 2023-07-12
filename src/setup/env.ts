@@ -5,41 +5,116 @@ import { cleanEnv, str, port, url, num, makeValidator, bool } from "envalid";
 config();
 
 const validEnv = cleanEnv(process.env, {
+  /**
+   * The MongoDB URI.
+   * @see[MongoDB Connection String URI Format](https://mongodb.com/docs/connections\trings/)
+   * @example
+   * ```env
+   * MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
+   * ```
+   */
   MONGODB_URI: url(),
+
+  /**
+   * The base name of the DB to use in the production.
+   * For test environment, the DB name will be `DB_BASE_NAME` + `_test`,
+   * and for development environment, the DB name will
+   * be `DB_BASE_NAME` + `_dev`.
+   */
   DB_BASE_NAME: str(),
 
+  /**
+   * The log level of the application.
+   * @default "info"
+   */
   LOG_LEVEL: str({
     choices: ["error", "warn", "info", "http", "verbose", "debug", "silly"],
     default: "info",
   }),
 
+  /**
+   * The environment of the application. This will affect the DB to use.
+   * @default "development"
+   */
   NODE_ENV: str({
     choices: ["development", "test", "production", "staging"],
     default: "development",
   }),
 
+  /**
+   * The exposed port of the application. Make sure there is no other service using this port.
+   * @default 3000
+   */
   PORT: port({ default: 3000 }),
 
+  /**
+   * The default amount of entities to return per request.
+   * @default 15
+   */
   DEFAULT_READ_LIMIT: num({ default: 15 }),
 
+  /**
+   * The maximum amount of entities to return per request.
+   * @default 50
+   */
   MAX_READ_LIMIT: num({ default: 50 }),
 
+  /**
+   * The max time to wait for a DB connection to be established.
+   * @default 15000
+   * @see[MongoDB Connection Options](https://mongodb.com/docs/drivers/node/current/fundam\entals/connection/connection-options/) for more info.
+   * @see[Connection Pooling](https://mongodb.com/docs/drivers/node/current/fundam\entals/connection/pooling/) for more info.
+   * @see[Connection Pooling in MongoDB](https://mongodb.com/blog/post/server-side-connections-are-coming-to-the-node-js-driver) for more info.
+   */
   CONNECT_DB_TIMEOUT_MS: num({ default: 15000 }),
 
+  /**
+   * Whether to listening to all network interfaces or not.
+   * @default false
+   */
   ENABLE_LISTENING_TO_ALL_INTERFACES: bool({ default: false }),
 
+  /**
+   * The secret of the JWT.
+   * @default "a random string of 64 bytes"
+   * @example NTJlYjJkZTVkMGVhYzU4YzRiNWJiNDM4MmQyMmM2M2NhNzM4ZmQxNjVkZjY2NGE0YTYzZWRhOTI1MmQwOTZjMDk3YzNkZWIyNzQzYmM5OWMzNzJlY2NiYTU5NGE1ODlmZDVhODU1ZjhhMzU0M2UxMzQ2ZmZlNjdhN2Y5ZDI5ZGY=
+   */
   JWT_SECRET: str({
     default: btoa(randomBytes(64).toString("hex")),
   }),
 
+  /**
+   * The expiration time of the JWT in minutes.
+   * @default 30
+   */
   JWT_EXPIRES_MINUTES: num({ default: 30 }),
 
+  /**
+   * The max pool size of the DB.
+   * @default 20
+   * @see[Connection Pool Overview](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/) for more info.
+   */
   MAX_POOL_SIZE: num({ default: 20 }),
 
+  /**
+   * The min pool size of the DB.
+   * @default 10
+   * @see[Connection Pool Overview](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/) for more info.
+   */
   MIN_POOL_SIZE: num({ default: 10 }),
 
+  /**
+   * The maximum time a connection can remain idle in the pool before being removed and closed.
+   * @default 30000
+   * @see[Connection Pool Overview](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/) for more info.
+   */
   MAX_IDLE_TIME_MS: num({ default: 30000 }),
 
+  /**
+   * The write concern level of the DB.
+   * @default "majority"
+   * @see[MongoDB Write Concern](https://mongodb.com/docs/manual/reference/write-concern/)
+   */
   WRITE_CONCERN: makeValidator((input: string) => {
     if (input === "majority") return input;
     const num = Number(input);
@@ -49,62 +124,34 @@ const validEnv = cleanEnv(process.env, {
     default: "majority",
   }),
 
+  /**
+   * The write concern timeout of the DB.
+   * @default 3000
+   * @see[MongoDB Write Concern](https://mongodb.com/docs/manual/reference/write-concern/)
+   */
   WRITE_CONCERN_TIMEOUT: num({
     default: 3000,
   }),
 
+  /**
+   * Whether to enable reconnecting to the DB if the connection is failed.
+   */
   ENABLE_RECONNECTING: bool({
     default: true,
   }),
 
+  /**
+   * The interval in which the DB will try to reconnect to the DB if the connection is failed.
+   * If `ENABLE_RECONNECTING` is false, this property will be ignored.
+   * @default 15000
+   */
   RECONNECTING_INTERVAL_MS: num({
     default: 15000,
   }),
 });
 
 /**
- * The environment variables
- *
- * @property `NODE_ENV` - The environment of the application.
- *
- * @property `LOG_LEVEL` - The log level of the application.
- *
- * @property `PORT` - The exposed port of the application.
- *
- * @property `ENABLE_LISTENING_TO_ALL_INTERFACES` - Whether to listening to all network interfaces or not.
- *
- * @property `DEFAULT_READ_LIMIT` - The default amount of entities to return per request.
- 
-* @property `MAX_READ_LIMIT` - The maximum amount of entities to return per request.
- *
- * @property `MONGODB_URI` - The MongoDB URI.
- *
- * @property `DB_BASE_NAME` - The base name of the DB to use in the production.
- *    For test environment, the DB name will be `DB_BASE_NAME` + `_test`,
- *    and for development environment, the DB name will
- *    be `DB_BASE_NAME` + `_dev`.
- *
- * @property `JWT_SECRET` - The secret of the JWT.
- * @property `JWT_EXPIRES_MINUTES` - The expiration time of the JWT in minutes.
- *
- * @property `CONNECT_DB_TIMEOUT_MS` - The max time to wait for a
- *     DB connection to be established.
- * @property `MAX_POOL_SIZE` - The max pool size of the DB.
- * @property `MIN_POOL_SIZE` - The min pool size of the DB.
- * @property `MAX_IDLE_TIME_MS` - The maximum time a connection can remain
- *    idle in the pool before being removed and closed.
- * @see[MongoDB Connection Options](https://mongodb.com/docs/drivers/node/current/fundam\entals/connection/connection-options/) for more info.
- *
- * @property `WRITE_CONCERN` - The write concern level of the DB.
- * @property `WRITE_CONCERN_TIMEOUT` - The write concern timeout of the DB.
- * @see[MongoDB Write Concern](https://mongodb.com/docs/manual/reference/write-concern/)
- *
- * @property `ENABLE_RECONNECTING` - Whether to enable reconnecting to the DB
- *    if the connection is failed. If false, the application will exit if the
- *    connection is failed.
- * @property `RECONNECTING_INTERVAL_MS` - The interval in which the DB will
- *    try to reconnect to the DB if the connection is failed.
- *    If `ENABLE_RECONNECTING` is false, this property will be ignored.
+ * The environment variables of the application.
  *
  * @example
  * ```ts
