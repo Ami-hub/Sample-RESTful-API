@@ -6,7 +6,7 @@ export const errorHandler = (
   _request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  logger.error(`Error: ${error}`);
+  logger.error(`Got the error: ${JSON.stringify(error)}`);
   reply.status(error.statusCode || 500).send({
     error: error.message,
   });
