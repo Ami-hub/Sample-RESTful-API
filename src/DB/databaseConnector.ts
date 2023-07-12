@@ -97,7 +97,7 @@ export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
  */
 export const isConnected = async () => {
   try {
-    getDbInstance().command({ ping: 1 });
+    await getDbInstance().command({ ping: 1 });
     return true;
   } catch (error) {
     return false;
