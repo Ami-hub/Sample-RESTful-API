@@ -1,6 +1,5 @@
 import { initializeApp, startListen } from "./setup/initSetUp";
 import { logger } from "./logging/logger";
-import { env } from "./setup/env";
 import { getDbConnector } from "./DB/databaseConnector";
 import { Application, getApplicationInstance } from "./types/application";
 
@@ -10,7 +9,7 @@ import { Application, getApplicationInstance } from "./types/application";
 const start = async () => {
   const app: Application = getApplicationInstance();
 
-  logger.info(`Starting in ${env.NODE_ENV} mode...`);
+  logger.info(`The application is starting...`);
 
   const dbConnector = await getDbConnector();
   await dbConnector.connect();

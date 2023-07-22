@@ -82,7 +82,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
 
   const read = async (
     filters: Filter<EntitiesMapDB[N]>[],
-    limit: number = env.DEFAULT_READ_LIMIT,
+    limit: number = env.DEFAULT_PAGE_SIZE,
     skip: number = 0
   ) => {
     const result = await collection

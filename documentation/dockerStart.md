@@ -39,14 +39,15 @@ cd Sample-RESTful-API
 2. Modify the `.env` file to match your needs and environment, e.g.:
 
    ```env
-   ENABLE_LISTENING_TO_ALL_INTERFACES=true # Must be true when using docker!
-   MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
-   DB_BASE_NAME=sample_mflix
+   MONGODB_URI=mongodb+srv://username:password@cluster0.1a2b3c4.mongodb.net/
+   DB_NAME=sample_mflix
    LOG_LEVEL=debug
    ...
    ```
 
 ### 🖼️ Build the docker image
+
+Make sure your Docker daemon is running!
 
 ```
 docker build -t sample-restful-api .
@@ -54,7 +55,8 @@ docker build -t sample-restful-api .
 
 ### 👟 Run the app using docker
 
-The default port is `3000`, but you can change it to any other free port you want, just set the `PORT` variable in the `.env` file and use the same port in the `docker run` command.
+Make sure the port you write after `-p` (`3000` in this example) matches the port you wrote in the `.env` file.  
+If you didn't set a port in the `.env` file, the default port is `3000`.
 
 ```
 docker run -p 3000:3000 --env-file .env sample-restful-api

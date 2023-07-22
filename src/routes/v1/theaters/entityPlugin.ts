@@ -42,9 +42,8 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
       },
       async (request, reply) => {
         const offset = request.query.offset || 0;
-        const limit = request.query.limit || env.DEFAULT_READ_LIMIT;
-        const safeLimit =
-          limit > env.MAX_READ_LIMIT ? env.MAX_READ_LIMIT : limit;
+        const limit = request.query.limit || env.DEFAULT_PAGE_SIZE;
+        const safeLimit = limit > env.MAX_PAGE_SIZE ? env.MAX_PAGE_SIZE : limit;
         const entities = await entityDal.get(offset, safeLimit);
         reply.status(StatusCodes.OK).send(entities);
       }

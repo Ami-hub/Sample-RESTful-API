@@ -2,19 +2,9 @@ import { MongoClient } from "mongodb";
 import { env } from "../setup/env";
 import { logger } from "../logging/logger";
 import { EntitiesMapDB } from "../types/general";
-/**
- // TODO return to this
-const CURRENT_DB_NAME = env.isProd 
-  ? env.DB_BASE_NAME
-  : env.isDev
-  ? env.DB_BASE_NAME + "_dev"
-  : env.DB_BASE_NAME + "_test";
-*/
-
-const CURRENT_DB_NAME = env.DB_BASE_NAME;
 
 const getDbInstance = () => {
-  return client.db(CURRENT_DB_NAME);
+  return client.db(env.DB_NAME);
 };
 
 export interface DatabaseConnector {
@@ -70,23 +60,24 @@ const client = new MongoClient(env.MONGODB_URI, {
  * @param retry whether to retry connecting to the DB if the connection is failed
  */
 export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
+  const dbName = env.DB_NAME;
   if (await isConnected()) {
-    logger.verbose(`Already connected to '${env.DB_BASE_NAME}' DB`);
+    logger.verbose(`Already connected to '${dbName}' DB`);
     return;
   }
 
   while (true) {
     try {
-      logger.verbose(`Trying to connect to '${env.DB_BASE_NAME}' DB...`);
+      logger.verbose(`Trying to connect to '${dbName}' DB...`);
       await client.connect();
-      logger.info(`Connected to '${env.DB_BASE_NAME}' DB`);
+      logger.info(`Connected to '${dbName}' DB`);
       return;
     } catch (error) {
-      logger.error(`Failed to connect to '${env.DB_BASE_NAME}' DB!`);
+      logger.error(`Failed to connect to '${dbName}' DB!`);
       if (!retry) process.exit(1);
 
       logger.verbose(
-        `Retrying to connect to '${env.DB_BASE_NAME}' DB in ${
+        `Retrying to connect to '${dbName}' DB in ${
           env.RECONNECTING_INTERVAL_MS / 1000
         } seconds...`
       );
