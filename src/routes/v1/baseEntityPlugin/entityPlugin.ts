@@ -13,10 +13,13 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
   const entityDal = getEntityDAL(collectionName);
+
   const entityJSONSchema = entityDal.getSchema();
   const entityPartialJSONSchema = entityDal.getPartialSchema();
+
   const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam();
   const paginationOptions = getPaginationOptionsJSONSchema();
+
   const entityPlugin = async (
     fastify: Application,
     _options: FastifyPluginOptions = {}

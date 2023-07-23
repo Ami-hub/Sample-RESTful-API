@@ -114,16 +114,49 @@ const entityJSONSchemaMap = {
   users: getUserJSONSchema(),
 };
 
+/**
+ * The type of the pagination options, used for getting a subset of entities
+ */
+export type ToPartialJSONSchema<T> = {
+  [K in keyof T]: K extends "required"
+    ? []
+    : T[K] extends object
+    ? ToPartialJSONSchema<T[K]>
+    : T[K];
+};
+
+/**
+ * Makes all properties of a JSON schema optional
+ *
+ * @param schema the JSON schema to make its properties optional
+ * @returns the JSON schema with all properties optional
+ */
+export const toPartialJSONSchema = <T extends JSONSchema & object>(
+  schema: T
+): ToPartialJSONSchema<T> => {
+  return Object.keys(schema).reduce((acc, key) => {
+    if (key === "required") {
+      return acc;
+    }
+    const value = schema[key as keyof T];
+    acc[key] =
+      typeof value === "object" && !Array.isArray(value) && value !== null
+        ? toPartialJSONSchema(value)
+        : value;
+    return acc;
+  }, {} as any);
+};
+
 const entityPartialJSONSchemaMap: {
   [T in keyof typeof entityJSONSchemaMap]: ToPartialJSONSchema<
     (typeof entityJSONSchemaMap)[T]
   >;
-} = Object.keys(entityJSONSchemaMap).reduce((acc, curr) => {
-  acc[curr] = toPartialJSONSchema(
-    entityJSONSchemaMap[curr as keyof typeof entityJSONSchemaMap]
+} = Object.keys(entityJSONSchemaMap).reduce((acc, key) => {
+  acc[key] = toPartialJSONSchema(
+    entityJSONSchemaMap[key as keyof typeof entityJSONSchemaMap]
   );
   return acc;
-}, {} as any);
+}, {} as any); // TODO: fix this any
 
 /**
  * A map of all entities collection names and their JSON schemas
@@ -162,35 +195,4 @@ export type Filter<
   T extends EntitiesMapDBWithoutId[keyof EntitiesMapDBWithoutId]
 > = {
   [key: string]: any;
-};
-
-/**
- * The type of the pagination options, used for getting a subset of entities
- */
-export type ToPartialJSONSchema<T> = {
-  [K in keyof T]: K extends "required"
-    ? []
-    : T[K] extends object
-    ? ToPartialJSONSchema<T[K]>
-    : T[K];
-};
-
-/**
- * Makes all properties of a JSON schema optional
- *
- * @param schema the JSON schema to make its properties optional
- * @returns the JSON schema with all properties optional
- */
-export const toPartialJSONSchema = <T extends JSONSchema & object>(
-  schema: T
-): ToPartialJSONSchema<T> => {
-  const partialSchema: any = { ...schema, required: [] };
-
-  return Object.keys(partialSchema).map((key) =>
-    partialSchema.hasOwnProperty(key)
-      ? typeof partialSchema[key] === "object" && partialSchema[key] !== null
-        ? toPartialJSONSchema(partialSchema[key])
-        : partialSchema[key]
-      : partialSchema[key]
-  ) as ToPartialJSONSchema<T>;
 };
