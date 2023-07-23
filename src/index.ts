@@ -7,9 +7,9 @@ import { Application, getApplicationInstance } from "./types/application";
  * The first function to run when the application starts
  */
 const start = async () => {
-  const app: Application = getApplicationInstance();
-
   logger.info(`The application is starting...`);
+
+  const app: Application = getApplicationInstance();
 
   const dbConnector = await getDbConnector();
   await dbConnector.connect();

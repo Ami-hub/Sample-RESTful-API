@@ -3,6 +3,16 @@ import { Theater, getTheaterJSONSchema } from "./theater";
 import { User } from "./user";
 
 /**
+ * Unwraps a promise type
+ * @example
+ * ```ts
+ * type PromiseString = Promise<string>;
+ * type str = UnwrapPromise<PromiseString>; // equals to string
+ * ```
+ */
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+
+/**
  * The key name of the unique identifier for each entity
  */
 export const idKey = "_id";
