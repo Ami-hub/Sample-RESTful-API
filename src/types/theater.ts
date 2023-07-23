@@ -1,4 +1,5 @@
-import { FromSchema } from "json-schema-to-ts";
+import { JSONSchema, FromSchema } from "json-schema-to-ts";
+import { ToPartialJSONSchema, toPartialJSONSchema } from "./general";
 
 const theaterJSONSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
@@ -55,11 +56,14 @@ const theaterJSONSchema = {
   required: ["location", "name"],
 } as const;
 
+/**
+ * The JSON schema of the theater entity
+ */
 export const getTheaterJSONSchema = () => theaterJSONSchema;
 
 /**
  * Type of the theater entity
- * @see {@link theaterSchema}
+ * 
  * @example
  * ```ts
     const theater: Theater = {
@@ -78,9 +82,3 @@ export const getTheaterJSONSchema = () => theaterJSONSchema;
  * ```
  */
 export type Theater = FromSchema<typeof theaterJSONSchema>;
-
-/**
- * Transaction fields that are of type `ObjectId`
- * @see {@link ObjectId}
- */
-export const theaterObjectIdFields: (keyof Theater)[] = [];

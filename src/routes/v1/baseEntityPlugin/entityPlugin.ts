@@ -13,9 +13,10 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
   const entityDal = getEntityDAL(collectionName);
+  const entityJSONSchema = entityDal.getSchema();
+  const entityPartialJSONSchema = entityDal.getPartialSchema();
   const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam();
   const paginationOptions = getPaginationOptionsJSONSchema();
-  const entityJSONSchema = entityDal.getSchema();
   const entityPlugin = async (
     fastify: Application,
     _options: FastifyPluginOptions = {}
@@ -62,12 +63,12 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
       }
     );
 
-    fastify.put(
+    fastify.patch(
       `/:id`,
       {
         schema: {
           params: idSchemaAsQueryParam,
-          // body: {}, // TODO: add partial schema
+          body: entityPartialJSONSchema,
         },
       },
 

@@ -1,6 +1,6 @@
 import { FastifyPluginOptions } from "fastify";
 import { Application } from "../../types/application";
-import { getEntityPlugin } from "./theaters/entityPlugin";
+import { getEntityPlugin } from "./baseEntityPlugin/entityPlugin";
 
 const API_V1_PREFIX = "/api/v1";
 

@@ -1,6 +1,6 @@
-import { FromSchema } from "json-schema-to-ts";
+import { FromSchema, JSONSchema } from "json-schema-to-ts";
 import { Theater, getTheaterJSONSchema } from "./theater";
-import { User } from "./user";
+import { User, getUserJSONSchema } from "./user";
 
 /**
  * Unwraps a promise type
@@ -111,11 +111,35 @@ export type EntitiesMapDB = {
 
 const entityJSONSchemaMap = {
   theaters: getTheaterJSONSchema(),
-  users: getTheaterJSONSchema(),
+  users: getUserJSONSchema(),
 };
 
+const entityPartialJSONSchemaMap: {
+  [T in keyof typeof entityJSONSchemaMap]: ToPartialJSONSchema<
+    (typeof entityJSONSchemaMap)[T]
+  >;
+} = Object.keys(entityJSONSchemaMap).reduce((acc, curr) => {
+  acc[curr] = toPartialJSONSchema(
+    entityJSONSchemaMap[curr as keyof typeof entityJSONSchemaMap]
+  );
+  return acc;
+}, {} as any);
+
+/**
+ * A map of all entities collection names and their JSON schemas
+ */
 export type EntityJSONSchemaMap = typeof entityJSONSchemaMap;
 
+/**
+ * A map of all entities collection names and their partial JSON schemas
+ */
+export type EntityPartialJSONSchemaMap = typeof entityPartialJSONSchemaMap;
+
+/**
+ * Gets the JSON schema of an entity
+ * @param entityName the name of the entity
+ * @returns the JSON schema of the entity
+ */
 export const getEntityJSONSchema = <T extends keyof EntitiesMapDB>(
   entityName: T
 ): EntityJSONSchemaMap[T] => {
@@ -123,33 +147,50 @@ export const getEntityJSONSchema = <T extends keyof EntitiesMapDB>(
 };
 
 /**
- * Filter type
+ * Gets the partial JSON schema of an entity
+ * @param entityName the name of the entity
+ * @returns the partial JSON schema of the entity
+ */
+export const getEntityPartialJSONSchema = <T extends keyof EntitiesMapDB>(
+  entityName: T
+): EntityPartialJSONSchemaMap[T] => {
+  return entityPartialJSONSchemaMap[entityName];
+};
 
-type FilterHelper<T> = {
-  [P in keyof T]?: T[P] extends (infer U)[]
-  ? U extends object
-  ? FilterHelper<U>[]
-      : T[P]
-    : T[P] extends object
-    ? FilterHelper<T[P]>
-    : T[P];
-  };
-
-type Filter<
-  T extends EntitiesMapDBWithoutId[keyof EntitiesMapDBWithoutId]
-  > = {
-    [P in keyof (T & Id)]?: (T & Id)[P] extends (infer U)[]
-    ? U extends object
-    ? FilterHelper<U>[]
-    : (T & Id)[P]
-    : (T & Id)[P] extends object
-    ? FilterHelper<(T & Id)[P]>
-    : (T & Id)[P];
-  };
-*/
-
+// TODO: consider making this more explicit
 export type Filter<
   T extends EntitiesMapDBWithoutId[keyof EntitiesMapDBWithoutId]
 > = {
   [key: string]: any;
+};
+
+/**
+ * The type of the pagination options, used for getting a subset of entities
+ */
+export type ToPartialJSONSchema<T> = {
+  [K in keyof T]: K extends "required"
+    ? []
+    : T[K] extends object
+    ? ToPartialJSONSchema<T[K]>
+    : T[K];
+};
+
+/**
+ * Makes all properties of a JSON schema optional
+ *
+ * @param schema the JSON schema to make its properties optional
+ * @returns the JSON schema with all properties optional
+ */
+export const toPartialJSONSchema = <T extends JSONSchema & object>(
+  schema: T
+): ToPartialJSONSchema<T> => {
+  const partialSchema: any = { ...schema, required: [] };
+
+  return Object.keys(partialSchema).map((key) =>
+    partialSchema.hasOwnProperty(key)
+      ? typeof partialSchema[key] === "object" && partialSchema[key] !== null
+        ? toPartialJSONSchema(partialSchema[key])
+        : partialSchema[key]
+      : partialSchema[key]
+  ) as ToPartialJSONSchema<T>;
 };

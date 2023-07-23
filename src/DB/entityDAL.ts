@@ -6,6 +6,8 @@ import {
   Filter,
   IdType,
   getEntityJSONSchema,
+  getEntityPartialJSONSchema,
+  EntityPartialJSONSchemaMap,
   idKey,
 } from "../types/general";
 import { getCRUD } from "./CRUD";
@@ -25,7 +27,7 @@ import { logger } from "../logging/logger";
  * // [
  * //   {
  * //     _id: new ObjectId("5f9d88d3d6b0b3e5d0e0d9a8"),
- * //     name: "The Shawshank Redemption",
+ * //     name: "The Shaws-hank Redemption",
  * //     genres: ["Drama"],
  * //     ...
  * //   },
@@ -36,7 +38,7 @@ import { logger } from "../logging/logger";
 export interface EntityDAL<T extends keyof EntitiesMapDB> {
   getSchema(): EntityJSONSchemaMap[T];
 
-  getPartialSchema(): unknown; // TODO: implement type
+  getPartialSchema(): EntityPartialJSONSchemaMap[T];
 
   get(
     offset?: number,
@@ -63,6 +65,7 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   const entityCrud = getCRUD(entityName);
   const errorBuilder = getEntityErrorBuilder(entityName);
   const entitySchema = getEntityJSONSchema(entityName);
+  const entityPartialSchema = getEntityPartialJSONSchema(entityName);
 
   const get = async (
     offset?: number,
@@ -124,7 +127,7 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
 
   return {
     getSchema: () => entitySchema,
-    getPartialSchema: () => {}, // TODO: implement
+    getPartialSchema: () => entityPartialSchema,
     get,
     getById,
     create,
