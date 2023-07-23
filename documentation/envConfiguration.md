@@ -8,7 +8,7 @@ Below is the list of environment variables along with their descriptions and def
 
 ### MONGODB_URI
 
-- **Description:** The MongoDB URI to connect to the database (without the database name or any other parameters)
+- **Description:** The MongoDB URI to connect to the cluster (without the database name or any other parameters)
 - **Example:**
   ```env
   MONGODB_URI=mongodb+srv://username:password@cluster0.1a2b3c4.mongodb.net/

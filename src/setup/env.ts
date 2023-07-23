@@ -16,9 +16,17 @@ const availableLogLevel = [
 
 config();
 
+/**
+ * The environment variables of the application.
+ * For more info, see the @link[Environment Variables Documentation](../../documentation/envConfiguration.md).
+ * @example
+ * ```ts
+ * console.log(env.PORT); // 3000
+ * ```
+ */
 export const env = cleanEnv(process.env, {
   /**
-   * The MongoDB URI.
+   * The MongoDB URI to connect to the cluster.
    * @see[MongoDB Connection String URI Format](https://mongodb.com/docs/connections\trings/)
    * @example
    * ```env
@@ -153,11 +161,5 @@ export const env = cleanEnv(process.env, {
 
 /**
  * The environment variables of the application.
- * For more info, see the @link[Environment Variables Documentation](../../documentation/envConfiguration.md).
- * @example
- * ```ts
- * const env = await configEnvironmentVariables();
- * console.log(env.PORT); // 3000
- * ```
  */
 export type EnvironmentVariables = typeof env;
