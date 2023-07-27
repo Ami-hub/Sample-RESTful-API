@@ -11,7 +11,7 @@ import {
   idKey,
   EntitiesMapDBWithoutId,
 } from "../types/general";
-import { getCRUD } from "./CRUD";
+import { ReadOptions, getCRUD } from "./CRUD";
 import { logger } from "../logging/logger";
 
 /**
@@ -64,11 +64,7 @@ export interface EntityDAL<T extends keyof EntitiesMapDB> {
    * // ];
    * ```
    */
-  get(
-    offset?: number,
-    limit?: number,
-    filters?: Filter<EntitiesMapDB[T]>[]
-  ): Promise<EntitiesMapDB[T][]>;
+  get(readOptions?: ReadOptions): Promise<EntitiesMapDB[T][]>;
 
   /**
    * Get an entity by id from the DB
@@ -167,19 +163,17 @@ export interface EntityDAL<T extends keyof EntitiesMapDB> {
 //             Implementation
 // ########################################
 
-export const getEntityDAL = <T extends keyof EntitiesMapDB>(
+export const getEntityDAL = async <T extends keyof EntitiesMapDB>(
   entityName: T
-): EntityDAL<T> => {
-  const entityCrud = getCRUD(entityName);
+): Promise<EntityDAL<T>> => {
+  const entityCrud = await getCRUD(entityName);
   const errorBuilder = getEntityErrorBuilder(entityName);
   const entitySchema = getEntityJSONSchema(entityName);
   const entityPartialSchema = getEntityPartialJSONSchema(entityName);
 
-  const get = async (
-    offset?: number,
-    limit?: number,
-    filters: Filter<EntitiesMapDB[T]>[] = [{}]
-  ) => {
+  const get = async (readOptions: ReadOptions = {}) => {
+    const filters = readOptions.filters ?? [{}];
+
     logger.verbose(
       `trying to GET entities from ${entityName}, filters: ${JSON.stringify(
         filters,
@@ -187,20 +181,20 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
         4
       )}`
     );
-    const entities = await entityCrud.read(filters, limit, offset);
+    const entities = await entityCrud.read({
+      filters,
+      limit: readOptions.limit,
+      offset: readOptions.offset,
+    });
     logger.info(`found ${entities.length} entities from ${entityName}`);
     return entities;
   };
 
   const getByIdHelper = async (id: IdType) => {
-    const entitiesFound = await entityCrud.read(
-      [
-        {
-          [idKey]: id,
-        },
-      ],
-      1
-    );
+    const entitiesFound = await entityCrud.read({
+      filters: [{ [idKey]: id }],
+      limit: 1,
+    });
     return entitiesFound[0];
   };
 

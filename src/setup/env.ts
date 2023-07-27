@@ -102,21 +102,21 @@ export const env = cleanEnv(process.env, {
    * @default 20
    * @see[Connection Pool Overview](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/) for more info.
    */
-  MAX_POOL_SIZE: num({ default: 20 }),
+  MAX_DB_POOL_SIZE: num({ default: 20 }),
 
   /**
    * The min pool size of the DB.
    * @default 10
    * @see[Connection Pool Overview](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/) for more info.
    */
-  MIN_POOL_SIZE: num({ default: 10 }),
+  MIN_DB_POOL_SIZE: num({ default: 10 }),
 
   /**
    * The maximum time a connection can remain idle in the pool before being removed and closed.
    * @default 30000
    * @see[Connection Pool Overview](https://www.mongodb.com/docs/manual/administration/connection-pool-overview/) for more info.
    */
-  MAX_IDLE_TIME_MS: num({ default: 30000 }),
+  MAX_IDLE_TIME_DB_MS: num({ default: 30000 }),
 
   /**
    * The write concern level of the DB.
@@ -159,16 +159,28 @@ export const env = cleanEnv(process.env, {
   }),
 
   /**
-   * The maximum amount of responses to cache.
-   * @default 30
+   * Whether to enable caching or not.
+   * @default true
    */
-  MAX_CACHE_SIZE: num({ default: 30 }),
+  ENABLE_CACHING: bool({
+    default: true,
+  }),
 
   /**
-   * The default time to keep a response as valid in the cache.
-   * @default 180000 (3 minutes)
+   * The default time to keep a response as valid in the cache in seconds.
+   * @default 300 (5 minutes)
    */
-  DEFAULT_CACHE_TTL_MS: num({ default: 180000 }), // 3 minutes
+  DEFAULT_CACHE_EXPIRY_SEC: num({
+    default: 300,
+  }),
+
+  /**
+   * The URL of the Redis server.
+   * @default "redis://localhost:6379"
+   */
+  REDIS_URL: url({
+    default: "redis://localhost:6379",
+  }),
 });
 
 /**

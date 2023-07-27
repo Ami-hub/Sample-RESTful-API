@@ -7,10 +7,10 @@ import { EntitiesMapDB } from "../types/general";
  * The client that connects to the DB
  */
 const client = new MongoClient(env.MONGODB_URI, {
-  maxPoolSize: env.MAX_POOL_SIZE,
-  minPoolSize: env.MIN_POOL_SIZE,
+  maxPoolSize: env.MAX_DB_POOL_SIZE,
+  minPoolSize: env.MIN_DB_POOL_SIZE,
   connectTimeoutMS: env.CONNECT_DB_TIMEOUT_MS,
-  maxIdleTimeMS: env.MAX_IDLE_TIME_MS,
+  maxIdleTimeMS: env.MAX_IDLE_TIME_DB_MS,
   writeConcern: {
     w: env.WRITE_CONCERN,
     wtimeout: env.WRITE_CONCERN_TIMEOUT,

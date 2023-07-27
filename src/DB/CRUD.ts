@@ -9,13 +9,37 @@ import {
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
 import { env } from "../setup/env";
-import { createCache } from "./cache";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
+import { getEntityCache } from "./redisCache";
 
 /**
  * Supported CRUD operations
  */
 export type CRUDOperation = "read" | "create" | "update" | "delete";
+
+export type ReadOptions = {
+  /**
+   * The filters to apply
+   * @default []
+   * @example
+   * ```ts
+   * const usersFound = await getCRUD("users").read([{
+   *   name: "Jane Doe", "email": "jane@female.com",
+   * }]);
+   * ```
+   */
+  filters?: Array<Filter<EntitiesMapDB[keyof EntitiesMapDB]>>;
+
+  /**
+   * The amount of entities to return
+   */
+  limit?: number;
+
+  /**
+   * The amount of entities to skip
+   */
+  offset?: number;
+};
 
 export interface CRUD<N extends keyof EntitiesMapDB> {
   /**
@@ -48,11 +72,7 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
       // ]
       ```
     */
-  read(
-    filters?: Array<Filter<EntitiesMapDB[N]>>,
-    limit?: number,
-    skip?: number
-  ): Promise<Array<EntitiesMapDB[N]>>;
+  read(readOptions: ReadOptions): Promise<Array<EntitiesMapDB[N]>>;
 
   /**
    * Updates an entity instance
@@ -77,21 +97,25 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
 //             Implementation
 // ########################################
 
-export const getCRUD = <N extends keyof EntitiesMapDB>(
+export const getCRUD = async <N extends keyof EntitiesMapDB>(
   collectionName: N
-): CRUD<N> => {
+): Promise<CRUD<N>> => {
   const collection = getCollection(collectionName);
-  const cache = createCache<EntitiesMapDB[N][]>();
   const errorBuilder = getEntityErrorBuilder(collectionName);
+  const cache = await getEntityCache(collectionName);
 
-  const createCacheKey = (
-    filters: Filter<EntitiesMapDB[N]>[],
-    limit: number,
-    offset: number = 0
-  ) => JSON.stringify({ filters, skip: offset, limit });
+  const createCacheKey = (keys: Required<Omit<ReadOptions, "limit">>) => {
+    return JSON.stringify({
+      filters: keys.filters,
+      offset: keys.offset,
+    });
+  };
 
   const createCacheKeyById = (id: IdType) =>
-    createCacheKey([{ [idKey]: id }], 1);
+    createCacheKey({
+      filters: [{ [idKey]: id }],
+      offset: 0,
+    });
 
   const isIdExists = async (id: IdType): Promise<boolean> => {
     if (!ObjectId.isValid(id)) return false;
@@ -99,33 +123,48 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     return !!result;
   };
 
-  const read = async (
-    filters: Filter<EntitiesMapDB[N]>[],
-    limit: number = env.DEFAULT_PAGE_SIZE,
-    skip: number = 0
-  ) => {
-    const cacheKey = createCacheKey(filters, limit, skip);
-    const cached = cache.get(cacheKey);
+  const readHelper = async (readOptions: Required<ReadOptions>) => {
+    return await collection
+      .aggregate<EntitiesMapDB[N]>([
+        ...readOptions.filters.map((filter) =>
+          idKey in filter && ObjectId.isValid(filter[idKey])
+            ? { $match: { [idKey]: new ObjectId(filter[idKey]) } }
+            : { $match: filter }
+        ),
+        { $skip: readOptions.offset },
+        { $limit: readOptions.limit },
+      ])
+      .toArray();
+  };
+
+  const read = async (readOptions: ReadOptions) => {
+    const filters = readOptions.filters ?? [];
+    const limit = readOptions.limit ?? env.DEFAULT_PAGE_SIZE;
+    const offset = readOptions.offset ?? 0;
+
+    const cacheKey = createCacheKey({
+      filters,
+      offset,
+    });
+
+    const cachedResult = await cache?.get(cacheKey);
+
+    const isThereValidCachedResult =
+      cachedResult && cachedResult.length >= limit;
 
     logger.verbose(
-      `found ${cached?.length} items in cache for key: ${cacheKey}`
+      `found ${cachedResult?.length} items in cache for key: ${cacheKey}`
     );
 
-    const entitiesFound =
-      cached ??
-      (await collection
-        .aggregate<EntitiesMapDB[N]>([
-          ...filters.map((filter) =>
-            idKey in filter && ObjectId.isValid(filter[idKey])
-              ? { $match: { [idKey]: new ObjectId(filter[idKey]) } }
-              : { $match: filter }
-          ),
-          { $skip: skip },
-          { $limit: limit },
-        ])
-        .toArray());
+    const entitiesFound = isThereValidCachedResult
+      ? cachedResult
+      : await readHelper({
+          filters,
+          limit,
+          offset,
+        });
 
-    cache.set(cacheKey, entitiesFound);
+    if (!isThereValidCachedResult) await cache?.set(cacheKey, entitiesFound);
 
     if (!entitiesFound.length) {
       throw filters.length === 1 && idKey in filters[0]
@@ -141,7 +180,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     if (!result.acknowledged) return undefined;
     const insertedId = result.insertedId.toString();
 
-    cache.delete(createCacheKeyById(insertedId));
+    await cache?.delete(createCacheKeyById(insertedId));
 
     logger.verbose(`create result: ${JSON.stringify(result, null, 4)}`);
     return insertedId;
@@ -158,7 +197,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     );
     logger.verbose(`update result: ${JSON.stringify(result, null, 4)}`);
 
-    if (result.modifiedCount > 0) cache.delete(createCacheKeyById(id));
+    if (result.modifiedCount > 0) cache?.delete(createCacheKeyById(id));
 
     return result.acknowledged;
   };
@@ -168,7 +207,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
     logger.verbose(`delete result: ${JSON.stringify(result, null, 4)}`);
 
-    if (result.deletedCount > 0) cache.delete(createCacheKeyById(id));
+    if (result.deletedCount > 0) cache?.delete(createCacheKeyById(id));
     return result.acknowledged;
   };
 

@@ -72,19 +72,19 @@ Below is the list of environment variables along with their descriptions and def
 - **Description:** The expiration time of the JWT in minutes.
 - **Default value:** `30`.
 
-### MAX_POOL_SIZE
+### MAX_DB_POOL_SIZE
 
 - **Description:** The maximum pool size of the database connections.
 - **Default value:** `20`.
 - **Additional information:** For more information, refer to [Connection Pooling in MongoDB](https://mongodb.com/blog/post/server-side-connections-are-coming-to-the-node-js-driver).
 
-### MIN_POOL_SIZE
+### MIN_DB_POOL_SIZE
 
 - **Description:** The minimum pool size of the database connections.
 - **Default value:** `10`.
 - **Additional information:** For more information, refer to [Connection Pooling in MongoDB](https://mongodb.com/blog/post/server-side-connections-are-coming-to-the-node-js-driver).
 
-### MAX_IDLE_TIME_MS
+### MAX_IDLE_TIME_DB_MS
 
 - **Description:** The maximum time a connection can remain idle in the pool before being removed and closed.
 - **Default value:** `60000` (1 minute).
@@ -114,14 +114,26 @@ Below is the list of environment variables along with their descriptions and def
 - **Default value:** `15000` (15 seconds).
 - **Additional information:** If [`ENABLE_RECONNECTING`](#enable_reconnecting) is false, this property will be ignored.
 
-### MAX_CACHE_SIZE
+### ENABLE_CACHING
 
-- **Description:** The maximum amount of responses to cache.
-- **Default value:** `30`.
+- **Description:** Whether to enable caching of the responses or not.
+- **Available choices:** `true`, `false`.
+- **Default value:** `true`.
 
-### DEFAULT_TTL_MS
+### REDIS_URI
 
-- **Description:** The default time to keep a response as valid in the cache.
-- **Default value:** `180000` (3 minutes).
+- **Description:** The Redis URI to connect to the cluster
+- **Example:**
+  ```env
+  REDIS_URI=redis://alice:foobared@awesome.redis.server:6380
+  ```
+- **Default value:** `redis://localhost:6379`.
+- **Additional information:** The connection string is in this format:
+  `redis[s]://[[username][:password]@][host][:port][/db-number]`
+
+### DEFAULT_CACHE_EXPIRY_SEC
+
+- **Description:** The default time to keep a response as valid in the cache in seconds.
+- **Default value:** `300` (5 minutes).
 
 Please make sure to set these environment variables according to your specific deployment environment to ensure the proper functioning of the application.

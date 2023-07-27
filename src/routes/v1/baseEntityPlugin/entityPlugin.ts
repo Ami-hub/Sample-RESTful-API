@@ -14,7 +14,7 @@ import { logger } from "../../../logging/logger";
 export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
-  const entityDal = getEntityDAL(collectionName);
+  const entityDal = await getEntityDAL(collectionName);
 
   const entityJSONSchema = entityDal.getSchema();
   const entityPartialJSONSchema = entityDal.getPartialSchema();
@@ -52,7 +52,10 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
         const offset = request.query.offset ?? 0;
         const limit = request.query.limit ?? env.DEFAULT_PAGE_SIZE;
         const safeLimit = limit > env.MAX_PAGE_SIZE ? env.MAX_PAGE_SIZE : limit;
-        const entities = await entityDal.get(offset, safeLimit);
+        const entities = await entityDal.get({
+          offset,
+          limit: safeLimit,
+        });
         reply.status(StatusCodes.OK).send(entities);
       }
     );
