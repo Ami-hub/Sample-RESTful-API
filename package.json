@@ -1,7 +1,7 @@
 {
   "name": "mfix-api",
   "version": "1.0.0",
-  "description": "An API server in TypeScript",
+  "description": "An API CRUD server in TypeScript using Fastify",
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc -p . && echo Build complete!",
@@ -23,17 +23,17 @@
     "fastify": "^4.20.0",
     "http-status-codes": "^2.2.0",
     "json-schema-to-ts": "^2.9.1",
-    "jsonwebtoken": "^9.0.0",
+    "jsonwebtoken": "^9.0.1",
     "mongodb": "^5.7.0",
     "pino": "^8.14.1",
     "pino-pretty": "^10.0.1",
-    "winston": "^3.9.0"
+    "winston": "^3.10.0"
   },
   "devDependencies": {
     "@fastify/type-provider-json-schema-to-ts": "^2.2.2",
     "@types/bcrypt": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.2",
-    "@types/node": "^20.4.2",
+    "@types/node": "^20.4.5",
     "nodemon": "^3.0.1",
     "typescript": "^5.1.6"
   }
