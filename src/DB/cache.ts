@@ -1,3 +1,5 @@
+import { env } from "../setup/env";
+
 interface CacheEntry<T> {
   value: T;
   expirationTime: number;
@@ -9,10 +11,6 @@ interface CacheData<T> {
   [key: string]: CacheEntry<T>;
 }
 
-// TODO: add to ENV
-const MAX_CACHE_SIZE = 30; // Set the maximum cache size as desired.
-const DEFAULT_TTL_MS = 1000 * 60 * 3; // 3 minutes
-
 /**
  * Creates a cache with a doubly linked list (DLL) to keep track of the most recently used entries.
  * @param defaultTTL - the default TTL for the cache entries (in milliseconds)
@@ -22,15 +20,22 @@ const DEFAULT_TTL_MS = 1000 * 60 * 3; // 3 minutes
  * const cache = createCache<string>();
  *
  * cache.set("key1", "value1");
+ * cache.set("key2", "value2");
  *
  * const value1 = cache.get("key1");
  * console.log(value1); // "value1"
  *
+ * cache.delete("key2");
  * const value2 = cache.get("key2");
  * console.log(value2); // null
+ *
+ * const value3 = cache.get("key3");
+ * console.log(value3); // null
  * ```
  */
-export const createCache = <T = any>(defaultTTL: number = DEFAULT_TTL_MS) => {
+export const createCache = <T = any>(
+  defaultTTL: number = env.DEFAULT_CACHE_TTL_MS
+) => {
   const cacheData: CacheData<T> = {};
   let head: string | null = null;
   let tail: string | null = null;
@@ -55,7 +60,7 @@ export const createCache = <T = any>(defaultTTL: number = DEFAULT_TTL_MS) => {
         head = key;
       }
 
-      if (Object.keys(cacheData).length > MAX_CACHE_SIZE) {
+      if (Object.keys(cacheData).length > env.MAX_CACHE_SIZE) {
         delete cacheData[head!];
         const t = cacheData[head!].next;
         if (t) {

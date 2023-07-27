@@ -157,6 +157,18 @@ export const env = cleanEnv(process.env, {
   RECONNECTING_INTERVAL_MS: num({
     default: 15000,
   }),
+
+  /**
+   * The maximum amount of responses to cache.
+   * @default 30
+   */
+  MAX_CACHE_SIZE: num({ default: 30 }),
+
+  /**
+   * The default time to keep a response as valid in the cache.
+   * @default 180000 (3 minutes)
+   */
+  DEFAULT_CACHE_TTL_MS: num({ default: 180000 }), // 3 minutes
 });
 
 /**

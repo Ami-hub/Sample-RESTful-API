@@ -114,4 +114,14 @@ Below is the list of environment variables along with their descriptions and def
 - **Default value:** `15000` (15 seconds).
 - **Additional information:** If [`ENABLE_RECONNECTING`](#enable_reconnecting) is false, this property will be ignored.
 
+### MAX_CACHE_SIZE
+
+- **Description:** The maximum amount of responses to cache.
+- **Default value:** `30`.
+
+### DEFAULT_TTL_MS
+
+- **Description:** The default time to keep a response as valid in the cache.
+- **Default value:** `180000` (3 minutes).
+
 Please make sure to set these environment variables according to your specific deployment environment to ensure the proper functioning of the application.
