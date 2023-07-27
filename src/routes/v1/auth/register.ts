@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import { logger } from "../../../logging/logger";
 import { getCollection } from "../../../DB/databaseConnector";
-import { getUserJSONSchema } from "../../../types/user";
+import { getUserJSONSchema } from "../../../types/models/user";
 import { Application } from "../../../types/application";
 
 const generatePasswordHash = async (password: string) => {

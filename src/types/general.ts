@@ -1,6 +1,6 @@
-import { FromSchema, JSONSchema } from "json-schema-to-ts";
-import { Theater, getTheaterJSONSchema } from "./theater";
-import { User, getUserJSONSchema } from "./user";
+import { FromSchema } from "json-schema-to-ts";
+import { Theater, getTheaterJSONSchema } from "./models/theater";
+import { User, getUserJSONSchema } from "./models/user";
 
 /**
  * Unwraps a promise type
@@ -23,6 +23,7 @@ export const idKey = "_id";
 export type IdKey = typeof idKey;
 
 const idSchema = {
+  $schema: "http://json-schema.org/draft-07/schema#",
   type: "string",
   pattern: "^[0-9a-fA-F]{24}$",
 } as const;
@@ -125,38 +126,54 @@ export type ToPartialJSONSchema<T> = {
     : T[K];
 };
 
+const getObjectKeys = <T extends object>(obj: T) =>
+  Object.keys(obj) as (keyof T)[];
+
 /**
  * Makes all properties of a JSON schema optional
  *
  * @param schema the JSON schema to make its properties optional
  * @returns the JSON schema with all properties optional
  */
-export const toPartialJSONSchema = <T extends JSONSchema & object>(
+export const toPartialJSONSchema = <T extends object>(
   schema: T
-): ToPartialJSONSchema<T> => {
-  return Object.keys(schema).reduce((acc, key) => {
-    if (key === "required") {
-      return acc;
+): ToPartialJSONSchema<T> =>
+  toPartialJSONSchemaHelper(structuredClone(schema)) as ToPartialJSONSchema<T>;
+
+type AnyObject = { [key: string]: any };
+
+const toPartialJSONSchemaHelper = (object: AnyObject) => {
+  for (const prop in object) {
+    if (object.hasOwnProperty(prop)) {
+      if (typeof object[prop] === "object" && object[prop] !== null) {
+        toPartialJSONSchemaHelper(object[prop]);
+      }
+      if (prop === "required") {
+        // object["minProperties"] = 1; // TODO: consider adding this
+        delete object[prop];
+      }
     }
-    const value = schema[key as keyof T];
-    acc[key] =
-      typeof value === "object" && !Array.isArray(value) && value !== null
-        ? toPartialJSONSchema(value)
-        : value;
-    return acc;
-  }, {} as any);
+  }
+
+  return object;
 };
 
-const entityPartialJSONSchemaMap: {
+type PartialEntityJSONSchemaMap = {
   [T in keyof typeof entityJSONSchemaMap]: ToPartialJSONSchema<
     (typeof entityJSONSchemaMap)[T]
   >;
-} = Object.keys(entityJSONSchemaMap).reduce((acc, key) => {
-  acc[key] = toPartialJSONSchema(
-    entityJSONSchemaMap[key as keyof typeof entityJSONSchemaMap]
-  );
-  return acc;
-}, {} as any); // TODO: fix this any
+};
+
+const getEntityPartialJSONSchemaMap = (): PartialEntityJSONSchemaMap => {
+  const entityPartialMap: any = {};
+  getObjectKeys(entityJSONSchemaMap).forEach((k) => {
+    entityPartialMap[k] = toPartialJSONSchema(entityJSONSchemaMap[k]);
+  });
+  return entityPartialMap;
+};
+
+const entityPartialJSONSchemaMap: PartialEntityJSONSchemaMap =
+  getEntityPartialJSONSchemaMap();
 
 /**
  * A map of all entities collection names and their JSON schemas
@@ -195,4 +212,15 @@ export type Filter<
   T extends EntitiesMapDBWithoutId[keyof EntitiesMapDBWithoutId]
 > = {
   [key: string]: any;
+};
+
+export type FilterExplicit<
+  E extends EntitiesMapDBWithoutId[keyof EntitiesMapDBWithoutId],
+  T = E & Id
+> = {
+  [K in keyof T]?: T[K] extends object ? FilterExplicitHelper<T[K]> : T[K];
+};
+
+type FilterExplicitHelper<T extends object> = {
+  [K in keyof T]?: T[K] extends object ? FilterExplicitHelper<T[K]> : T[K];
 };

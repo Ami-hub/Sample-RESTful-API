@@ -3,9 +3,19 @@ import { env } from "../setup/env";
 import { logger } from "../logging/logger";
 import { EntitiesMapDB } from "../types/general";
 
-const getDbInstance = () => {
-  return client.db(env.DB_NAME);
-};
+/**
+ * The client that connects to the DB
+ */
+const client = new MongoClient(env.MONGODB_URI, {
+  maxPoolSize: env.MAX_POOL_SIZE,
+  minPoolSize: env.MIN_POOL_SIZE,
+  connectTimeoutMS: env.CONNECT_DB_TIMEOUT_MS,
+  maxIdleTimeMS: env.MAX_IDLE_TIME_MS,
+  writeConcern: {
+    w: env.WRITE_CONCERN,
+    wtimeout: env.WRITE_CONCERN_TIMEOUT,
+  },
+});
 
 export interface DatabaseConnector {
   /**
@@ -42,29 +52,15 @@ export interface DatabaseConnector {
 // ########################################
 
 /**
- * The client that connects to the DB
- */
-const client = new MongoClient(env.MONGODB_URI, {
-  maxPoolSize: env.MAX_POOL_SIZE,
-  minPoolSize: env.MIN_POOL_SIZE,
-  connectTimeoutMS: env.CONNECT_DB_TIMEOUT_MS,
-  maxIdleTimeMS: env.MAX_IDLE_TIME_MS,
-  writeConcern: {
-    w: env.WRITE_CONCERN,
-    wtimeout: env.WRITE_CONCERN_TIMEOUT,
-  },
-});
-
-/**
  * Connects to the DB
  * @param retry whether to retry connecting to the DB if the connection is failed
  */
 export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
   const dbName = env.DB_NAME;
-  if (await isConnected()) {
-    logger.verbose(`Already connected to '${dbName}' DB`);
-    return;
-  }
+  //  if (await isConnected()) {
+  //    logger.verbose(`Already connected to '${dbName}' DB`);
+  //    return;
+  //  }
 
   while (true) {
     try {
@@ -86,6 +82,10 @@ export const connectToDB = async (retry: boolean = env.ENABLE_RECONNECTING) => {
       );
     }
   }
+};
+
+const getDbInstance = () => {
+  return client.db(env.DB_NAME);
 };
 
 /**

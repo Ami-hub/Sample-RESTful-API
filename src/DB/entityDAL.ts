@@ -9,49 +9,157 @@ import {
   getEntityPartialJSONSchema,
   EntityPartialJSONSchemaMap,
   idKey,
+  EntitiesMapDBWithoutId,
 } from "../types/general";
 import { getCRUD } from "./CRUD";
 import { logger } from "../logging/logger";
 
 /**
- * DAL for a specific entity
- *
- * @example
- * ```ts
- * const moviesDAL = getEntityDAL("movies");
- *
- * const movies = await moviesDAL.get();
- * console.log(movies);
- *
- * // Output:
- * // [
- * //   {
- * //     _id: new ObjectId("5f9d88d3d6b0b3e5d0e0d9a8"),
- * //     name: "The Shaws-hank Redemption",
- * //     genres: ["Drama"],
- * //     ...
- * //   },
- * //   ...
- * // ]
- * ```
+ * DAL for a specific entity, provides CRUD operations for the entity
  */
 export interface EntityDAL<T extends keyof EntitiesMapDB> {
+  /**
+   * Get the JSON schema of the entity
+   * @returns the JSON schema of the entity
+   */
   getSchema(): EntityJSONSchemaMap[T];
 
+  /**
+   * Get the partial JSON schema of the entity
+   * @returns the partial JSON schema of the entity
+   */
   getPartialSchema(): EntityPartialJSONSchemaMap[T];
 
+  /**
+   * Get entities from the DB
+   * @param offset - the offset of the entities to get
+   * @param limit - the limit of the entities to get
+   * @param filters - the filters to apply on the entities
+   * @returns the entities found
+   *
+   * @example
+   * ```ts
+   * const theatersDAL = getEntityDAL("theaters");
+   *
+   * const theaters = await theatersDAL.get();
+   * console.log(theaters);
+   *
+   * // Output:
+   * // [
+   * //   {
+   * //     _id: "59a47286cfa9a3a73e51e72c",
+   * //     name: "Theater 1000",
+   * //     location: {
+   * //       address: {
+   * //         city: "Bloomington",
+   * //         state: "MN",
+   * //         country: "USA",
+   * //         street: "340 W Market",
+   * //         zipCode: "55425",
+   * //       },
+   * //       geoCoordinates: [-93.24565, 44.85466],
+   * //     },
+   * //   },
+   * //   ...
+   * // ];
+   * ```
+   */
   get(
     offset?: number,
     limit?: number,
     filters?: Filter<EntitiesMapDB[T]>[]
   ): Promise<EntitiesMapDB[T][]>;
 
+  /**
+   * Get an entity by id from the DB
+   * @param id - the id of the entity to get
+   * @returns the entity found
+   * @throws {EntityNotFoundError} if the entity was not found
+   *
+   * @example
+   * ```ts
+   * const theatersDAL = getEntityDAL("theaters");
+   * const theater = await theatersDAL.getById("59a47286cfa9a3a73e51e72c");
+   * console.log(theater);
+   *
+   * // Output:
+   * // {
+   * //   _id: "59a47286cfa9a3a73e51e72c",
+   * //   name: "Theater 1000",
+   * //   location: {
+   * //     address: {
+   * //       city: "Bloomington",
+   * //       state: "MN",
+   * //       country: "USA",
+   * //       street: "340 W Market",
+   * //       zipCode: "55425",
+   * //     },
+   * //     geoCoordinates: [-93.24565, 44.85466],
+   * //   },
+   * // };
+   * ```
+   */
   getById(id: IdType): Promise<EntitiesMapDB[T]>;
 
-  create(data: unknown): Promise<EntitiesMapDB[T]>;
+  /**
+   * Create an entity
+   * @param data - the data of the entity to create
+   * @returns the created entity
+   *
+   * @example
+   * ```ts
+   * const theatersDAL = getEntityDAL("theaters");
+   * const theater = await theatersDAL.create({
+   *   name: "Theater 1000",
+   *   location: {
+   *     address: {
+   *       city: "Bloomington",
+   *       state: "MN",
+   *       country: "USA",
+   *       street: "340 W Market",
+   *       zipCode: "55425",
+   *     },
+   *     geoCoordinates: [-93.24565, 44.85466],
+   *   }
+   * });
+   * console.log(theater);
+   *
+   * // Output:
+   * // {
+   * //   _id: "59a47286cfa9a3a73e51e72c",
+   * //   name: "Theater 1000",
+   * //   location: {
+   * //     address: {
+   * //       city: "Bloomington",
+   * //       state: "MN",
+   * //       country: "USA",
+   * //       street: "340 W Market",
+   * //       zipCode: "55425",
+   * //     },
+   * //     geoCoordinates: [-93.24565, 44.85466],
+   * //   },
+   * // };
+   * ```
+   */
+  create(data: EntitiesMapDBWithoutId[T]): Promise<EntitiesMapDB[T]>;
 
-  update(id: IdType, data: unknown): Promise<EntitiesMapDB[T]>;
+  /**
+   * Update an entity by id, and save it to the DB if the entity is valid
+   * @param id - the id of the entity to update
+   * @param data - the data of the entity to update
+   * @returns the updated entity
+   *
+   */
+  update(
+    id: IdType,
+    data: Partial<EntitiesMapDBWithoutId[T]>
+  ): Promise<EntitiesMapDB[T]>;
 
+  /**
+   * Delete an entity by id from the DB
+   * @param id - the id of the entity to delete
+   * @returns the deleted entity
+   */
   delete(id: IdType): Promise<EntitiesMapDB[T]>;
 }
 
@@ -70,57 +178,81 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   const get = async (
     offset?: number,
     limit?: number,
-    filters?: Filter<EntitiesMapDB[T]>[]
+    filters: Filter<EntitiesMapDB[T]>[] = [{}]
   ) => {
-    logger.debug(
-      `get from ${entityName}: offset=${offset}, limit=${limit}, filter=${filters}`
+    logger.verbose(
+      `trying to GET entities from ${entityName}, filters: ${JSON.stringify(
+        filters,
+        null,
+        4
+      )}`
     );
-    const entities = await entityCrud.read(filters || [{}], limit, offset);
+    const entities = await entityCrud.read(filters, limit, offset);
+    logger.info(`found ${entities.length} entities from ${entityName}`);
     return entities;
   };
 
-  const getById = async (id: IdType) => {
-    logger.info(`getById: '${id}' from ${entityName}'`);
-    if (!ObjectId.isValid(id))
-      throw errorBuilder.entityNotFoundError(idKey, id);
-
+  const getByIdHelper = async (id: IdType) => {
     const entitiesFound = await entityCrud.read(
       [
         {
-          [idKey]: new ObjectId(id),
+          [idKey]: id,
         },
       ],
       1
     );
-    if (!entitiesFound.length)
-      throw errorBuilder.entityNotFoundError(idKey, id);
-
     return entitiesFound[0];
   };
 
-  const create = async (data: EntitiesMapDB[T]) => {
-    const createdId = await entityCrud.create(data);
-    if (!createdId) {
-      throw errorBuilder.generalError("create");
-    }
-    return await getById(createdId);
+  const getById = async (id: IdType) => {
+    logger.verbose(
+      `trying to GET ONE entity from ${entityName} by id: "${id}"`
+    );
+    return await getByIdHelper(id);
   };
 
-  const update = async (id: IdType, data: Partial<EntitiesMapDB[T]>) => {
-    const entityToUpdate = await getById(id);
+  const create = async (data: EntitiesMapDBWithoutId[T]) => {
+    logger.verbose(
+      `trying to CREATE entity to ${entityName}: ${JSON.stringify(
+        data,
+        null,
+        4
+      )}`
+    );
+    const createdId = await entityCrud.create(data);
+    if (!createdId) {
+      throw errorBuilder.general("create");
+    }
+    return await getByIdHelper(createdId);
+  };
+
+  const update = async (
+    id: IdType,
+    data: Partial<EntitiesMapDBWithoutId[T]>
+  ) => {
+    logger.verbose(
+      `trying to UPDATE entity from ${entityName} by id: "${id}", to ${JSON.stringify(
+        data,
+        null,
+        4
+      )}`
+    );
     const isUpdated = await entityCrud.update(id, data);
     if (!isUpdated) {
-      throw errorBuilder.generalError("update");
+      throw errorBuilder.general("update");
     }
-    return entityToUpdate;
+    const UpdatedEntity = await getByIdHelper(id);
+
+    return UpdatedEntity;
   };
 
   const deleteOne = async (id: IdType) => {
-    const entityToDelete = await getById(id);
+    logger.verbose(`trying to DELETE entity from ${entityName} by id: "${id}"`);
+    const entityToDelete = await getByIdHelper(id);
 
     const isDeleted = await entityCrud.delete(id);
     if (!isDeleted) {
-      throw errorBuilder.generalError("delete");
+      throw errorBuilder.general("delete");
     }
     return entityToDelete;
   };

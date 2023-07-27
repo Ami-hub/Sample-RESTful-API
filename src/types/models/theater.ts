@@ -1,5 +1,4 @@
-import { JSONSchema, FromSchema } from "json-schema-to-ts";
-import { ToPartialJSONSchema, toPartialJSONSchema } from "./general";
+import { FromSchema } from "json-schema-to-ts";
 
 const theaterJSONSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",

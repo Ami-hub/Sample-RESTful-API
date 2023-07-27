@@ -59,7 +59,7 @@ const winstonToPinoLogLevelMap: Record<string, string> = {
 };
 
 const getPinoLogLevel = (winstonLogLevel: string) =>
-  winstonToPinoLogLevelMap[winstonLogLevel] || "info";
+  winstonToPinoLogLevelMap[winstonLogLevel] ?? "info";
 
 const isRequestLog = (fastifyLogParsed: object) => "req" in fastifyLogParsed;
 

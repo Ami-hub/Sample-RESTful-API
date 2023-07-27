@@ -27,7 +27,7 @@ export const customError = (
 export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
   relatedEntity: T
 ) => {
-  const generalError = (
+  const general = (
     relatedOperation: CRUDOperation,
     details: string | undefined = undefined
   ) => {
@@ -39,7 +39,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
     );
   };
 
-  const entityNotFoundError = (
+  const notFound = (
     fieldName: string,
     value: string,
     details: string | undefined = undefined
@@ -57,8 +57,8 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
   };
 
   return {
-    generalError,
-    entityNotFoundError,
+    general,
+    notFound,
     invalidEntityError,
     customError,
   };
