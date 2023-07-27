@@ -9,6 +9,8 @@ import {
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
 import { env } from "../setup/env";
+import { createCache } from "./cache";
+import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
 
 /**
  * Supported CRUD operations
@@ -79,52 +81,94 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
   collectionName: N
 ): CRUD<N> => {
   const collection = getCollection(collectionName);
+  const cache = createCache<EntitiesMapDB[N][]>();
+  const errorBuilder = getEntityErrorBuilder(collectionName);
+
+  const createCacheKey = (
+    filters: Filter<EntitiesMapDB[N]>[],
+    limit: number,
+    offset: number = 0
+  ) => JSON.stringify({ filters, skip: offset, limit });
+
+  const createCacheKeyById = (id: IdType) =>
+    createCacheKey([{ [idKey]: id }], 1);
+
+  const isIdExists = async (id: IdType): Promise<boolean> => {
+    if (!ObjectId.isValid(id)) return false;
+    const result = await collection.findOne({ [idKey]: new ObjectId(id) });
+    return !!result;
+  };
 
   const read = async (
     filters: Filter<EntitiesMapDB[N]>[],
     limit: number = env.DEFAULT_PAGE_SIZE,
     skip: number = 0
   ) => {
-    const result = await collection
-      .aggregate<EntitiesMapDB[N]>([
-        // Filters are in this format: { $match: { key: value } }, { $match: { key2: value2 } }
-        ...filters.map((filter) => ({ $match: filter })),
-        { $skip: skip },
-        { $limit: limit },
-      ])
-      .toArray();
+    const cacheKey = createCacheKey(filters, limit, skip);
+    const cached = cache.get(cacheKey);
 
-    logger.info(`found ${result.length} entities from ${collectionName}`);
-    return result;
+    logger.verbose(
+      `found ${cached?.length} items in cache for key: ${cacheKey}`
+    );
+
+    const entitiesFound =
+      cached ??
+      (await collection
+        .aggregate<EntitiesMapDB[N]>([
+          ...filters.map((filter) =>
+            idKey in filter && ObjectId.isValid(filter[idKey])
+              ? { $match: { [idKey]: new ObjectId(filter[idKey]) } }
+              : { $match: filter }
+          ),
+          { $skip: skip },
+          { $limit: limit },
+        ])
+        .toArray());
+
+    cache.set(cacheKey, entitiesFound);
+
+    if (!entitiesFound.length) {
+      throw filters.length === 1 && idKey in filters[0]
+        ? errorBuilder.notFound(idKey, filters[0][idKey])
+        : errorBuilder.notFound("filters", JSON.stringify(filters));
+    }
+
+    return entitiesFound;
   };
 
   const create = async (data: EntitiesMapDBWithoutId[N]) => {
-    logger.info(`create: ${collectionName} - ${JSON.stringify(data, null, 4)}`);
     const result = await collection.insertOne(data);
     if (!result.acknowledged) return undefined;
+    const insertedId = result.insertedId.toString();
 
-    return result.insertedId.toString();
+    cache.delete(createCacheKeyById(insertedId));
+
+    logger.verbose(`create result: ${JSON.stringify(result, null, 4)}`);
+    return insertedId;
   };
 
   const update = async (
     id: IdType,
     data: Partial<EntitiesMapDBWithoutId[N]>
   ) => {
-    logger.info(
-      `update: ${collectionName} - ${id} - ${JSON.stringify(data, null, 4)}`
-    );
-    if (!ObjectId.isValid(id)) return false;
+    if (!(await isIdExists(id))) throw errorBuilder.notFound(idKey, id);
     const result = await collection.updateOne(
       { [idKey]: new ObjectId(id) },
       { $set: data }
     );
+    logger.verbose(`update result: ${JSON.stringify(result, null, 4)}`);
+
+    if (result.modifiedCount > 0) cache.delete(createCacheKeyById(id));
+
     return result.acknowledged;
   };
 
   const deleteOne = async (id: IdType) => {
-    logger.info(`delete: ${collectionName} - ${id}`);
-    if (!ObjectId.isValid(id)) return false;
+    if (!(await isIdExists(id))) throw errorBuilder.notFound(idKey, id);
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
+    logger.verbose(`delete result: ${JSON.stringify(result, null, 4)}`);
+
+    if (result.deletedCount > 0) cache.delete(createCacheKeyById(id));
     return result.acknowledged;
   };
 
