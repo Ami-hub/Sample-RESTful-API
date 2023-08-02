@@ -112,7 +112,7 @@ export const disconnectFromDB = async () => {
 /**
  * Get a mongoDB implementation of the DalManager interface
  */
-export const getDbConnector = async (): Promise<DatabaseConnector> => {
+export const getDbConnector = (): DatabaseConnector => {
   return {
     connect: connectToDB,
     isConnected: isConnected,

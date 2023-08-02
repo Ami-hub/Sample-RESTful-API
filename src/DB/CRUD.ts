@@ -10,7 +10,7 @@ import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
 import { env } from "../setup/env";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
-import { getEntityCache } from "./redisCache";
+import { getEntityCache } from "../cache/redisCache";
 
 /**
  * Supported CRUD operations
@@ -20,10 +20,10 @@ export type CRUDOperation = "read" | "create" | "update" | "delete";
 export type ReadOptions = {
   /**
    * The filters to apply
-   * @default []
    * @example
    * ```ts
-   * const usersFound = await getCRUD("users").read([{
+   * const usersCrud = await getCRUD("users");
+   * const usersFound = usersCrud.read([{
    *   name: "Jane Doe", "email": "jane@female.com",
    * }]);
    * ```
@@ -41,13 +41,13 @@ export type ReadOptions = {
   offset?: number;
 };
 
-export interface CRUD<N extends keyof EntitiesMapDB> {
+export interface CRUD<N extends keyof EntitiesMapDB, E = EntitiesMapDB[N]> {
   /**
    * Creates a new entity instance
    * @param data data of the entity instance
    * @returns id of the created entity instance or undefined if not created
    */
-  create(data: EntitiesMapDBWithoutId[N]): Promise<IdType | undefined>;
+  create(data: EntitiesMapDBWithoutId[N]): Promise<E>;
 
   /**
    * Gets all entity instances
@@ -72,7 +72,29 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
       // ]
       ```
     */
-  read(readOptions: ReadOptions): Promise<Array<EntitiesMapDB[N]>>;
+  read(readOptions: ReadOptions): Promise<Array<E>>;
+
+  /**
+   * Gets an entity instance by its id
+   * @param id id of the entity instance
+   * @returns the entity
+   *
+   * @example
+   * ```ts
+   * const idToFind = "59a47286cfa9a3a73e51e72c";
+   * const usersCrud = await getCRUD("users");
+   * const userFound = await usersCrud.readById(idToFind);
+   * console.log(userFound);
+   *
+   * // Output:
+   * // {
+   * //   _id: "59a47286cfa9a3a73e51e72c",
+   * //   email: 'a12...',
+   * //   ...
+   * // }
+   * ```
+   */
+  readById(id: IdType): Promise<E>;
 
   /**
    * Updates an entity instance
@@ -80,17 +102,14 @@ export interface CRUD<N extends keyof EntitiesMapDB> {
    * @param data data of the entity instance
    * @returns whether the entity instance was updated or not
    */
-  update(
-    id: IdType,
-    data: Partial<EntitiesMapDBWithoutId[N]>
-  ): Promise<boolean>;
+  update(id: IdType, data: Partial<EntitiesMapDBWithoutId[N]>): Promise<E>;
 
   /**
    * Deletes an entity instance
    * @param id id of the entity instance
    * @returns whether the entity instance was deleted or not
    */
-  delete(id: IdType): Promise<boolean>;
+  delete(id: IdType): Promise<E>;
 }
 
 // ########################################
@@ -117,10 +136,27 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
       offset: 0,
     });
 
-  const isIdExists = async (id: IdType): Promise<boolean> => {
-    if (!ObjectId.isValid(id)) return false;
-    const result = await collection.findOne({ [idKey]: new ObjectId(id) });
-    return !!result;
+  const create = async (data: EntitiesMapDBWithoutId[N]) => {
+    const result = await collection.insertOne(data);
+    if (!result.acknowledged)
+      throw errorBuilder.general("create", "operation failed");
+
+    const insertedId = result.insertedId.toString();
+
+    const cacheKey = createCacheKeyById(insertedId);
+
+    const deletedCountCache = await cache?.delete(cacheKey);
+
+    if (deletedCountCache !== 1)
+      logger.warn(
+        `Cache: deleted ${deletedCountCache} items from cache instead of 1 in key: ${cacheKey}`
+      );
+
+    logger.verbose(`create result: ${JSON.stringify(result, null, 4)}`);
+
+    const entityCreated = await readByIdHelper(insertedId);
+
+    return entityCreated;
   };
 
   const readHelper = async (readOptions: Required<ReadOptions>) => {
@@ -152,7 +188,7 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
     const isThereValidCachedResult =
       cachedResult && cachedResult.length >= limit;
 
-    logger.verbose(
+    logger.debug(
       `found ${cachedResult?.length} items in cache for key: ${cacheKey}`
     );
 
@@ -164,56 +200,110 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
           offset,
         });
 
-    if (!isThereValidCachedResult) await cache?.set(cacheKey, entitiesFound);
-
+    if (!isThereValidCachedResult) {
+      const setCacheResult = await cache?.set(cacheKey, entitiesFound);
+      if (!setCacheResult)
+        logger.warn(`Cache: failed to set cache for key: ${cacheKey}`);
+    }
     if (!entitiesFound.length) {
-      throw filters.length === 1 && idKey in filters[0]
-        ? errorBuilder.notFound(idKey, filters[0][idKey])
-        : errorBuilder.notFound("filters", JSON.stringify(filters));
+      throw errorBuilder.notFound("filters", JSON.stringify(filters));
     }
 
     return entitiesFound;
   };
 
-  const create = async (data: EntitiesMapDBWithoutId[N]) => {
-    const result = await collection.insertOne(data);
-    if (!result.acknowledged) return undefined;
-    const insertedId = result.insertedId.toString();
+  const readByIdHelper = async (id: IdType, enableCache = true) => {
+    const entityCacheKey = createCacheKeyById(id);
 
-    await cache?.delete(createCacheKeyById(insertedId));
+    const cachedResult = enableCache
+      ? await cache?.get(entityCacheKey)
+      : undefined;
 
-    logger.verbose(`create result: ${JSON.stringify(result, null, 4)}`);
-    return insertedId;
+    if (cachedResult) return cachedResult[0];
+
+    if (!ObjectId.isValid(id)) throw errorBuilder.notFound(idKey, id);
+
+    const entity = await collection.findOne<EntitiesMapDB[N]>({
+      [idKey]: new ObjectId(id),
+    });
+
+    if (!entity) throw errorBuilder.notFound(idKey, id);
+
+    const setCacheResult = await cache?.set(entityCacheKey, [entity]);
+
+    if (!setCacheResult)
+      logger.warn(`Cache: failed to set cache for key: ${entityCacheKey}`);
+
+    return entity;
+  };
+
+  const readById = async (id: IdType) => {
+    const entity = await readByIdHelper(id);
+
+    return entity;
   };
 
   const update = async (
     id: IdType,
     data: Partial<EntitiesMapDBWithoutId[N]>
   ) => {
-    if (!(await isIdExists(id))) throw errorBuilder.notFound(idKey, id);
-    const result = await collection.updateOne(
+    const entityToUpdate = await readByIdHelper(id);
+
+    const insertionResult = await collection.updateOne(
       { [idKey]: new ObjectId(id) },
       { $set: data }
     );
-    logger.verbose(`update result: ${JSON.stringify(result, null, 4)}`);
 
-    if (result.modifiedCount > 0) cache?.delete(createCacheKeyById(id));
+    if (!insertionResult.acknowledged)
+      throw errorBuilder.general("update", "operation failed");
 
-    return result.acknowledged;
+    if (insertionResult.modifiedCount <= 0) return entityToUpdate;
+
+    const updatedEntity = await readByIdHelper(id);
+
+    const entityCacheKey = createCacheKeyById(id);
+    const deletedCountCache = await cache?.delete(entityCacheKey);
+
+    if (deletedCountCache !== 1)
+      logger.warn(
+        `Cache: deleted ${deletedCountCache} items from cache instead of 1 in key: ${entityCacheKey}`
+      );
+
+    const setCacheResult = await cache?.set(entityCacheKey, [updatedEntity]);
+
+    if (!setCacheResult)
+      logger.warn(`Cache: failed to set cache for key: ${entityCacheKey}`);
+
+    return updatedEntity;
   };
 
   const deleteOne = async (id: IdType) => {
-    if (!(await isIdExists(id))) throw errorBuilder.notFound(idKey, id);
+    const entityToDelete = await readByIdHelper(id, false);
+
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
     logger.verbose(`delete result: ${JSON.stringify(result, null, 4)}`);
 
-    if (result.deletedCount > 0) cache?.delete(createCacheKeyById(id));
-    return result.acknowledged;
+    if (!result.acknowledged)
+      throw errorBuilder.general("delete", "operation failed");
+
+    if (result.deletedCount <= 0)
+      throw errorBuilder.general("delete", "nothing was deleted");
+
+    const entityCacheKey = createCacheKeyById(id);
+    const deletedCountCache = await cache?.delete(entityCacheKey);
+
+    if (deletedCountCache !== 1)
+      logger.warn(
+        `Cache: deleted ${deletedCountCache} items from cache instead of 1 in key: ${entityCacheKey}`
+      );
+
+    return entityToDelete;
   };
 
   return {
     create,
     read,
+    readById,
     update,
     delete: deleteOne,
   };

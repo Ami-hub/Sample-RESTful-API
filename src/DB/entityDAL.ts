@@ -190,19 +190,11 @@ export const getEntityDAL = async <T extends keyof EntitiesMapDB>(
     return entities;
   };
 
-  const getByIdHelper = async (id: IdType) => {
-    const entitiesFound = await entityCrud.read({
-      filters: [{ [idKey]: id }],
-      limit: 1,
-    });
-    return entitiesFound[0];
-  };
-
   const getById = async (id: IdType) => {
     logger.verbose(
       `trying to GET ONE entity from ${entityName} by id: "${id}"`
     );
-    return await getByIdHelper(id);
+    return await entityCrud.readById(id);
   };
 
   const create = async (data: EntitiesMapDBWithoutId[T]) => {
@@ -213,11 +205,17 @@ export const getEntityDAL = async <T extends keyof EntitiesMapDB>(
         4
       )}`
     );
-    const createdId = await entityCrud.create(data);
-    if (!createdId) {
-      throw errorBuilder.general("create");
+
+    /* consider add validation here instead of in the route options
+       somthing like:
+    if (!isValid(data, entitySchema)) {
+      throw errorBuilder.invalidEntity("create", data);
     }
-    return await getByIdHelper(createdId);
+    */
+
+    const entity = await entityCrud.create(data);
+
+    return entity;
   };
 
   const update = async (
@@ -231,24 +229,23 @@ export const getEntityDAL = async <T extends keyof EntitiesMapDB>(
         4
       )}`
     );
-    const isUpdated = await entityCrud.update(id, data);
-    if (!isUpdated) {
-      throw errorBuilder.general("update");
-    }
-    const UpdatedEntity = await getByIdHelper(id);
 
-    return UpdatedEntity;
+    /* consider add validation here instead of in the route options
+       somthing like:
+    if (!isValid(data, entitySchema)) {
+      throw errorBuilder.invalidEntity("create", data);
+    }
+    */
+    const updatedEntity = await entityCrud.update(id, data);
+    return updatedEntity;
   };
 
   const deleteOne = async (id: IdType) => {
     logger.verbose(`trying to DELETE entity from ${entityName} by id: "${id}"`);
-    const entityToDelete = await getByIdHelper(id);
 
-    const isDeleted = await entityCrud.delete(id);
-    if (!isDeleted) {
-      throw errorBuilder.general("delete");
-    }
-    return entityToDelete;
+    const deletedEntity = await entityCrud.delete(id);
+
+    return deletedEntity;
   };
 
   return {

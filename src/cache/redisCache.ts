@@ -2,10 +2,31 @@ import { createClient } from "redis";
 import { env } from "../setup/env";
 import { logger } from "../logging/logger";
 import { EntitiesMapDB } from "../types/general";
+import { on } from "events";
 
 const client = createClient({
   url: env.REDIS_URL,
 });
+
+interface CashConnector {
+  /**
+   * Connects to the Redis server.
+   * @returns Whether the connection was successful.
+   */
+  connect: () => Promise<void>;
+
+  /**
+   * Checks whether the Redis server is connected or not.
+   * @returns true if connected, false otherwise.
+   */
+  isConnected: () => Promise<boolean>;
+
+  /**
+   * Disconnects from the Redis server.
+   * @returns Whether the disconnection was successful.
+   */
+  disconnect: () => Promise<void>;
+}
 
 interface RedisCache<T extends keyof EntitiesMapDB> {
   /**
@@ -36,19 +57,61 @@ interface RedisCache<T extends keyof EntitiesMapDB> {
   delete: (key: string) => Promise<number>;
 }
 
+const isConnected = async () => {
+  try {
+    await client.ping();
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+const connectToRedis = async () => {
+  logger.verbose(`Redis: Trying to connect to Redis`);
+  try {
+    if (await isConnected()) {
+      logger.info(`Redis: Already connected to Redis`);
+      return;
+    }
+
+    await client.connect();
+    logger.info(`Redis: Connected to Redis`);
+  } catch (error) {
+    logger.error(`Redis: Could not connect to Redis due to: ${error}`);
+    logger.warn(`Caching will not be used`);
+    return;
+  }
+};
+
+const disconnectFromRedis = async () => {
+  try {
+    if (!(await isConnected())) {
+      return;
+    }
+    await client.disconnect();
+  } catch (error) {
+    logger.error(`Redis: Cannot disconnect from Redis due to: ${error}`);
+  }
+};
+
+export const getCashConnector = (): CashConnector => {
+  return {
+    connect: connectToRedis,
+    isConnected,
+    disconnect: disconnectFromRedis,
+  };
+};
+
 export const getEntityCache = async <T extends keyof EntitiesMapDB>(
   entityName: T
 ): Promise<RedisCache<T> | undefined> => {
   if (!env.ENABLE_CACHING) {
+    logger.warn(`Caching is disabled`);
     return;
   }
 
-  try {
-    await client.connect();
-    logger.info(`Redis: Connected to Redis`);
-  } catch (error) {
-    logger.error(`Redis: Could not connect to Redis`);
-    logger.warn(`Caching will not be used`);
+  if (!(await isConnected())) {
+    logger.error(`Redis: Redis is not connected`);
     return;
   }
 
@@ -94,12 +157,4 @@ export const getEntityCache = async <T extends keyof EntitiesMapDB>(
     get,
     delete: del,
   };
-};
-
-export const disconnectFromRedis = async () => {
-  try {
-    await client.disconnect();
-  } catch (error) {
-    logger.error(`Redis: disconnecting from Redis`);
-  }
 };

@@ -48,7 +48,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
     return createErrorWithStatus(message, StatusCodes.NOT_FOUND, details);
   };
 
-  const invalidEntityError = (
+  const invalidEntity = (
     relatedOperation: CRUDOperation,
     details: string | undefined = undefined
   ) => {
@@ -59,7 +59,7 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
   return {
     general,
     notFound,
-    invalidEntityError,
+    invalidEntity,
     customError,
   };
 };
