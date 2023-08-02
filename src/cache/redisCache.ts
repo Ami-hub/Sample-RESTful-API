@@ -2,10 +2,18 @@ import { createClient } from "redis";
 import { env } from "../setup/env";
 import { logger } from "../logging/logger";
 import { EntitiesMapDB } from "../types/general";
-import { on } from "events";
+
+const REDIS_RECONNECTING_INTERVAL_MS = 10000; // TODO: move to env
 
 const client = createClient({
   url: env.REDIS_URL,
+}).on("error", async (error) => {
+  logger.error(`Redis: Error: ${error}`);
+  logger.warn(`Redis: Trying to reconnect to Redis`);
+  await client.disconnect();
+  setTimeout(async () => {
+    await client.connect();
+  }, REDIS_RECONNECTING_INTERVAL_MS);
 });
 
 interface CashConnector {
@@ -102,16 +110,11 @@ export const getCashConnector = (): CashConnector => {
   };
 };
 
-export const getEntityCache = async <T extends keyof EntitiesMapDB>(
+export const getEntityCache = <T extends keyof EntitiesMapDB>(
   entityName: T
-): Promise<RedisCache<T> | undefined> => {
+): RedisCache<T> | undefined => {
   if (!env.ENABLE_CACHING) {
     logger.warn(`Caching is disabled`);
-    return;
-  }
-
-  if (!(await isConnected())) {
-    logger.error(`Redis: Redis is not connected`);
     return;
   }
 
@@ -121,33 +124,51 @@ export const getEntityCache = async <T extends keyof EntitiesMapDB>(
     expirySec?: number
   ) => {
     try {
+      if (!(await isConnected())) {
+        logger.silly(`Redis: Not connected to Redis`);
+        return false;
+      }
+
       const result = await client.set(key, JSON.stringify(value), {
         EX: expirySec || env.DEFAULT_CACHE_EXPIRY_SEC,
       });
+      logger.debug(`Redis: Set key '${key}'`);
       return result === "OK";
     } catch (error) {
-      logger.error(`Redis: Could not set key '${key}' to value '${value}'`);
+      logger.error(`Redis: Could not set key '${key}' due to: ${error}`);
       return false;
     }
   };
 
   const get = async (key: string) => {
     try {
+      if (!(await isConnected())) {
+        logger.silly(`Redis: Not connected to Redis`);
+        return;
+      }
       const value = await client.get(key);
       if (!value) return;
+      logger.debug(`Redis: got value for key '${key}'`);
       return JSON.parse(value) as EntitiesMapDB[T][];
     } catch (error) {
-      logger.error(`Redis: Could not get value for key '${key}'`);
+      logger.error(
+        `Redis: Could not get value for key '${key}' due to: ${error}`
+      );
       return;
     }
   };
 
   const del = async (key: string) => {
     try {
+      if (!(await isConnected())) {
+        logger.silly(`Redis: Not connected to Redis`);
+        return 0;
+      }
       const numDeleted = await client.del(key);
+      logger.debug(`Redis: deleted key '${key}'`);
       return numDeleted;
     } catch (error) {
-      logger.error(`Redis: Could not delete key '${key}'`);
+      logger.error(`Redis: Could not delete key '${key}' due to: ${error}`);
       return 0;
     }
   };
