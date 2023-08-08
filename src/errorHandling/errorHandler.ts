@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply, FastifyError } from "fastify";
+import { StatusCodes } from "http-status-codes";
 import { logger } from "../logging/logger";
 
 export const errorHandler = (
@@ -7,7 +8,31 @@ export const errorHandler = (
   reply: FastifyReply
 ) => {
   logger.error(`Got the error: ${JSON.stringify(error)}`);
-  reply.status(error.statusCode || 500).send({
+
+  const statusCode = error.statusCode ?? 500;
+
+  if (statusCode === StatusCodes.NOT_FOUND) {
+    reply.status(StatusCodes.NOT_FOUND).send({
+      error: "no such route",
+    });
+    return;
+  }
+
+  if (statusCode == StatusCodes.BAD_REQUEST) {
+    reply.status(StatusCodes.BAD_REQUEST).send({
+      error: "invalid request",
+    });
+    return;
+  }
+
+  if (statusCode === StatusCodes.INTERNAL_SERVER_ERROR) {
+    reply.status(StatusCodes.BAD_REQUEST).send({
+      error: "unknown error",
+    });
+    return;
+  }
+
+  reply.status(statusCode).send({
     error: error.message,
   });
 };
