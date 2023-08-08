@@ -145,7 +145,7 @@ export const env = cleanEnv(process.env, {
    * Whether to enable reconnecting to the DB if the connection is failed.
    * @default true
    */
-  ENABLE_RECONNECTING: bool({
+  ENABLE_RECONNECTING_DB: bool({
     default: true,
   }),
 
@@ -154,32 +154,8 @@ export const env = cleanEnv(process.env, {
    * If `ENABLE_RECONNECTING` is false, this property will be ignored.
    * @default 15000
    */
-  RECONNECTING_INTERVAL_MS: num({
+  RECONNECTING_INTERVAL_DB_MS: num({
     default: 15000,
-  }),
-
-  /**
-   * Whether to enable caching or not.
-   * @default true
-   */
-  ENABLE_CACHING: bool({
-    default: true,
-  }),
-
-  /**
-   * The default time to keep a response as valid in the cache in seconds.
-   * @default 300 (5 minutes)
-   */
-  DEFAULT_CACHE_EXPIRY_SEC: num({
-    default: 300,
-  }),
-
-  /**
-   * The URL of the Redis server.
-   * @default "redis://localhost:6379"
-   */
-  REDIS_URL: url({
-    default: "redis://localhost:6379",
   }),
 });
 

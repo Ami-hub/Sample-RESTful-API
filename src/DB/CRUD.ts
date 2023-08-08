@@ -10,7 +10,6 @@ import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
 import { env } from "../setup/env";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
-import { getEntityCache } from "../cache/redisCache";
 
 /**
  * Supported CRUD operations
@@ -121,20 +120,6 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
 ): Promise<CRUD<N>> => {
   const collection = getCollection(collectionName);
   const errorBuilder = getEntityErrorBuilder(collectionName);
-  const cache = await getEntityCache(collectionName);
-
-  const createCacheKey = (keys: Required<Omit<ReadOptions, "limit">>) => {
-    return JSON.stringify({
-      filters: keys.filters,
-      offset: keys.offset,
-    });
-  };
-
-  const createCacheKeyById = (id: IdType) =>
-    createCacheKey({
-      filters: [{ [idKey]: id }],
-      offset: 0,
-    });
 
   const create = async (data: EntitiesMapDBWithoutId[N]) => {
     const result = await collection.insertOne(data);
@@ -142,15 +127,6 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
       throw errorBuilder.general("create", "operation failed");
 
     const insertedId = result.insertedId.toString();
-
-    const cacheKey = createCacheKeyById(insertedId);
-
-    const deletedCountCache = await cache?.delete(cacheKey);
-
-    if (deletedCountCache !== 1)
-      logger.warn(
-        `Cache: deleted ${deletedCountCache} items from cache instead of 1 in key: ${cacheKey}`
-      );
 
     logger.verbose(`create result: ${JSON.stringify(result, null, 4)}`);
 
@@ -178,33 +154,12 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
     const limit = readOptions.limit ?? env.DEFAULT_PAGE_SIZE;
     const offset = readOptions.offset ?? 0;
 
-    const cacheKey = createCacheKey({
+    const entitiesFound = await readHelper({
       filters,
+      limit,
       offset,
     });
 
-    const cachedResult = await cache?.get(cacheKey);
-
-    const isThereValidCachedResult =
-      cachedResult && cachedResult.length >= limit;
-
-    logger.debug(
-      `found ${cachedResult?.length} items in cache for key: ${cacheKey}`
-    );
-
-    const entitiesFound = isThereValidCachedResult
-      ? cachedResult
-      : await readHelper({
-          filters,
-          limit,
-          offset,
-        });
-
-    if (!isThereValidCachedResult) {
-      const setCacheResult = await cache?.set(cacheKey, entitiesFound);
-      if (!setCacheResult)
-        logger.warn(`Cache: failed to set cache for key: ${cacheKey}`);
-    }
     if (!entitiesFound.length) {
       throw errorBuilder.notFound("filters", JSON.stringify(filters));
     }
@@ -212,15 +167,7 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
     return entitiesFound;
   };
 
-  const readByIdHelper = async (id: IdType, enableCache = true) => {
-    const entityCacheKey = createCacheKeyById(id);
-
-    const cachedResult = enableCache
-      ? await cache?.get(entityCacheKey)
-      : undefined;
-
-    if (cachedResult) return cachedResult[0];
-
+  const readByIdHelper = async (id: IdType) => {
     if (!ObjectId.isValid(id)) throw errorBuilder.notFound(idKey, id);
 
     const entity = await collection.findOne<EntitiesMapDB[N]>({
@@ -228,11 +175,6 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
     });
 
     if (!entity) throw errorBuilder.notFound(idKey, id);
-
-    const setCacheResult = await cache?.set(entityCacheKey, [entity]);
-
-    if (!setCacheResult)
-      logger.warn(`Cache: failed to set cache for key: ${entityCacheKey}`);
 
     return entity;
   };
@@ -261,24 +203,11 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
 
     const updatedEntity = await readByIdHelper(id);
 
-    const entityCacheKey = createCacheKeyById(id);
-    const deletedCountCache = await cache?.delete(entityCacheKey);
-
-    if (deletedCountCache !== 1)
-      logger.warn(
-        `Cache: deleted ${deletedCountCache} items from cache instead of 1 in key: ${entityCacheKey}`
-      );
-
-    const setCacheResult = await cache?.set(entityCacheKey, [updatedEntity]);
-
-    if (!setCacheResult)
-      logger.warn(`Cache: failed to set cache for key: ${entityCacheKey}`);
-
     return updatedEntity;
   };
 
   const deleteOne = async (id: IdType) => {
-    const entityToDelete = await readByIdHelper(id, false);
+    const entityToDelete = await readByIdHelper(id);
 
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
     logger.verbose(`delete result: ${JSON.stringify(result, null, 4)}`);
@@ -288,14 +217,6 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
 
     if (result.deletedCount <= 0)
       throw errorBuilder.general("delete", "nothing was deleted");
-
-    const entityCacheKey = createCacheKeyById(id);
-    const deletedCountCache = await cache?.delete(entityCacheKey);
-
-    if (deletedCountCache !== 1)
-      logger.warn(
-        `Cache: deleted ${deletedCountCache} items from cache instead of 1 in key: ${entityCacheKey}`
-      );
 
     return entityToDelete;
   };

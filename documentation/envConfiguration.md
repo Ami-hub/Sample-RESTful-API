@@ -103,37 +103,15 @@ Below is the list of environment variables along with their descriptions and def
 - **Default value:** `3000` (3 seconds).
 - **Additional information:** For more information, refer to [MongoDB Write Concern](https://mongodb.com/docs/manual/reference/write-concern/).
 
-### ENABLE_RECONNECTING
+### ENABLE_RECONNECTING_DB
 
 - **Description:** Whether to enable reconnecting to the database if the connection fails.
 - **Default value:** `true`.
 
-### RECONNECTING_INTERVAL_MS
+### RECONNECTING_INTERVAL_DB_MS
 
 - **Description:** The interval in which the application will try to reconnect to the database if the connection fails.
 - **Default value:** `15000` (15 seconds).
-- **Additional information:** If [`ENABLE_RECONNECTING`](#enable_reconnecting) is false, this property will be ignored.
-
-### ENABLE_CACHING
-
-- **Description:** Whether to enable caching of the responses or not.
-- **Available choices:** `true`, `false`.
-- **Default value:** `true`.
-
-### REDIS_URI
-
-- **Description:** The Redis URI to connect to the cluster
-- **Example:**
-  ```env
-  REDIS_URI=redis://alice:foobared@awesome.redis.server:6380
-  ```
-- **Default value:** `redis://localhost:6379`.
-- **Additional information:** The connection string is in this format:
-  `redis[s]://[[username][:password]@][host][:port][/db-number]`
-
-### DEFAULT_CACHE_EXPIRY_SEC
-
-- **Description:** The default time to keep a response as valid in the cache in seconds.
-- **Default value:** `300` (5 minutes).
+- **Additional information:** If [`ENABLE_RECONNECTING_DB`](#enable_reconnecting_db) is false, this property will be ignored.
 
 Please make sure to set these environment variables according to your specific deployment environment to ensure the proper functioning of the application.

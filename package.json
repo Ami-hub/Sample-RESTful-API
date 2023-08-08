@@ -27,7 +27,6 @@
     "mongodb": "^5.7.0",
     "pino": "^8.14.1",
     "pino-pretty": "^10.0.1",
-    "redis": "^4.6.7",
     "winston": "^3.10.0"
   },
   "devDependencies": {
