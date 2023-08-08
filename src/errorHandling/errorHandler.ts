@@ -11,13 +11,6 @@ export const errorHandler = (
 
   const statusCode = error.statusCode ?? 500;
 
-  if (statusCode === StatusCodes.NOT_FOUND) {
-    reply.status(StatusCodes.NOT_FOUND).send({
-      error: "no such route",
-    });
-    return;
-  }
-
   if (statusCode == StatusCodes.BAD_REQUEST) {
     reply.status(StatusCodes.BAD_REQUEST).send({
       error: "invalid request",

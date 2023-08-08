@@ -19,7 +19,17 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
   const entityJSONSchema = entityDal.getSchema();
   const entityPartialJSONSchema = entityDal.getPartialSchema();
 
-  const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam();
+  // const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam();
+  const idSchemaAsQueryParam = {
+    type: "object",
+    required: ["id"],
+    additionalProperties: false,
+    properties: {
+      id: {
+        type: "string",
+      },
+    },
+  } as const;
   const paginationOptions = getPaginationOptionsJSONSchema();
 
   const entityPlugin = async (

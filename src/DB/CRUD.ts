@@ -138,11 +138,12 @@ export const getCRUD = async <N extends keyof EntitiesMapDB>(
   const readHelper = async (readOptions: Required<ReadOptions>) => {
     return await collection
       .aggregate<EntitiesMapDB[N]>([
-        ...readOptions.filters.map((filter) =>
-          idKey in filter && ObjectId.isValid(filter[idKey])
-            ? { $match: { [idKey]: new ObjectId(filter[idKey]) } }
-            : { $match: filter }
-        ),
+        // ...readOptions.filters.map((filter) =>
+        //   idKey in filter && ObjectId.isValid(filter[idKey])
+        //     ? { $match: { [idKey]: new ObjectId(filter[idKey]) } }
+        //     : { $match: filter }
+        // ),
+        ...readOptions.filters.map((filter) => ({ $match: filter })),
         { $skip: readOptions.offset },
         { $limit: readOptions.limit },
       ])

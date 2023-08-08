@@ -207,7 +207,7 @@ export const getEntityDAL = async <T extends keyof EntitiesMapDB>(
     );
 
     /* consider add validation here instead of in the route options
-       somthing like:
+       something like:
     if (!isValid(data, entitySchema)) {
       throw errorBuilder.invalidEntity("create", data);
     }
@@ -231,7 +231,7 @@ export const getEntityDAL = async <T extends keyof EntitiesMapDB>(
     );
 
     /* consider add validation here instead of in the route options
-       somthing like:
+       something like:
     if (!isValid(data, entitySchema)) {
       throw errorBuilder.invalidEntity("create", data);
     }
