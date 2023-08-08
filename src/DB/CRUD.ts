@@ -115,9 +115,9 @@ export interface CRUD<N extends keyof EntitiesMapDB, E = EntitiesMapDB[N]> {
 //             Implementation
 // ########################################
 
-export const getCRUD = async <N extends keyof EntitiesMapDB>(
+export const getCRUD = <N extends keyof EntitiesMapDB>(
   collectionName: N
-): Promise<CRUD<N>> => {
+): CRUD<N> => {
   const collection = getCollection(collectionName);
   const errorBuilder = getEntityErrorBuilder(collectionName);
 

@@ -163,10 +163,10 @@ export interface EntityDAL<T extends keyof EntitiesMapDB> {
 //             Implementation
 // ########################################
 
-export const getEntityDAL = async <T extends keyof EntitiesMapDB>(
+export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   entityName: T
-): Promise<EntityDAL<T>> => {
-  const entityCrud = await getCRUD(entityName);
+): EntityDAL<T> => {
+  const entityCrud = getCRUD(entityName);
   const errorBuilder = getEntityErrorBuilder(entityName);
   const entitySchema = getEntityJSONSchema(entityName);
   const entityPartialSchema = getEntityPartialJSONSchema(entityName);

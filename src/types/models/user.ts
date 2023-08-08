@@ -11,19 +11,14 @@ const userJSONSchema = {
     email: { type: "string", format: "email" },
     password: { type: "string" },
     role: { type: "string", enum: ["admin", "user"] },
-    sessions: {
+    accessTokens: {
       type: "array",
       items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          accessToken: { type: "string" },
-        },
-        required: ["accessToken"],
+        type: "string",
       },
     },
   },
-  required: ["name", "email", "password", "role", "sessions"],
+  required: ["name", "email", "password", "role", "accessTokens"],
 } as const;
 
 export const getUserJSONSchema = () => userJSONSchema;
@@ -38,13 +33,9 @@ export const getUserJSONSchema = () => userJSONSchema;
     email: "test@test.com",
     password: "$2b$10$ITV/R/fmXonjOta/NvCnQetcYCabS1pEniDLyPwv.H3j.YMm1hBLG",
     role: "user",
-    sessions: [
-      {
-        accessToken: "eyJhbGciOiJ...",
-      },
-      {
-        accessToken: "eyJhbGciOia...",
-      },
+    accessTokens: [
+      "eyJhbGciOiJ...",
+      "eyJhbGcLSac..."
     ],
   };
  * ```

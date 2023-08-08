@@ -1,13 +1,15 @@
 import { sign } from "jsonwebtoken";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
+import { ObjectId } from "mongodb";
+import { FromSchema } from "json-schema-to-ts";
+
 import { env } from "../../../setup/env";
 import { logger } from "../../../logging/logger";
-import { Id, idKey } from "../../../types/general";
+import { IdType, idKey } from "../../../types/general";
 import { getCollection } from "../../../DB/databaseConnector";
-import { ObjectId, WithId } from "mongodb";
-import { FromSchema } from "json-schema-to-ts";
 import { Application } from "../../../types/application";
+import { getEntityDAL } from "../../../DB/entityDAL";
 
 export const createAccessToken = (user: object) =>
   sign(user, env.JWT_SECRET, {
@@ -24,30 +26,26 @@ const loginInputJSONSchema = {
   required: ["email", "password"],
 } as const;
 
-type LoginInput = FromSchema<typeof loginInputJSONSchema>;
-
 const getUser = async (email: string, password: string) => {
-  const userCollection = getCollection("users");
-
-  const user = await userCollection.findOne<WithId<LoginInput>>(
-    { email },
-    {
-      projection: {
-        email: 1,
-        password: 1,
+  const userDAL = getEntityDAL("users");
+  const usersFound = await userDAL.get({
+    filters: [
+      {
+        email,
       },
-    }
-  );
+    ],
+  });
 
-  if (!user) {
+  if (!usersFound.length) {
     throw {
       message: "Invalid credentials",
       statusCode: StatusCodes.UNAUTHORIZED,
       user: null,
       accessToken: null,
-      details: "User not found",
+      details: `User '${email}' not found`,
     };
   }
+  const user = usersFound[0];
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
@@ -63,26 +61,35 @@ const getUser = async (email: string, password: string) => {
   return user;
 };
 
-const updateUsersSessions = async (
-  user: WithId<LoginInput>,
-  accessToken: string
-) => {
+const addAccessTokenToUser = async (userId: IdType, accessToken: string) => {
   const userCollection = getCollection("users");
 
   const updateResult = await userCollection.updateOne(
-    { [idKey]: new ObjectId(user[idKey]) },
-    { $push: { sessions: { accessToken } } }
+    { [idKey]: new ObjectId(userId) },
+    { $push: { accessTokens: accessToken } }
   );
 
   if (!updateResult.acknowledged) {
-    logger.error(`Failed to update user sessions for user ${user.email}`);
+    logger.error(`Failed to update user sessions for user ${userId}`);
 
     throw {
       message: "Internal server error",
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      user: user._id,
+      userId,
       accessToken: null,
       details: "Failed to update user sessions",
+    };
+  }
+
+  if (!updateResult.modifiedCount) {
+    logger.error(`Failed to update user sessions for user ${userId}`);
+
+    throw {
+      message: "Internal server error",
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      userId,
+      accessToken: null,
+      details: "Nothing was updated",
     };
   }
 
@@ -102,12 +109,14 @@ export const initLoginRoute = async (app: Application) => {
 
       const user = await getUser(email, password);
 
+      const userId = user[idKey].toString();
+
       const accessToken = createAccessToken({
-        id: user._id,
+        userId,
         email,
       });
 
-      await updateUsersSessions(user, accessToken);
+      await addAccessTokenToUser(userId, accessToken);
 
       reply.code(StatusCodes.OK).send({ accessToken });
     }

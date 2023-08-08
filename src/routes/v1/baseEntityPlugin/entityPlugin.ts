@@ -14,12 +14,12 @@ import { logger } from "../../../logging/logger";
 export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
-  const entityDal = await getEntityDAL(collectionName);
+  const entityDal = getEntityDAL(collectionName);
 
   const entityJSONSchema = entityDal.getSchema();
   const entityPartialJSONSchema = entityDal.getPartialSchema();
 
-  // const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam();
+  // const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam(); // TODO: decide whether to use this or the one below
   const idSchemaAsQueryParam = {
     type: "object",
     required: ["id"],

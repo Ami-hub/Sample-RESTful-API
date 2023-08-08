@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { randomBytes } from "crypto";
 import { cleanEnv, str, port, url, num, makeValidator, bool } from "envalid";
 
-const defaultJWTSecretGenerator = () => btoa(randomBytes(256).toString("hex"));
+const getRandomJWTSecret = () => btoa(randomBytes(256).toString("hex"));
 
 const availableLogLevel = [
   "error",
@@ -88,7 +88,7 @@ export const env = cleanEnv(process.env, {
    * @example OGUxNGE2M2hkM2YyMzAwMDE3NmQ4MmYxYz...
    */
   JWT_SECRET: str({
-    default: defaultJWTSecretGenerator(),
+    default: getRandomJWTSecret(),
   }),
 
   /**

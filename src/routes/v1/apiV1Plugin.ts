@@ -13,5 +13,5 @@ export const getApiVersion1Plugin =
     fastify.register(await getEntityPlugin(`users`), {
       prefix: `${API_V1_PREFIX}/users`,
     });
-    // fastify.register(getMoviePlugin, { prefix: `${API_V1_PREFIX}/movies` });
+    // fastify.register(getMoviePlugin, { prefix: `${API_V1_PREFIX}/movies` }); // TODO: you know what
   };
