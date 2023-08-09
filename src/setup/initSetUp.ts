@@ -6,6 +6,7 @@ import { StatusCodes } from "http-status-codes";
 import { initLoginRoute } from "../routes/v1/auth/login";
 import { getApiVersion1Plugin } from "../routes/v1/apiV1Plugin";
 import { Application } from "../types/application";
+import { initRateLimiter } from "./rateLimiter";
 
 // ######################################
 const loginJsonSchemaBody = {
@@ -20,6 +21,9 @@ const loginJsonSchemaBody = {
 // ######################################
 
 export const initializeApp = async (app: Application) => {
+  await initRateLimiter(app);
+  logger.verbose(`Initialized rate limiter`);
+
   await initLoginRoute(app);
   logger.verbose(`Initialized login route`);
 

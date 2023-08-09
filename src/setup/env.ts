@@ -157,6 +157,18 @@ export const env = cleanEnv(process.env, {
   RECONNECTING_INTERVAL_DB_MS: num({
     default: 15000,
   }),
+
+  /**
+   * Redis URL to connect to.
+   *
+   * @default "redis://localhost:6379"
+   * @example ```env
+   * REDIS_URL=rediss://ami:password@my-host:6379
+   * ```
+   */
+  REDIS_URL: url({
+    default: "redis://localhost:6379",
+  }),
 });
 
 /**
