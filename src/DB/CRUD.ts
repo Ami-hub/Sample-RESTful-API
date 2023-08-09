@@ -162,7 +162,12 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     });
 
     if (!entitiesFound.length) {
-      throw errorBuilder.notFound("filters", JSON.stringify(filters));
+      throw errorBuilder.notFound(
+        "filters",
+        JSON.stringify(filters),
+        undefined,
+        true
+      );
     }
 
     return entitiesFound;

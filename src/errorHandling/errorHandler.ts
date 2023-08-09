@@ -4,10 +4,12 @@ import { logger } from "../logging/logger";
 
 export const errorHandler = (
   error: FastifyError,
-  _request: FastifyRequest,
+  request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  logger.error(`Got the error: ${JSON.stringify(error)}`);
+  logger.error(
+    `Got the error: ${JSON.stringify(error)} from the requestId ${request.id}`
+  );
 
   const statusCode = error.statusCode ?? 500;
 

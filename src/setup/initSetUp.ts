@@ -8,18 +8,6 @@ import { getApiVersion1Plugin } from "../routes/v1/apiV1Plugin";
 import { Application } from "../types/application";
 import { initRateLimiter } from "./rateLimiter";
 
-// ######################################
-const loginJsonSchemaBody = {
-  type: "object",
-  properties: {
-    email: { type: "string" },
-    password: { type: "string" },
-  },
-  additionalProperties: false,
-  required: ["email", "password"],
-};
-// ######################################
-
 export const initializeApp = async (app: Application) => {
   await initRateLimiter(app);
   logger.verbose(`Initialized rate limiter`);
