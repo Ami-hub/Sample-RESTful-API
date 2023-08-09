@@ -58,7 +58,8 @@ npm i
    copy .env.example .env
    ```
 
-2. Modify the `.env` file to match your needs and environment, e.g.:
+2. Modify the `.env` file to match your needs and environment, see [environment variables documentation](./documentation/envConfiguration.md).  
+    For example:
 
    ```env
    MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/

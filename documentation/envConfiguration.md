@@ -4,9 +4,9 @@ This document provides an explanation of the environment variables for the confi
 
 Below is the list of environment variables along with their descriptions and default values:
 
-## Required Environment Variables
+## 💾 Database Configuration
 
-### MONGODB_URI
+### MONGODB_URI (Required!)
 
 - **Description:** The MongoDB URI to connect to the cluster (without the database name or any other parameters)
 - **Example:**
@@ -15,7 +15,7 @@ Below is the list of environment variables along with their descriptions and def
   ```
 - **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).
 
-### DB_NAME
+### DB_NAME (Required!)
 
 - **Description:** The name of the database to use.
 - **Example:**
@@ -23,54 +23,10 @@ Below is the list of environment variables along with their descriptions and def
   DB_NAME=sample_mflix
   ```
 
-## Optional Environment Variables
-
-### LOG_LEVEL
-
-- **Description:** The log level of the application.
-- **Available choices:** `error`, `warn`, `info`, `http`, `verbose`, `debug`, `silly`.
-- **Default value:** `http`.
-
-### PORT
-
-- **Description:** The exposed port of the application.
-- **Default value:** `3000`.
-- **Additional information:** Make sure the port you choose is not already in use!
-
-### DEFAULT_PAGE_SIZE
-
-- **Description:** The default amount of entities to return per request.
-- **Default value:** `15`.
-
-### MAX_PAGE_SIZE
-
-- **Description:** The maximum amount of entities to return per request.
-- **Default value:** `50`.
-
 ### CONNECT_DB_TIMEOUT_MS
 
 - **Description:** The maximum time to wait for a database connection to be established.
 - **Default value:** `15000` (15 seconds).
-
-### ENABLE_LISTENING_TO_ALL_INTERFACES
-
-- **Description:** Whether to listen to all network interfaces or not.
-- **Default value:** `true`.
-- **Additional information:** While [using Docker](dockerStart.md), this must be set to `true`.
-
-### JWT_SECRET
-
-- **Description:** The secret of the JSON Web Token (JWT) used for authentication.
-- **Default value:** A base64 encoded string of 256 random bytes.
-- **Example:**
-  ```env
-  JWT_SECRET=OGUxNGE2M2hkM2YyMzAwMDE3NmQ4MmYxYz...
-  ```
-
-### JWT_EXPIRES_MINUTES
-
-- **Description:** The expiration time of the JWT in minutes.
-- **Default value:** `30`.
 
 ### MAX_DB_POOL_SIZE
 
@@ -103,15 +59,79 @@ Below is the list of environment variables along with their descriptions and def
 - **Default value:** `3000` (3 seconds).
 - **Additional information:** For more information, refer to [MongoDB Write Concern](https://mongodb.com/docs/manual/reference/write-concern/).
 
-### ENABLE_RECONNECTING_DB
+### RECONNECTING_INTERVAL_DB_S
 
-- **Description:** Whether to enable reconnecting to the database if the connection fails.
+- **Description:** The interval in which the application will try to reconnect to the database if the connection fails (in seconds).
+- **Default value:** `15`
+
+## 🌐 Network Configuration
+
+### PORT
+
+- **Description:** The exposed port of the application.
+- **Default value:** `3000`.
+- **Additional information:** Make sure the port you choose is not already in use!
+
+### ENABLE_LISTENING_TO_ALL_INTERFACES
+
+- **Description:** Whether to listen to all network interfaces or not.
+- **Default value:** `true`.
+- **Additional information:** While [using Docker](dockerStart.md), this must be set to `true`.
+
+## 🔐 Authentication Configuration
+
+### JWT_SECRET
+
+- **Description:** The secret of the JSON Web Token (JWT) used for authentication.
+- **Default value:** A base64 encoded string of 256 random bytes.
+- **Example:**
+  ```env
+  JWT_SECRET=OGUxNGE2M2hkM2YyMzAwMDE3NmQ4MmYxYz...
+  ```
+
+### JWT_EXPIRES_MINUTES
+
+- **Description:** The expiration time of the JWT in minutes.
+- **Default value:** `30`.
+
+## 📝 Logging Configuration
+
+### LOG_LEVEL
+
+- **Description:** The log level of the application.
+- **Available choices:** `error`, `warn`, `info`, `http`, `verbose`, `debug`, `silly`.
+- **Default value:** `http`.
+
+## 📖 Pagination Configuration
+
+### DEFAULT_PAGE_SIZE
+
+- **Description:** The default amount of entities to return per request.
+- **Default value:** `15`.
+
+### MAX_PAGE_SIZE
+
+- **Description:** The maximum amount of entities to return per request.
+- **Default value:** `50`.
+
+## ⛔ Rate Limiting Configuration
+
+### ENABLE_RATE_LIMITING
+
+- **Description:** Whether to enable rate limiting or not.
 - **Default value:** `true`.
 
-### RECONNECTING_INTERVAL_DB_MS
+### RATE_LIMIT_WINDOW_MS
 
-- **Description:** The interval in which the application will try to reconnect to the database if the connection fails.
-- **Default value:** `15000` (15 seconds).
-- **Additional information:** If [`ENABLE_RECONNECTING_DB`](#enable_reconnecting_db) is false, this property will be ignored.
+- **Description:** The time window in which the rate limit is applied (in milliseconds).
+- **Default value:** `60000` (1 minute).
 
-Please make sure to set these environment variables according to your specific deployment environment to ensure the proper functioning of the application.
+### RATE_LIMIT_MAX_REQUESTS
+
+- **Description:** The maximum number of requests allowed in the time window.
+- **Default value:** `30`.
+
+### REDIS_URI
+
+- **Description:** The Redis URI to use for the rate limiting.
+- **Default value:** `redis://localhost:6379`.

@@ -7,11 +7,12 @@ import { logger } from "../logging/logger";
 
 /**
  * A Redis instance to use for rate limiting.
- * The following config is recommended by `@fastify/rate-limit` to achieve performance.
- *
- * @see https://github.com/fastify/fastify-rate-limit/blob/master/example/example.js
  */
 const redis = new Redis(env.REDIS_URL, {
+  /*
+   That configuration is recommended by `@fastify/rate-limit` to achieve performance.
+   @see https://github.com/fastify/fastify-rate-limit/blob/master/example/example.js
+  */
   connectTimeout: 500, // in ms
   maxRetriesPerRequest: 1,
 
@@ -22,9 +23,11 @@ const redis = new Redis(env.REDIS_URL, {
         `Redis connection closed unexpectedly, Rate limiter is not set up!`
       );
     } else {
-      logger.verbose(`Retrying to connect to Redis in 5 seconds...`);
+      logger.verbose(
+        `Retrying to connect to Redis in ${env.RECONNECTING_INTERVAL_REDIS_S} seconds...`
+      );
     }
-    return 5000;
+    return env.RECONNECTING_INTERVAL_REDIS_S * 1000;
   },
 })
   .on("connect", () => {
@@ -38,8 +41,8 @@ export const initRateLimiter = async (app: Application) => {
   await redis.connect();
 
   app.register(fastifyRateLimit, {
-    max: 3, // TODO: add to env
-    timeWindow: "1 minute",
+    max: env.RATE_LIMIT_MAX_REQUESTS_PER_WINDOW,
+    timeWindow: env.RATE_LIMIT_WINDOW_MS,
     redis,
     addHeaders: {
       "x-ratelimit-limit": true,

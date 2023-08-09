@@ -142,21 +142,18 @@ export const env = cleanEnv(process.env, {
   }),
 
   /**
-   * Whether to enable reconnecting to the DB if the connection is failed.
-   * @default true
+   * The interval in which the DB will try to reconnect to the DB if the connection is failed (in seconds).
+   * @default 15
    */
-  ENABLE_RECONNECTING_DB: bool({
-    default: true,
+  RECONNECTING_INTERVAL_DB_S: num({
+    default: 15,
   }),
 
   /**
-   * The interval in which the DB will try to reconnect to the DB if the connection is failed.
-   * If `ENABLE_RECONNECTING` is false, this property will be ignored.
-   * @default 15000
+   * Whether to enable the rate limiter or not.
+   * @default true
    */
-  RECONNECTING_INTERVAL_DB_MS: num({
-    default: 15000,
-  }),
+  ENABLE_RATE_LIMITING: bool({ default: true }),
 
   /**
    * Redis URL to connect to.
@@ -168,6 +165,30 @@ export const env = cleanEnv(process.env, {
    */
   REDIS_URL: url({
     default: "redis://localhost:6379",
+  }),
+
+  /**
+   * The interval in which the Redis will try to reconnect to the Redis if the connection is failed (in seconds).
+   * @default 5
+   */
+  RECONNECTING_INTERVAL_REDIS_S: num({
+    default: 5,
+  }),
+
+  /**
+   * The window of the rate limiter in milliseconds.
+   * @default 60000 (1 minute)
+   */
+  RATE_LIMIT_WINDOW_MS: num({
+    default: 60000,
+  }),
+
+  /**
+   * The max amount of requests per window.
+   * @default 30
+   */
+  RATE_LIMIT_MAX_REQUESTS_PER_WINDOW: num({
+    default: 30,
   }),
 });
 

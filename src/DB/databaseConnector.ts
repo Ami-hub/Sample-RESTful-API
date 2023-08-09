@@ -51,19 +51,8 @@ export interface DatabaseConnector {
 //             Implementation
 // ########################################
 
-/**
- * Connects to the DB
- * @param retry whether to retry connecting to the DB if the connection is failed
- */
-export const connectToDB = async (
-  retry: boolean = env.ENABLE_RECONNECTING_DB
-) => {
+export const connectToDB = async () => {
   const dbName = env.DB_NAME;
-  //  if (await isConnected()) {
-  //    logger.verbose(`Already connected to '${dbName}' DB`);
-  //    return;
-  //  }
-
   while (true) {
     try {
       logger.verbose(`Trying to connect to '${dbName}' DB...`);
@@ -72,15 +61,12 @@ export const connectToDB = async (
       return;
     } catch (error) {
       logger.error(`Failed to connect to '${dbName}' DB!`);
-      if (!retry) process.exit(1);
 
       logger.verbose(
-        `Retrying to connect to '${dbName}' DB in ${
-          env.RECONNECTING_INTERVAL_DB_MS / 1000
-        } seconds...`
+        `Retrying to connect to '${dbName}' DB in ${env.RECONNECTING_INTERVAL_DB_S} seconds...`
       );
       await new Promise((resolve) =>
-        setTimeout(resolve, env.RECONNECTING_INTERVAL_DB_MS)
+        setTimeout(resolve, env.RECONNECTING_INTERVAL_DB_S * 1000)
       );
     }
   }
