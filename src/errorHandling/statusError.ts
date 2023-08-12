@@ -1,49 +1,38 @@
+import { FastifyError } from "fastify";
 import { StatusCodes } from "http-status-codes";
 
 /**
- * An error with a status code.
+ * An error with a status code
  */
-export interface StatusError extends Error {
-  status: StatusCodes;
+export interface ErrorWithStatus extends Error {
+  /**
+   * The status code of the error
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+   */
+  statusCode: StatusCodes;
+  /**
+   * More details about the error, hidden from the user
+   */
   details?: string;
 }
 
 /**
- * Converts an error to a status error.
+ * Builds an error with status code
  *
- * @param error The error to convert.
- * @param details
- * @returns The status error.
+ * @param message an error message
+ * @param statusCode the status code to use
+ * @param details some details about the error, hidden from the user
+ * @returns an error with status code
  */
-export const errorToStatusError = <T extends StatusError>(
-  error: T,
-  details: string | undefined = undefined
-): StatusError => {
-  return {
-    name: error.name,
-    message: error.message,
-    status: error.status ?? StatusCodes.INTERNAL_SERVER_ERROR,
-    details: error.details,
-  };
-};
-
-/**
- * Builds a status error.
- *
- * @param message The error to convert.
- * @param status The status code to use.
- * @param details
- * @returns The status error.
- */
-export const createStatusError = (
+export const createErrorWithStatus = (
   message: string,
-  status: StatusCodes,
+  statusCode: StatusCodes,
   details: string | undefined = undefined
-): StatusError => {
+): ErrorWithStatus => {
   return {
     name: "Error",
     message,
-    status,
+    statusCode,
     details,
   };
 };

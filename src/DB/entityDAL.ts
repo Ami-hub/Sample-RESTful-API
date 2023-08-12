@@ -1,81 +1,257 @@
+import { ObjectId } from "mongodb";
 import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
-import { EntitiesMap, IdType } from "../types/general";
-import { getValidator } from "../validators/validators";
-import { getCRUD } from "./CRUD";
+import {
+  EntitiesMapDB,
+  EntityJSONSchemaMap,
+  Filter,
+  IdType,
+  getEntityJSONSchema,
+  getEntityPartialJSONSchema,
+  EntityPartialJSONSchemaMap,
+  idKey,
+  EntitiesMapDBWithoutId,
+} from "../types/general";
+import { ReadOptions, getCRUD } from "./CRUD";
+import { logger } from "../logging/logger";
 
-export interface EntityDAL<T extends keyof EntitiesMap> {
-  getAll(): Promise<EntitiesMap[T][]>;
+/**
+ * DAL for a specific entity, provides CRUD operations for the entity
+ */
+export interface EntityDAL<T extends keyof EntitiesMapDB> {
+  /**
+   * Get the JSON schema of the entity
+   * @returns the JSON schema of the entity
+   */
+  getSchema(): EntityJSONSchemaMap[T];
 
-  getById(id: IdType): Promise<EntitiesMap[T] | null>;
+  /**
+   * Get the partial JSON schema of the entity
+   * @returns the partial JSON schema of the entity
+   */
+  getPartialSchema(): EntityPartialJSONSchemaMap[T];
 
-  create(data: unknown): Promise<EntitiesMap[T]>;
+  /**
+   * Get entities from the DB
+   * @param offset - the offset of the entities to get
+   * @param limit - the limit of the entities to get
+   * @param filters - the filters to apply on the entities
+   * @returns the entities found
+   *
+   * @example
+   * ```ts
+   * const theatersDAL = getEntityDAL("theaters");
+   *
+   * const theaters = await theatersDAL.get();
+   * console.log(theaters);
+   *
+   * // Output:
+   * // [
+   * //   {
+   * //     _id: "59a47286cfa9a3a73e51e72c",
+   * //     name: "Theater 1000",
+   * //     location: {
+   * //       address: {
+   * //         city: "Bloomington",
+   * //         state: "MN",
+   * //         country: "USA",
+   * //         street: "340 W Market",
+   * //         zipCode: "55425",
+   * //       },
+   * //       geoCoordinates: [-93.24565, 44.85466],
+   * //     },
+   * //   },
+   * //   ...
+   * // ];
+   * ```
+   */
+  get(readOptions?: ReadOptions): Promise<EntitiesMapDB[T][]>;
 
-  update(id: IdType, data: unknown): Promise<EntitiesMap[T]>;
+  /**
+   * Get an entity by id from the DB
+   * @param id - the id of the entity to get
+   * @returns the entity found
+   * @throws {EntityNotFoundError} if the entity was not found
+   *
+   * @example
+   * ```ts
+   * const theatersDAL = getEntityDAL("theaters");
+   * const theater = await theatersDAL.getById("59a47286cfa9a3a73e51e72c");
+   * console.log(theater);
+   *
+   * // Output:
+   * // {
+   * //   _id: "59a47286cfa9a3a73e51e72c",
+   * //   name: "Theater 1000",
+   * //   location: {
+   * //     address: {
+   * //       city: "Bloomington",
+   * //       state: "MN",
+   * //       country: "USA",
+   * //       street: "340 W Market",
+   * //       zipCode: "55425",
+   * //     },
+   * //     geoCoordinates: [-93.24565, 44.85466],
+   * //   },
+   * // };
+   * ```
+   */
+  getById(id: IdType): Promise<EntitiesMapDB[T]>;
 
-  delete(id: IdType): Promise<EntitiesMap[T]>;
+  /**
+   * Create an entity
+   * @param data - the data of the entity to create
+   * @returns the created entity
+   *
+   * @example
+   * ```ts
+   * const theatersDAL = getEntityDAL("theaters");
+   * const theater = await theatersDAL.create({
+   *   name: "Theater 1000",
+   *   location: {
+   *     address: {
+   *       city: "Bloomington",
+   *       state: "MN",
+   *       country: "USA",
+   *       street: "340 W Market",
+   *       zipCode: "55425",
+   *     },
+   *     geoCoordinates: [-93.24565, 44.85466],
+   *   }
+   * });
+   * console.log(theater);
+   *
+   * // Output:
+   * // {
+   * //   _id: "59a47286cfa9a3a73e51e72c",
+   * //   name: "Theater 1000",
+   * //   location: {
+   * //     address: {
+   * //       city: "Bloomington",
+   * //       state: "MN",
+   * //       country: "USA",
+   * //       street: "340 W Market",
+   * //       zipCode: "55425",
+   * //     },
+   * //     geoCoordinates: [-93.24565, 44.85466],
+   * //   },
+   * // };
+   * ```
+   */
+  create(data: EntitiesMapDBWithoutId[T]): Promise<EntitiesMapDB[T]>;
+
+  /**
+   * Update an entity by id, and save it to the DB if the entity is valid
+   * @param id - the id of the entity to update
+   * @param data - the data of the entity to update
+   * @returns the updated entity
+   *
+   */
+  update(
+    id: IdType,
+    data: Partial<EntitiesMapDBWithoutId[T]>
+  ): Promise<EntitiesMapDB[T]>;
+
+  /**
+   * Delete an entity by id from the DB
+   * @param id - the id of the entity to delete
+   * @returns the deleted entity
+   */
+  delete(id: IdType): Promise<EntitiesMapDB[T]>;
 }
 
 // ########################################
 //             Implementation
 // ########################################
 
-/**
- * Gets an entity dal by collection name
- *
- * @param collectionName name of the collection
- * @returns the matching entity dal
- * @example
- * ```ts
- * const moviesDAL = getEntityDAL("movies");
- *
- * const movies = await moviesDAL.getAll();
- * console.log(`I have ${movies.length} movies!`);
- * ```
- */
-export const getEntityDAL = <T extends keyof EntitiesMap>(
+export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   entityName: T
 ): EntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
   const errorBuilder = getEntityErrorBuilder(entityName);
-  const entityValidator = getValidator(entityName);
+  const entitySchema = getEntityJSONSchema(entityName);
+  const entityPartialSchema = getEntityPartialJSONSchema(entityName);
 
-  const getAll = async () => {
-    return await entityCrud.readAll();
+  const get = async (readOptions: ReadOptions = {}) => {
+    const filters = readOptions.filters ?? [{}];
+
+    logger.verbose(
+      `trying to GET entities from ${entityName}, filters: ${JSON.stringify(
+        filters,
+        null,
+        4
+      )}`
+    );
+    const entities = await entityCrud.read({
+      filters,
+      limit: readOptions.limit,
+      offset: readOptions.offset,
+    });
+    logger.info(`found ${entities.length} entities from ${entityName}`);
+    return entities;
   };
 
   const getById = async (id: IdType) => {
+    logger.verbose(
+      `trying to GET ONE entity from ${entityName} by id: "${id}"`
+    );
     return await entityCrud.readById(id);
   };
 
-  const create = async (data: unknown) => {
-    const valid = entityValidator.validateEntity(data);
-    const id = await entityCrud.create(valid);
-    if (!id) {
-      throw errorBuilder.generalError("create");
+  const create = async (data: EntitiesMapDBWithoutId[T]) => {
+    logger.verbose(
+      `trying to CREATE entity to ${entityName}: ${JSON.stringify(
+        data,
+        null,
+        4
+      )}`
+    );
+
+    /* consider add validation here instead of in the route options
+       something like:
+    if (!isValid(data, entitySchema)) {
+      throw errorBuilder.invalidEntity("create", data);
     }
-    return id;
+    */
+
+    const entity = await entityCrud.create(data);
+
+    return entity;
   };
 
-  const update = async (id: IdType, data: unknown) => {
-    const valid = entityValidator.validateFields(data);
-    const updated = await entityCrud.update(id, valid);
+  const update = async (
+    id: IdType,
+    data: Partial<EntitiesMapDBWithoutId[T]>
+  ) => {
+    logger.verbose(
+      `trying to UPDATE entity from ${entityName} by id: "${id}", to ${JSON.stringify(
+        data,
+        null,
+        4
+      )}`
+    );
 
-    if (!updated) {
-      throw errorBuilder.generalError("update");
+    /* consider add validation here instead of in the route options
+       something like:
+    if (!isValid(data, entitySchema)) {
+      throw errorBuilder.invalidEntity("create", data);
     }
-    return updated;
+    */
+    const updatedEntity = await entityCrud.update(id, data);
+    return updatedEntity;
   };
 
   const deleteOne = async (id: IdType) => {
-    const deleted = await entityCrud.delete(id);
-    if (!deleted) {
-      throw errorBuilder.generalError("delete");
-    }
-    return deleted;
+    logger.verbose(`trying to DELETE entity from ${entityName} by id: "${id}"`);
+
+    const deletedEntity = await entityCrud.delete(id);
+
+    return deletedEntity;
   };
 
   return {
-    getAll,
+    getSchema: () => entitySchema,
+    getPartialSchema: () => entityPartialSchema,
+    get,
     getById,
     create,
     update,

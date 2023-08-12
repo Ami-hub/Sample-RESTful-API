@@ -1,23 +1,29 @@
-# RESTful API Sample Project
+# ❤️‍🔥 RESTful API Sample Project
 
-Sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) for [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) based on [Node.js](https://nodejs.org/en/) ([typescript](https://www.typescriptlang.org/)), [mongoDB](https://www.mongodb.com/)
-and [Express](https://expressjs.com/). Provides an easy way to perform [CRUD operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) on the data. Feel free to use it as a template for your own projects or as a reference for learning.
+A sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) based on the data of [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) using [typescript](https://www.typescriptlang.org/), [mongoDB](https://www.mongodb.com/),
+and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times. Feel free to use it as a template for your own projects or as a reference for learning.
 
-## 📖 Documentation
+<div style="text-align: center;">
+  <img src="https://i.ibb.co/bFHnVP6/sample-api-logo.png" alt="sample-api-logo" width="55%">
+</div>
+
+# 📖 Documentation
 
 For the documentation about supported endpoints and their usage, please import [this collection](https://gist.githubusercontent.com/Ami-hub/6de2c4f52b8c2b9f4a9fce7daa7b2034/raw/a32e1e380eaafbeab16115e8c4cd4052461fccca/Mfix%2520API.postman_collection.json) to your [Postman](https://www.postman.com/) app. The collection contains all the information you need to use the API, including detailed examples.
 
-#
+<br>
+<br>
+
+# 🚀 Quick start or [quick start with Docker](./documentation/dockerStart.md)
 
 ## 📚 Prerequisites
 
-- [Node.js](https://nodejs.org/en/) (v14.17.0 or higher)
-- [MongoDB](https://www.mongodb.com/) (v4.4.6 or higher)
-- TODO - add instructions to import the sample data
+- [Node.js](https://nodejs.org/en/)
+- [MongoDB](https://www.mongodb.com/) cluster with [mflix sample data](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) loaded (see how to [load sample data](https://www.mongodb.com/docs/guides/atlas/sample-data/))
 
-#
+<br>
 
-## 🚀 Quick start
+## 🚀 Let's get started!
 
 ### ⬇️ Clone the repo from github
 
@@ -52,11 +58,13 @@ npm i
    copy .env.example .env
    ```
 
-2. Modify the `.env` file to match your needs and environment, e.g.:
+2. Modify the `.env` file to match your needs and environment, see [environment variables documentation](./documentation/envConfiguration.md).  
+    For example:
 
    ```env
-   PORT=3001
-   MONGODB_URI=mongodb+srv://Ami:123@cluster0.1a2b3c4.mongodb.net/
+   MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
+   DB_BASE_NAME=sample_mflix
+   LOG_LEVEL=silly
    ...
    ```
 
@@ -74,12 +82,7 @@ npm run start
 
 ### 🎉 Done!
 
-<<<<<<< HEAD
-You can open your browser and go to `http://localhost:<.envPort>/api/v1/` to see the welcome message.
-=======
-You can open your browser and go to http://localhost:<.envPort>/api/v1/
-
-> > > > > > > main
+You can open your browser and go to `http://localhost:3000/api/v1` (or whatever port you chose) to see the welcome message.
 
 You should see the following message:
 
@@ -89,9 +92,10 @@ You should see the following message:
 }
 ```
 
-#
+<br>
+<br>
 
-## 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/api)!
+# 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/api)!
 
 ### 🌟 Essence
 
@@ -105,12 +109,16 @@ You should see the following message:
   `DELETE` and `PATCH` requests are disabled.  
    For more information about the deployed version see the [render deployed branch]()
 
-#
+<br>
+<br>
 
-## ✍🏽 Authors
+# ✍🏽 Authors
 
 - [AmiHub](https://github.com/Ami-hub)
 
-## 🪪 License
+<br>
+<br>
+
+# 🪪 License
 
 - [MIT License](https://github.com/Ami-hub/Sample-RESTful-API/blob/main/LICENSE)

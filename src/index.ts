@@ -1,21 +1,20 @@
-import express, { Application } from "express";
-import { initializeApp, runApp } from "./setup/initSetUp";
+import { initializeApp, startListen } from "./setup/initSetUp";
 import { logger } from "./logging/logger";
-import { env } from "./setup/env";
 import { getDbConnector } from "./DB/databaseConnector";
+import { Application, getApplicationInstance } from "./types/application";
 
-const main = async () => {
-  logger.info(`Starting in ${env.NODE_ENV} mode...`);
+const start = async () => {
+  logger.info(`The application is starting...`);
 
-  const app: Application = express();
-  const dbConnector = await getDbConnector();
-  await dbConnector.connect();
+  const app: Application = getApplicationInstance();
+
+  await getDbConnector().connect();
 
   await initializeApp(app);
   logger.info(`Initializing done!`);
 
-  await runApp(app);
+  await startListen(app);
   logger.info(`Server is up and running!`);
 };
 
-main();
+start();

@@ -1,10 +1,23 @@
 import { MongoClient } from "mongodb";
 import { env } from "../setup/env";
 import { logger } from "../logging/logger";
-import { EntitiesMap } from "../types/general";
-import { EntityDAL, getEntityDAL } from "./entityDAL";
+import { EntitiesMapDB } from "../types/general";
 
-export interface databaseConnector {
+/**
+ * The client that connects to the DB
+ */
+const client = new MongoClient(env.MONGODB_URI, {
+  maxPoolSize: env.MAX_DB_POOL_SIZE,
+  minPoolSize: env.MIN_DB_POOL_SIZE,
+  connectTimeoutMS: env.CONNECT_DB_TIMEOUT_MS,
+  maxIdleTimeMS: env.MAX_IDLE_TIME_DB_MS,
+  writeConcern: {
+    w: env.WRITE_CONCERN,
+    wtimeout: env.WRITE_CONCERN_TIMEOUT,
+  },
+});
+
+export interface DatabaseConnector {
   /**
    * Connect to the database
    * @NOTE if you have already connected to the DB, this function will do nothing
@@ -38,46 +51,29 @@ export interface databaseConnector {
 //             Implementation
 // ########################################
 
-/**
- * The client that connects to the DB
- * @NOTE This project uses only one client for the DB!
- */
-const client = new MongoClient(env.MONGODB_URI, {
-  maxPoolSize: env.MAX_POOL_SIZE,
-  minPoolSize: env.MIN_POOL_SIZE,
-  connectTimeoutMS: env.CONNECT_DB_TIMEOUT_MS,
-  maxIdleTimeMS: env.MAX_IDLE_TIME_MS,
-  writeConcern: {
-    w: env.WRITE_CONCERN,
-    wtimeout: env.WRITE_CONCERN_TIMEOUT,
-  },
-});
+export const connectToDB = async () => {
+  const dbName = env.DB_NAME;
+  while (true) {
+    try {
+      logger.verbose(`Trying to connect to '${dbName}' DB...`);
+      await client.connect();
+      logger.info(`Connected to '${dbName}' DB`);
+      return;
+    } catch (error) {
+      logger.error(`Failed to connect to '${dbName}' DB!`);
 
-/**
- * The interval in which the DB will try to reconnect to the DB if the connection is failed
- */
-const reconnectingIntervalMs = 15000; // TODO move to .env
-/**
- * Connects to the DB
- * @param retry if true, will try to reconnect to the DB if the connection is failed
- * @NOTE if you have already connected to the DB, this function will do nothing
- */
-export const connectToDB = async (retry: boolean = false) => {
-  logger.verbose(`Trying to connect to '${env.MAIN_DB_NAME}' DB`);
-  try {
-    await client.connect();
-    logger.info(`Connected to '${env.MAIN_DB_NAME}' DB`);
-  } catch (error) {
-    logger.error(`Failed to connect to '${env.MAIN_DB_NAME}' DB ${
-      retry ? `retrying in ${reconnectingIntervalMs / 1000} seconds...` : ""
-    }
-    `);
-    if (retry) {
-      setTimeout(() => {
-        logger.verbose(`try to reconnect to '${env.MAIN_DB_NAME}' DB...`);
-      }, reconnectingIntervalMs);
+      logger.verbose(
+        `Retrying to connect to '${dbName}' DB in ${env.RECONNECTING_INTERVAL_DB_S} seconds...`
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, env.RECONNECTING_INTERVAL_DB_S * 1000)
+      );
     }
   }
+};
+
+const getDbInstance = () => {
+  return client.db(env.DB_NAME);
 };
 
 /**
@@ -87,16 +83,13 @@ export const connectToDB = async (retry: boolean = false) => {
  */
 export const isConnected = async () => {
   try {
-    getDbInstance().command({ ping: 1 });
+    await getDbInstance().command({ ping: 1 });
     return true;
   } catch (error) {
     return false;
   }
 };
 
-const getDbInstance = () => {
-  return client.db(env.MAIN_DB_NAME);
-};
 /**
  * Disconnects from the DB
  */
@@ -107,7 +100,7 @@ export const disconnectFromDB = async () => {
 /**
  * Get a mongoDB implementation of the DalManager interface
  */
-export const getDbConnector = async (): Promise<databaseConnector> => {
+export const getDbConnector = (): DatabaseConnector => {
   return {
     connect: connectToDB,
     isConnected: isConnected,
@@ -120,7 +113,7 @@ export const getDbConnector = async (): Promise<databaseConnector> => {
  * @param collectionName name of the collection
  * @returns a collection from the DB
  */
-export const getCollection = <T extends keyof EntitiesMap>(
+export const getCollection = <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
   return getDbInstance().collection(collectionName);

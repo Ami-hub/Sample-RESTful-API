@@ -1,37 +1,43 @@
 {
   "name": "mfix-api",
   "version": "1.0.0",
-  "description": "An express API server in TypeScript",
+  "description": "An API CRUD server in TypeScript using Fastify",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc -p . && echo Build done!",
+    "build": "tsc -p . && echo Build complete!",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts -w src -w tsconfig.json -w package.json -w .env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "express",
+    "fastify",
     "typescript",
     "api"
   ],
   "author": "Ami",
   "license": "MIT License",
   "dependencies": {
+    "@fastify/bearer-auth": "^9.0.0",
+    "@fastify/rate-limit": "^8.0.3",
     "bcrypt": "^5.1.0",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.1",
     "envalid": "^7.3.1",
-    "express": "^4.18.2",
+    "fastify": "^4.21.0",
     "http-status-codes": "^2.2.0",
-    "jsonwebtoken": "^9.0.0",
-    "mongodb": "^5.3.0",
-    "winston": "^3.8.2",
-    "zod": "^3.21.4"
+    "ioredis": "^5.3.2",
+    "json-schema-to-ts": "^2.9.1",
+    "jsonwebtoken": "^9.0.1",
+    "mongodb": "^5.7.0",
+    "pino": "^8.14.1",
+    "pino-pretty": "^10.0.1",
+    "winston": "^3.10.0"
   },
   "devDependencies": {
+    "@fastify/type-provider-json-schema-to-ts": "^2.2.2",
     "@types/bcrypt": "^5.0.0",
-    "@types/express": "^4.17.17",
     "@types/jsonwebtoken": "^9.0.2",
-    "nodemon": "^2.0.22",
-    "typescript": "^5.0.4"
+    "@types/node": "^20.4.9",
+    "nodemon": "^3.0.1",
+    "typescript": "^5.1.6"
   }
 }

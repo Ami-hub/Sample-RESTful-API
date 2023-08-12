@@ -1,140 +1,222 @@
 import { ObjectId } from "mongodb";
-import { EntitiesMap, IdKey, IdType, idKey } from "../types/general";
-import { isValidId } from "../validators/validators";
+import {
+  EntitiesMapDB,
+  EntitiesMapDBWithoutId,
+  IdType,
+  idKey,
+  Filter,
+} from "../types/general";
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
+import { env } from "../setup/env";
+import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
 
 /**
  * Supported CRUD operations
  */
 export type CRUDOperation = "read" | "create" | "update" | "delete";
 
-export interface CRUD<T extends EntitiesMap[keyof EntitiesMap]> {
+export type ReadOptions = {
   /**
-   * Gets all entity instances
-   * @returns an array of entity instances
+   * The filters to apply
+   * @example
+   * ```ts
+   * const usersCrud = await getCRUD("users");
+   * const usersFound = usersCrud.read([{
+   *   name: "Jane Doe", "email": "jane@female.com",
+   * }]);
+   * ```
    */
-  readAll(): Promise<Array<T>>;
+  filters?: Array<Filter<EntitiesMapDB[keyof EntitiesMapDB]>>;
 
   /**
-   * Gets an entity instance by id
-   * @param id id of the entity instance
-   * @returns an entity instance or null if not found
+   * The amount of entities to return
    */
-  readById(id: IdType): Promise<T | null>;
+  limit?: number;
 
   /**
-   * Gets all entities instances by a field
-   * @param field field of the entity instance
-   * @param value value of the field
-   * @returns an entity instance or null if not found
+   * The amount of entities to skip
    */
-  readByField<K extends keyof T>(field: K, value: T[K]): Promise<Array<T>>;
+  offset?: number;
+};
 
+export interface CRUD<N extends keyof EntitiesMapDB, E = EntitiesMapDB[N]> {
   /**
    * Creates a new entity instance
    * @param data data of the entity instance
-   * @returns id of the created entity instance or null if not created
+   * @returns id of the created entity instance or undefined if not created
    */
-  create(data: Omit<T, IdKey>): Promise<T | null>;
+  create(data: EntitiesMapDBWithoutId[N]): Promise<E>;
+
+  /**
+   * Gets all entity instances
+   * @param filters filters to apply (intersection between filters)
+   * @param limit max amount of entities to return, default is in env
+   * @param skip amount of entities to skip, default is 0
+   * @returns an array of entity instances
+   * @example
+   * ```ts
+      const usersFound = await getCRUD("users").read([{ 
+          email: "test@test.com" }], 1);
+
+      console.log(usersFound);
+
+      // Output:
+      // [
+      //   {
+      //     _id: ...,
+      //     email: 'test@test.com',
+      //     ...
+      //   }
+      // ]
+      ```
+    */
+  read(readOptions: ReadOptions): Promise<Array<E>>;
+
+  /**
+   * Gets an entity instance by its id
+   * @param id id of the entity instance
+   * @returns the entity
+   *
+   * @example
+   * ```ts
+   * const idToFind = "59a47286cfa9a3a73e51e72c";
+   * const usersCrud = await getCRUD("users");
+   * const userFound = await usersCrud.readById(idToFind);
+   * console.log(userFound);
+   *
+   * // Output:
+   * // {
+   * //   _id: "59a47286cfa9a3a73e51e72c",
+   * //   email: 'a12...',
+   * //   ...
+   * // }
+   * ```
+   */
+  readById(id: IdType): Promise<E>;
 
   /**
    * Updates an entity instance
    * @param id id of the entity instance
    * @param data data of the entity instance
-   * @returns the updated entity instance or null if not found
+   * @returns whether the entity instance was updated or not
    */
-  update(id: IdType, data: Partial<Omit<T, IdKey>>): Promise<T | null>;
+  update(id: IdType, data: Partial<EntitiesMapDBWithoutId[N]>): Promise<E>;
 
   /**
    * Deletes an entity instance
    * @param id id of the entity instance
-   * @returns the deleted entity instance or null it did not delete
+   * @returns whether the entity instance was deleted or not
    */
-  delete(id: IdType): Promise<T | null>;
+  delete(id: IdType): Promise<E>;
 }
 
 // ########################################
 //             Implementation
 // ########################################
 
-export const getCRUD = <T extends keyof EntitiesMap>(
-  collectionName: T
-): CRUD<EntitiesMap[T]> => {
+export const getCRUD = <N extends keyof EntitiesMapDB>(
+  collectionName: N
+): CRUD<N> => {
   const collection = getCollection(collectionName);
+  const errorBuilder = getEntityErrorBuilder(collectionName);
 
-  const readAll = async () => {
-    logger.debug(`read all: ${collectionName}`);
+  const create = async (data: EntitiesMapDBWithoutId[N]) => {
+    const result = await collection.insertOne(data);
+    if (!result.acknowledged)
+      throw errorBuilder.general("create", "operation failed");
 
-    const result = await collection
-      .find<EntitiesMap[T]>({})
-      .limit(10) // TODO: remember to remove this
+    const insertedId = result.insertedId.toString();
+
+    logger.verbose(`create result: ${JSON.stringify(result, null, 4)}`);
+
+    const entityCreated = await readByIdHelper(insertedId);
+
+    return entityCreated;
+  };
+
+  const readHelper = async (readOptions: Required<ReadOptions>) => {
+    return await collection
+      .aggregate<EntitiesMapDB[N]>([
+        ...readOptions.filters.map((filter) => ({ $match: filter })),
+        { $skip: readOptions.offset },
+        { $limit: readOptions.limit },
+      ])
       .toArray();
-    return result;
+  };
+
+  const read = async (readOptions: ReadOptions) => {
+    const filters = readOptions.filters ?? [];
+    const limit = readOptions.limit ?? env.DEFAULT_PAGE_SIZE;
+    const offset = readOptions.offset ?? 0;
+
+    const entitiesFound = await readHelper({
+      filters,
+      limit,
+      offset,
+    });
+
+    return entitiesFound;
+  };
+
+  const readByIdHelper = async (id: IdType) => {
+    if (!ObjectId.isValid(id)) throw errorBuilder.notFound(idKey, id);
+
+    const entity = await collection.findOne<EntitiesMapDB[N]>({
+      [idKey]: new ObjectId(id),
+    });
+
+    if (!entity) throw errorBuilder.notFound(idKey, id);
+
+    return entity;
   };
 
   const readById = async (id: IdType) => {
-    logger.debug(`readById: ${collectionName} - ${id}`);
-    if (!isValidId(id)) return null;
-    const result = await collection.findOne<EntitiesMap[T]>({
-      [idKey]: new ObjectId(id),
-    });
-    return result;
-  };
+    const entity = await readByIdHelper(id);
 
-  const readByField = async <K extends keyof EntitiesMap[T]>(
-    field: K,
-    value: EntitiesMap[T][K]
-  ) => {
-    logger.debug(
-      `readByField: ${collectionName} - ${field.toString()} - ${value}`
-    );
-    const isObjectIdField = false; // TODO: check if field is ObjectId
-    const filter = isObjectIdField
-      ? { [field]: new ObjectId(String(value)) }
-      : { [field]: value };
-    const result = await collection.find<EntitiesMap[T]>(filter).toArray();
-    return result;
-  };
-
-  const create = async (data: Omit<EntitiesMap[T], IdKey>) => {
-    logger.debug(
-      `create: ${collectionName} - ${JSON.stringify(data, null, 4)}`
-    );
-    const result = await collection.insertOne(data);
-    if (!result.acknowledged) return null;
-    return readById(result.insertedId.toString());
+    return entity;
   };
 
   const update = async (
     id: IdType,
-    data: Partial<Omit<EntitiesMap[T], IdKey>>
+    data: Partial<EntitiesMapDBWithoutId[N]>
   ) => {
-    logger.debug(
-      `update: ${collectionName} - ${id} - ${JSON.stringify(data, null, 4)}`
-    );
-    const toUpdate = await readById(id);
-    if (!toUpdate) return null;
-    const result = await collection.updateOne(
+    const entityToUpdate = await readByIdHelper(id);
+
+    const insertionResult = await collection.updateOne(
       { [idKey]: new ObjectId(id) },
       { $set: data }
     );
-    return result.acknowledged ? toUpdate : null;
+
+    if (!insertionResult.acknowledged)
+      throw errorBuilder.general("update", "operation failed");
+
+    if (insertionResult.modifiedCount <= 0) return entityToUpdate;
+
+    const updatedEntity = await readByIdHelper(id);
+
+    return updatedEntity;
   };
 
   const deleteOne = async (id: IdType) => {
-    logger.debug(`delete: ${collectionName} - ${id}`);
-    const toDelete = await readById(id);
-    if (!toDelete) return null;
+    const entityToDelete = await readByIdHelper(id);
+
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
-    return result.acknowledged ? toDelete : null;
+    logger.verbose(`delete result: ${JSON.stringify(result, null, 4)}`);
+
+    if (!result.acknowledged)
+      throw errorBuilder.general("delete", "operation failed");
+
+    if (result.deletedCount <= 0)
+      throw errorBuilder.general("delete", "nothing was deleted");
+
+    return entityToDelete;
   };
 
   return {
-    readAll,
-    readById,
-    readByField,
     create,
+    read,
+    readById,
     update,
     delete: deleteOne,
   };

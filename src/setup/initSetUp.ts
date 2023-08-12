@@ -1,78 +1,51 @@
-import {
-  deferToErrorMiddleware,
-  errorHandler,
-} from "../errorHandling/errorHandler";
-import express, { Application } from "express";
+import { errorHandler } from "../errorHandling/errorHandler";
 import { logger } from "../logging/logger";
-import { httpTrafficLoggerMiddleware } from "../logging/loggerMiddleware";
-import { welcomeRoutes, notFoundRoutes } from "../routing/routes/default";
-import { getEntityDAL } from "../DB/entityDAL";
 import { env } from "./env";
+import { FastifyReply, FastifyRequest } from "fastify";
+import { StatusCodes } from "http-status-codes";
+import { API_V1_PREFIX, getApiVersion1Plugin } from "../routes/v1/apiV1Plugin";
+import { Application } from "../types/application";
+import { setRateLimiter } from "./rateLimiter";
+import { createErrorWithStatus } from "../errorHandling/statusError";
 
-/**
- * The base URI for all the API routes
- */
-export const baseApiUri = "/api/v1";
+const notFoundHandler = (_request: FastifyRequest, _reply: FastifyReply) => {
+  throw createErrorWithStatus(`Route not found`, StatusCodes.NOT_FOUND);
+};
+
+const welcomeRoute = async (request: FastifyRequest, reply: FastifyReply) => {
+  reply.status(StatusCodes.OK).send({
+    message: `Welcome to the API`,
+  });
+};
 
 export const initializeApp = async (app: Application) => {
-  app.use(
-    express.json({
-      inflate: false,
-    })
-  );
-  logger.verbose(`JSON body parser middleware initialized`);
+  await setRateLimiter(app);
+  logger.verbose(`Initialized rate limiter`);
 
-  app.use(httpTrafficLoggerMiddleware);
-  logger.verbose(`HTTP traffic logger initialized`);
+  await app.register(getApiVersion1Plugin(), {
+    prefix: API_V1_PREFIX,
+  });
+  logger.verbose(`Initialized API v1 plugin`);
 
-  await initializeEntitiesRouters(app);
-  logger.verbose(`Entities routers initialized`);
-
-  await initializeDefaultRoutes(app);
-  logger.verbose(`Default routes initialized`);
-
-  app.use(errorHandler);
-  logger.verbose(`Error handler initialized`);
-
-  return app;
-};
-
-const initializeDefaultRoutes = async (app: Application) => {
-  app.get(`${baseApiUri}`, welcomeRoutes);
+  app.get(`/`, welcomeRoute);
   logger.verbose(`Initialized welcome route`);
 
-  app.use(deferToErrorMiddleware(notFoundRoutes));
-  logger.verbose(`Initialized 'not found' route`);
+  app.setErrorHandler(errorHandler);
+  logger.verbose(`Error handler initialized`);
 
-  return app;
+  app.setNotFoundHandler(notFoundHandler);
+
+  logger.verbose(`Not found handler initialized`);
 };
 
-const initializeEntitiesRouters = async (app: Application) => {
-  const theaterDAL = getEntityDAL("theaters");
-  app.get(
-    `${baseApiUri}/theaters`,
-    deferToErrorMiddleware(async (_req, res, _next) => {
-      const allTheaters = await theaterDAL.getAll();
-      res.send(allTheaters);
-    })
-  );
-};
-
-/**
- * The host to listen to in production mode (all interfaces)
- */
-const prodHost = "0.0.0.0";
-
-/**
- * The host to listen to in development mode (localhost only)
- */
-const devHost = "localhost";
-
-export const runApp = async (app: Application) => {
-  const host = env.isProd ? prodHost : devHost;
-  app.listen(env.PORT, host, () => {
-    logger.verbose(`Listening on port ${env.PORT}`);
-  });
-
-  return app;
+export const startListen = async (app: Application) => {
+  try {
+    await app.listen({
+      host: env.ENABLE_LISTENING_TO_ALL_INTERFACES ? "0.0.0.0" : "localhost",
+      port: env.PORT,
+    });
+  } catch (error) {
+    logger.error(`Error while starting the server: ${error}`);
+    process.exit(1);
+  }
 };

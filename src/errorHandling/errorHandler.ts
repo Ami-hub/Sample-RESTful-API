@@ -1,28 +1,25 @@
-import { NextFunction, Request, Response } from "express";
-import { StatusError, errorToStatusError } from "./statusError";
+import { FastifyRequest, FastifyReply, FastifyError } from "fastify";
+import { StatusCodes, getReasonPhrase } from "http-status-codes";
 import { logger } from "../logging/logger";
+import { env } from "../setup/env";
 
-export const deferToErrorMiddleware =
-  (route: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await route(req, res, next);
-    } catch (err) {
-      next(err);
-    }
-  };
-
-export const errorHandler = <T extends StatusError>(
-  err: T,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
+export const errorHandler = (
+  error: FastifyError,
+  request: FastifyRequest,
+  reply: FastifyReply
 ) => {
-  const statusError = errorToStatusError(err);
   logger.error(
-    `Error: ${statusError.message}: (${statusError.status}) - ${statusError.details}`
+    `Got the error: ${JSON.stringify(error)} from the requestId ${request.id}`
   );
-  res.status(statusError.status).json({
-    error: statusError.message,
+
+  const statusCode = error.statusCode ?? StatusCodes.INTERNAL_SERVER_ERROR;
+
+  const errorMessage =
+    statusCode === StatusCodes.INTERNAL_SERVER_ERROR
+      ? getReasonPhrase(statusCode)
+      : error.message;
+
+  reply.status(statusCode).send({
+    error: errorMessage,
   });
 };
