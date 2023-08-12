@@ -21,18 +21,10 @@ export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
   const notFound = (
     fieldName: string,
     value: string,
-    details: string | undefined = undefined,
-    hideReason: boolean = false
+    details: string | undefined = undefined
   ) => {
-    if (!hideReason) {
-      const message = `Unable to find ${relatedEntity} with ${fieldName} '${value}'`;
-      return createErrorWithStatus(message, StatusCodes.NOT_FOUND, details);
-    }
-    return createErrorWithStatus(
-      `Unable to find ${relatedEntity}`,
-      StatusCodes.NOT_FOUND,
-      `${fieldName} = '${value}'`
-    );
+    const message = `Unable to find ${relatedEntity} with ${fieldName} '${value}'`;
+    return createErrorWithStatus(message, StatusCodes.NOT_FOUND, details);
   };
 
   const invalidEntity = (

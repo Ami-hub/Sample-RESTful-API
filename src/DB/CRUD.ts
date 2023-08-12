@@ -57,7 +57,7 @@ export interface CRUD<N extends keyof EntitiesMapDB, E = EntitiesMapDB[N]> {
    * @example
    * ```ts
       const usersFound = await getCRUD("users").read([{ 
-          key: "email", value: "test@test.com" }], 1);
+          email: "test@test.com" }], 1);
 
       console.log(usersFound);
 
@@ -138,11 +138,6 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
   const readHelper = async (readOptions: Required<ReadOptions>) => {
     return await collection
       .aggregate<EntitiesMapDB[N]>([
-        // ...readOptions.filters.map((filter) =>
-        //   idKey in filter && ObjectId.isValid(filter[idKey])
-        //     ? { $match: { [idKey]: new ObjectId(filter[idKey]) } }
-        //     : { $match: filter }
-        // ),
         ...readOptions.filters.map((filter) => ({ $match: filter })),
         { $skip: readOptions.offset },
         { $limit: readOptions.limit },
@@ -160,15 +155,6 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
       limit,
       offset,
     });
-
-    if (!entitiesFound.length) {
-      throw errorBuilder.notFound(
-        "filters",
-        JSON.stringify(filters),
-        undefined,
-        true
-      );
-    }
 
     return entitiesFound;
   };

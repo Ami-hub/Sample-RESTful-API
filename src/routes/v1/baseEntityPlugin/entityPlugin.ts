@@ -11,7 +11,7 @@ import { Application } from "../../../types/application";
 import { env } from "../../../setup/env";
 import { logger } from "../../../logging/logger";
 
-export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
+export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
   const entityDal = getEntityDAL(collectionName);
@@ -34,7 +34,8 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
 
   const entityPlugin = async (
     fastify: Application,
-    _options: FastifyPluginOptions = {}
+    _options: FastifyPluginOptions = {},
+    done: () => void
   ) => {
     fastify.post(
       `/`,
@@ -113,6 +114,8 @@ export const getEntityPlugin = async <T extends keyof EntitiesMapDB>(
         reply.status(StatusCodes.OK).send(deleted);
       }
     );
+
+    done();
   };
 
   return entityPlugin;

@@ -4,6 +4,10 @@ import { Redis } from "ioredis";
 import { env } from "./env";
 import { Application } from "../types/application";
 import { logger } from "../logging/logger";
+import { isValidateToken } from "../routes/v1/auth/auth";
+import { FastifyRequest } from "fastify";
+import { StatusCodes } from "http-status-codes";
+import { errorHandler } from "../errorHandling/errorHandler";
 
 /**
  * A Redis instance to use for rate limiting.
@@ -31,24 +35,38 @@ const redis = new Redis(env.REDIS_URL, {
   },
 })
   .on("connect", () => {
-    logger.info(`Successfully connected to Redis!`);
+    logger.info(`Successfully connected to Redis, Rate limiter is set up!`);
   })
   .on("error", (error) => {
     logger.error(`Error while connecting to Redis! ${error}`);
   });
 
-export const initRateLimiter = async (app: Application) => {
+const keyGenerator = (req: FastifyRequest) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token || !isValidateToken(token)) {
+    return req.ip;
+  }
+  return token;
+};
+
+export const setRateLimiter = async (app: Application) => {
   await redis.connect();
 
-  app.register(fastifyRateLimit, {
+  await app.register(fastifyRateLimit, {
     max: env.RATE_LIMIT_MAX_REQUESTS_PER_WINDOW,
     timeWindow: env.RATE_LIMIT_WINDOW_MS,
     redis,
-    addHeaders: {
-      "x-ratelimit-limit": true,
-      "x-ratelimit-remaining": true,
+    keyGenerator,
+    errorResponseBuilder(req, context) {
+      logger.warn(
+        `Rate limit exceeded for ${req.ip} with the token ${req.headers.authorization}`
+      );
+
+      return {
+        message: `Rate limit exceeded, retry in ${context.after} seconds`,
+        statusCode: StatusCodes.TOO_MANY_REQUESTS,
+      };
     },
   });
-
-  return app;
+  app.setErrorHandler(errorHandler); // TODO: fix duplication of error handler
 };

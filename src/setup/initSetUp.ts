@@ -3,35 +3,39 @@ import { logger } from "../logging/logger";
 import { env } from "./env";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { StatusCodes } from "http-status-codes";
-import { initLoginRoute } from "../routes/v1/auth/login";
-import { getApiVersion1Plugin } from "../routes/v1/apiV1Plugin";
+import { API_V1_PREFIX, getApiVersion1Plugin } from "../routes/v1/apiV1Plugin";
 import { Application } from "../types/application";
-import { initRateLimiter } from "./rateLimiter";
+import { setRateLimiter } from "./rateLimiter";
+import { createErrorWithStatus } from "../errorHandling/statusError";
+
+const notFoundHandler = (_request: FastifyRequest, _reply: FastifyReply) => {
+  throw createErrorWithStatus(`Route not found`, StatusCodes.NOT_FOUND);
+};
+
+const welcomeRoute = async (request: FastifyRequest, reply: FastifyReply) => {
+  reply.status(StatusCodes.OK).send({
+    message: `Welcome to the API`,
+  });
+};
 
 export const initializeApp = async (app: Application) => {
-  await initRateLimiter(app);
+  await setRateLimiter(app);
   logger.verbose(`Initialized rate limiter`);
 
-  await initLoginRoute(app);
-  logger.verbose(`Initialized login route`);
-
-  // Middleware to check authorization header
-  //app.addHook("preHandler", authMiddleware);
-
-  app.register(await getApiVersion1Plugin());
+  await app.register(getApiVersion1Plugin(), {
+    prefix: API_V1_PREFIX,
+  });
   logger.verbose(`Initialized API v1 plugin`);
 
-  app.get(`/`, async (_request: FastifyRequest, reply: FastifyReply) => {
-    reply.status(StatusCodes.OK).send({
-      message: `Welcome to the API`,
-    });
-  });
+  app.get(`/`, welcomeRoute);
   logger.verbose(`Initialized welcome route`);
 
   app.setErrorHandler(errorHandler);
   logger.verbose(`Error handler initialized`);
 
-  return app;
+  app.setNotFoundHandler(notFoundHandler);
+
+  logger.verbose(`Not found handler initialized`);
 };
 
 export const startListen = async (app: Application) => {
@@ -44,5 +48,4 @@ export const startListen = async (app: Application) => {
     logger.error(`Error while starting the server: ${error}`);
     process.exit(1);
   }
-  return app;
 };

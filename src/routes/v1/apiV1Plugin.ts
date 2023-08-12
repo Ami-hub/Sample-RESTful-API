@@ -1,17 +1,46 @@
 import { FastifyPluginOptions } from "fastify";
-import { Application } from "../../types/application";
-import { getEntityPlugin } from "./baseEntityPlugin/entityPlugin";
+import { fastifyBearerAuth } from "@fastify/bearer-auth";
 
-const API_V1_PREFIX = "/api/v1";
+import { Application } from "../../types/application";
+import { env } from "../../setup/env";
+import { getEntityPlugin } from "./baseEntityPlugin/entityPlugin";
+import { getLoginPlugin } from "./auth/login";
+
+export const API_V1_PREFIX = "/api/v1";
+
+const getProtectedRoutesPlugin =
+  () =>
+  async (
+    app: Application,
+    _options: FastifyPluginOptions,
+    done: (error?: Error) => void
+  ) => {
+    await app.register(fastifyBearerAuth, {
+      keys: new Set([env.JWT_SECRET]),
+    });
+
+    await app.register(getEntityPlugin(`theaters`), {
+      prefix: `/theaters`,
+    });
+    await app.register(getEntityPlugin(`users`), {
+      prefix: `/users`,
+    });
+
+    done();
+  };
 
 export const getApiVersion1Plugin =
-  async () =>
-  async (fastify: Application, _options: FastifyPluginOptions = {}) => {
-    fastify.register(await getEntityPlugin(`theaters`), {
-      prefix: `${API_V1_PREFIX}/theaters`,
+  () =>
+  async (
+    fastify: Application,
+    _options: FastifyPluginOptions,
+    done: (error?: Error) => void
+  ) => {
+    await fastify.register(getProtectedRoutesPlugin());
+
+    await fastify.register(getLoginPlugin(), {
+      prefix: `/login`,
     });
-    fastify.register(await getEntityPlugin(`users`), {
-      prefix: `${API_V1_PREFIX}/users`,
-    });
-    // fastify.register(getMoviePlugin, { prefix: `${API_V1_PREFIX}/movies` }); // TODO: you know what
+
+    done();
   };
