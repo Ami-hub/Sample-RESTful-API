@@ -119,7 +119,8 @@ Below is the list of environment variables along with their descriptions and def
 ### ENABLE_RATE_LIMITING
 
 - **Description:** Whether to enable rate limiting or not.
-- **Default value:** `true`.
+- **Default value:** `false`.
+- **Additional information:** If you disable rate limiting, the following environment variables will be ignored.
 
 ### RATE_LIMIT_WINDOW_MS
 

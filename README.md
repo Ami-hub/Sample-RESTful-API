@@ -82,7 +82,7 @@ npm run start
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:3000/api/v1` (or whatever port you chose) to see the welcome message.
+You can open your browser and go to `http://localhost:3000/` (or whatever port you chose) to see the welcome message.
 
 You should see the following message:
 
@@ -95,7 +95,7 @@ You should see the following message:
 <br>
 <br>
 
-# 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/api)!
+# 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/)!
 
 ### 🌟 Essence
 

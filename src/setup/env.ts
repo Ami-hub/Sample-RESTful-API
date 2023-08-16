@@ -151,12 +151,12 @@ export const env = cleanEnv(process.env, {
 
   /**
    * Whether to enable the rate limiter or not.
-   * @default true
+   * @default false
    */
-  ENABLE_RATE_LIMITING: bool({ default: true }),
+  ENABLE_RATE_LIMITING: bool({ default: false }),
 
   /**
-   * Redis URL to connect to.
+   * Redis URL to connect to for the rate limiter.
    *
    * @default "redis://localhost:6379"
    * @example ```env

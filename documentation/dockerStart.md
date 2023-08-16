@@ -56,7 +56,7 @@ docker build -t sample-restful-api .
 
 ### 👟 Run the app using docker
 
-Make sure the port you write after `-p` (`3000` in this example) matches the port you wrote in the `.env` file.  
+Make sure the port you write after `-p` (`3000` in the below example) matches the port you wrote in the `.env` file.  
 If you didn't set a port in the `.env` file, the default port is `3000`.
 
 ```
@@ -65,7 +65,7 @@ docker run -p 3000:3000 --env-file .env sample-restful-api
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:3000/api/v1` (or whatever port you chose) to see the welcome message.
+You can open your browser and go to `http://localhost:3000/` (or whatever port you chose) to see the welcome message.
 
 You should see the following message:
 
