@@ -2,11 +2,11 @@
   "name": "mfix-api",
   "version": "1.0.0",
   "description": "An API CRUD server in TypeScript using Fastify",
-  "main": "src/index.ts",
+  "main": "src/startServer.ts",
   "scripts": {
     "build": "tsc -p . && echo Build complete!",
-    "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts -w src -w tsconfig.json -w package.json -w .env",
+    "start": "node dist/startServer.js",
+    "dev": "nodemon src/startServer.ts -w src -w tsconfig.json -w package.json -w .env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
