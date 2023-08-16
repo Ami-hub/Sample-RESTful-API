@@ -41,6 +41,12 @@ export const env = cleanEnv(process.env, {
   DB_NAME: str(),
 
   /**
+   * Whether to enable logging or not.
+   * @default true
+   */
+  ENABLE_LOGGING: bool({ default: true }),
+
+  /**
    * The log level of the application.
    * @default "http"
    */

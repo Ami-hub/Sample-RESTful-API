@@ -96,6 +96,11 @@ Below is the list of environment variables along with their descriptions and def
 
 ## 📝 Logging Configuration
 
+### ENABLE_LOGGING
+
+- **Description:** Whether to enable any logging or not.
+- **Default value:** `true`.
+
 ### LOG_LEVEL
 
 - **Description:** The log level of the application.
