@@ -1,12 +1,28 @@
 import { FastifyPluginOptions } from "fastify";
-import { fastifyBearerAuth } from "@fastify/bearer-auth";
 
 import { Application } from "../../types/application";
-import { env } from "../../setup/env";
 import { getEntityPlugin } from "./baseEntityPlugin/entityPlugin";
 import { getLoginPlugin } from "./auth/login";
+import { setBearerAuthMiddleware } from "./auth/auth";
+import { EntitiesMapDB } from "../../types/general";
+import { logger } from "../../logging/logger";
 
 export const API_V1_PREFIX = "/api/v1";
+
+const setEntitiesPlugins = async <T extends keyof EntitiesMapDB>(
+  app: Application,
+  entityNames: T[]
+) => {
+  await Promise.all(
+    entityNames.map(async (entityName) => {
+      await app.register(getEntityPlugin(entityName), {
+        prefix: `/${entityName}`,
+      });
+    })
+  );
+
+  return app;
+};
 
 const getProtectedRoutesPlugin =
   () =>
@@ -15,15 +31,22 @@ const getProtectedRoutesPlugin =
     _options: FastifyPluginOptions,
     done: (error?: Error) => void
   ) => {
-    await app.register(fastifyBearerAuth, {
-      keys: new Set([env.JWT_SECRET]),
-    });
+    await setBearerAuthMiddleware(app);
 
-    await app.register(getEntityPlugin(`theaters`), {
-      prefix: `/theaters`,
-    });
-    await app.register(getEntityPlugin(`users`), {
-      prefix: `/users`,
+    await setEntitiesPlugins(app, ["users", "theaters"]);
+
+    done();
+  };
+
+const getUnprotectedRoutesPlugin =
+  () =>
+  async (
+    app: Application,
+    _options: FastifyPluginOptions,
+    done: (error?: Error) => void
+  ) => {
+    await app.register(getLoginPlugin(), {
+      prefix: `/login`,
     });
 
     done();
@@ -32,15 +55,15 @@ const getProtectedRoutesPlugin =
 export const getApiVersion1Plugin =
   () =>
   async (
-    fastify: Application,
+    app: Application,
     _options: FastifyPluginOptions,
     done: (error?: Error) => void
   ) => {
-    await fastify.register(getProtectedRoutesPlugin());
+    await app.register(getProtectedRoutesPlugin());
 
-    await fastify.register(getLoginPlugin(), {
-      prefix: `/login`,
-    });
+    await app.register(getUnprotectedRoutesPlugin());
+
+    logger.verbose(`API version 1 initialized`);
 
     done();
   };

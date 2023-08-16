@@ -4,10 +4,9 @@ import { Redis } from "ioredis";
 import { env } from "./env";
 import { Application } from "../types/application";
 import { logger } from "../logging/logger";
-import { isValidateToken } from "../routes/v1/auth/auth";
+import { getToken, isValidToken } from "../routes/v1/auth/auth";
 import { FastifyRequest } from "fastify";
 import { StatusCodes } from "http-status-codes";
-import { errorHandler } from "../errorHandling/errorHandler";
 
 /**
  * A Redis instance to use for rate limiting.
@@ -33,24 +32,33 @@ const redis = new Redis(env.REDIS_URL, {
     }
     return env.RECONNECTING_INTERVAL_REDIS_S * 1000;
   },
-})
-  .on("connect", () => {
-    logger.info(`Successfully connected to Redis, Rate limiter is set up!`);
-  })
-  .on("error", (error) => {
+});
+
+redis.on("connect", () => {
+  logger.verbose(`Successfully connected to Redis!`);
+  logger.info(`Rate limiter is set up!`);
+});
+
+redis.on("error", (error) => {
+  logger.error(`Error in Redis! ${error}`);
+});
+
+const connectToRedis = async () => {
+  try {
+    await redis.connect();
+  } catch (error) {
     logger.error(`Error while connecting to Redis! ${error}`);
-  });
+  }
+};
 
 const keyGenerator = (req: FastifyRequest) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token || !isValidateToken(token)) {
-    return req.ip;
-  }
+  const token = getToken(req.headers.authorization);
+  if (!token || !isValidToken(token)) return req.ip;
   return token;
 };
 
 export const setRateLimiter = async (app: Application) => {
-  await redis.connect();
+  await connectToRedis();
 
   await app.register(fastifyRateLimit, {
     max: env.RATE_LIMIT_MAX_REQUESTS_PER_WINDOW,
@@ -63,10 +71,11 @@ export const setRateLimiter = async (app: Application) => {
       );
 
       return {
-        message: `Rate limit exceeded, retry in ${context.after} seconds`,
+        message: `Rate limit exceeded, retry in ${context.after}`,
         statusCode: StatusCodes.TOO_MANY_REQUESTS,
       };
     },
   });
-  app.setErrorHandler(errorHandler); // TODO: fix duplication of error handler
+
+  logger.verbose(`Rate limiter initialized`);
 };

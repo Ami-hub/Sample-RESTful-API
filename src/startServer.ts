@@ -11,9 +11,9 @@ const start = async () => {
   await getDbConnector().connect();
 
   await initializeApp(app);
-  logger.info(`Initializing done!`);
 
   await startListen(app);
+
   logger.info(`Server is up and running!`);
 };
 
