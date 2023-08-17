@@ -4,9 +4,9 @@ A sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)fu
 and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times.  
 Feel free to use it as a template for your own projects or as a reference for learning.
 
-<div style="text-align: center;">
-  <img src="https://i.ibb.co/bFHnVP6/sample-api-logo.png" alt="sample-api-logo" width="55%">
-</div>
+<p align="center">
+  <img src="https://i.ibb.co/bFHnVP6/sample-api-logo.png" alt="sample-api-logo" width="50%">
+</p>
 
 # 📖 Documentation
 
