@@ -24,7 +24,7 @@ For the documentation about supported endpoints and their usage, please import [
 
 <br>
 
-## 🚀 Let's get started!
+## 🔥 Let's get started!
 
 ### ⬇️ Clone the repo from github
 

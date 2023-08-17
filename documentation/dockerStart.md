@@ -7,7 +7,7 @@
 
 #
 
-## 🚀 Let's get started!
+## 🔥 Let's get started!
 
 ### ⬇️ Clone the repo from github
 
