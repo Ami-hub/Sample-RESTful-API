@@ -111,8 +111,8 @@ export type EntitiesMapDB = {
 };
 
 const entityJSONSchemaMap = {
-  theaters: getTheaterJSONSchema(),
-  users: getUserJSONSchema(),
+  [theatersCollectionName]: getTheaterJSONSchema(),
+  [usersCollectionName]: getUserJSONSchema(),
 };
 
 /**
@@ -143,17 +143,10 @@ export const toPartialJSONSchema = <T extends object>(
 type AnyObject = { [key: string]: any };
 
 const toPartialJSONSchemaHelper = (object: AnyObject) => {
-  for (const prop in object) {
-    if (object.hasOwnProperty(prop)) {
-      if (typeof object[prop] === "object" && object[prop] !== null) {
-        toPartialJSONSchemaHelper(object[prop]);
-      }
-      if (prop === "required") {
-        // object["minProperties"] = 1; // TODO: consider adding this
-        delete object[prop];
-      }
-    }
-  }
+  getObjectKeys(object).forEach((key) => {
+    if (typeof object[key] === "object") toPartialJSONSchemaHelper(object[key]);
+    if (key === "required") delete object[key];
+  });
 
   return object;
 };
