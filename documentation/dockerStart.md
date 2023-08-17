@@ -3,7 +3,7 @@
 ## 📚 Prerequisites
 
 - [Docker](https://www.docker.com/)
-- [MongoDB](https://www.mongodb.com/) cluster with [mflix sample data](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) loaded (see how to [load sample data](https://www.mongodb.com/docs/guides/atlas/sample-data/))
+- [MongoDB](https://www.mongodb.com/)
 
 #
 
@@ -65,7 +65,7 @@ docker run -p 3000:3000 --env-file .env sample-restful-api
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:3000/` (or whatever port you chose) to see the welcome message.
+You can open your browser and go to `http://localhost:3000/api` (or whatever port you chose) to see the welcome message.
 
 You should see the following message:
 

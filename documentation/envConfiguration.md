@@ -4,7 +4,7 @@ This document provides an explanation of the environment variables for the confi
 
 Below is the list of environment variables along with their descriptions and default values:
 
-## 💾 Database Configuration
+## 💾 Database
 
 ### MONGODB_URI (Required!)
 
@@ -64,7 +64,7 @@ Below is the list of environment variables along with their descriptions and def
 - **Description:** The interval in which the application will try to reconnect to the database if the connection fails (in seconds).
 - **Default value:** `15`
 
-## 🌐 Network Configuration
+## 🌐 Network
 
 ### PORT
 
@@ -78,7 +78,7 @@ Below is the list of environment variables along with their descriptions and def
 - **Default value:** `true`.
 - **Additional information:** While [using Docker](dockerStart.md), this must be set to `true`.
 
-## 🔐 Authentication Configuration
+## 🔐 Authentication
 
 ### JWT_SECRET
 
@@ -94,7 +94,7 @@ Below is the list of environment variables along with their descriptions and def
 - **Description:** The expiration time of the JWT in minutes.
 - **Default value:** `30`.
 
-## 📝 Logging Configuration
+## 📝 Logging
 
 ### ENABLE_LOGGING
 
@@ -107,7 +107,7 @@ Below is the list of environment variables along with their descriptions and def
 - **Available choices:** `fatal`, `error`, `warn`, `info`, `debug`, `trace`.
 - **Default value:** `info`.
 
-## 📖 Pagination Configuration
+## 📖 Pagination
 
 ### DEFAULT_PAGE_SIZE
 
@@ -119,7 +119,7 @@ Below is the list of environment variables along with their descriptions and def
 - **Description:** The maximum amount of entities to return per request.
 - **Default value:** `50`.
 
-## ⛔ Rate Limiting Configuration
+## ⛔ Rate Limiting
 
 ### ENABLE_RATE_LIMITING
 
