@@ -10,9 +10,6 @@ const start = async () => {
 
   await getDbConnector().connect();
 
-  await app.register(require("fastify-overview"), {});
-  await app.register(require("fastify-overview-ui"));
-
   await initializeApp(app);
 
   await startListen(app);
