@@ -2,7 +2,7 @@ import { FastifyPluginOptions } from "fastify";
 
 import { Application } from "../../types/application";
 import { getEntityPlugin } from "./baseEntityPlugin/entityPlugin";
-import { getLoginPlugin } from "./auth/login";
+import { getLoginPlugin, setLoginRoute } from "./auth/login";
 import { setBearerAuthMiddleware } from "./auth/auth";
 import { EntitiesMapDB } from "../../types/general";
 import { logger } from "../../logging/logger";
@@ -63,7 +63,26 @@ export const getApiVersion1Plugin =
 
     await app.register(getUnprotectedRoutesPlugin());
 
-    logger.verbose(`API version 1 initialized`);
+    logger.trace(`API v1 plugin initialized`);
 
     done();
   };
+
+export const setApiVersion1 = async (app: Application) => {
+  await app.register(
+    async (apiV1) => {
+      await apiV1.register(async (ProtectedRoutes) => {
+        await setBearerAuthMiddleware(ProtectedRoutes);
+
+        await setEntitiesPlugins(ProtectedRoutes, ["users", "theaters"]);
+      });
+
+      await apiV1.register(async (unprotectedRoutes) => {
+        await setLoginRoute(unprotectedRoutes);
+      });
+    },
+    { prefix: API_V1_PREFIX }
+  );
+
+  logger.trace(`API v1 plugin initialized`);
+};

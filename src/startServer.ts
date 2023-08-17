@@ -4,11 +4,14 @@ import { getDbConnector } from "./DB/databaseConnector";
 import { Application, getApplicationInstance } from "./types/application";
 
 const start = async () => {
-  logger.info(`The application is starting...`);
+  logger.info(`Starting the server...`);
 
   const app: Application = getApplicationInstance();
 
   await getDbConnector().connect();
+
+  await app.register(require("fastify-overview"), {});
+  await app.register(require("fastify-overview-ui"));
 
   await initializeApp(app);
 

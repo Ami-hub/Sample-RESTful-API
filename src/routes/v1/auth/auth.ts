@@ -1,7 +1,9 @@
 import { verify } from "jsonwebtoken";
-import { env } from "../../../setup/env";
 import fastifyBearerAuth from "@fastify/bearer-auth";
+
+import { env } from "../../../setup/env";
 import { Application } from "../../../types/application";
+import { logger } from "../../../logging/logger";
 
 const verifyAccessToken = (token: string) => verify(token, env.JWT_SECRET);
 
@@ -21,5 +23,8 @@ export const setBearerAuthMiddleware = async (app: Application) => {
   await app.register(fastifyBearerAuth, {
     keys: new Set([env.JWT_SECRET]),
     auth: isValidToken,
+    errorResponse: () => {
+      return { error: "Unauthorized" };
+    },
   });
 };

@@ -6,7 +6,10 @@ import { Application } from "../types/application";
 import { logger } from "../logging/logger";
 import { getToken, isValidToken } from "../routes/v1/auth/auth";
 import { FastifyRequest } from "fastify";
+import { createErrorWithStatus } from "../errorHandling/statusError";
 import { StatusCodes } from "http-status-codes";
+
+const reconnectingIntervalSec = env.RECONNECTING_INTERVAL_REDIS_S;
 
 /**
  * A Redis instance to use for rate limiting.
@@ -21,33 +24,43 @@ const redis = new Redis(env.REDIS_URL, {
 
   lazyConnect: true,
   retryStrategy: (times: number) => {
-    if (times === 1) {
-      logger.warn(
-        `Redis connection closed unexpectedly, Rate limiter is not set up!`
-      );
-    } else {
-      logger.verbose(
-        `Retrying to connect to Redis in ${env.RECONNECTING_INTERVAL_REDIS_S} seconds...`
-      );
-    }
-    return env.RECONNECTING_INTERVAL_REDIS_S * 1000;
+    logger.debug(
+      `Retrying to connect to Redis in ${reconnectingIntervalSec} seconds for the ${times} time...`
+    );
+
+    return reconnectingIntervalSec * 1000;
   },
 });
 
-redis.on("connect", () => {
-  logger.verbose(`Successfully connected to Redis!`);
-  logger.info(`Rate limiter is set up!`);
-});
+const setEventListeners = (redis: Redis) => {
+  redis.on("connect", () => {
+    logger.debug(`Connected to Redis`);
 
-redis.on("error", (error) => {
-  logger.error(`Error in Redis! ${error}`);
-});
+    logger.info(`Rate limiter is set up!`);
+  });
+
+  redis.on("error", (error) => {
+    logger.error(`Error in Redis`, error);
+  });
+
+  redis.on("end", () => {
+    logger.warn(`Redis connection has ended`);
+
+    logger.info(`Rate limiter is disabled!`);
+  });
+
+  redis.on("close", () => {
+    logger.warn(`Redis connection has closed`);
+
+    logger.info(`Rate limiter is disabled!`);
+  });
+};
 
 const connectToRedis = async () => {
   try {
     await redis.connect();
   } catch (error) {
-    logger.error(`Error while connecting to Redis! ${error}`);
+    logger.error(`Failed to connect to Redis`, error);
   }
 };
 
@@ -58,6 +71,8 @@ const keyGenerator = (req: FastifyRequest) => {
 };
 
 export const setRateLimiter = async (app: Application) => {
+  setEventListeners(redis);
+
   await connectToRedis();
 
   await app.register(fastifyRateLimit, {
@@ -65,17 +80,16 @@ export const setRateLimiter = async (app: Application) => {
     timeWindow: env.RATE_LIMIT_WINDOW_MS,
     redis,
     keyGenerator,
-    errorResponseBuilder(req, context) {
-      logger.warn(
-        `Rate limit exceeded for ${req.ip} with the token ${req.headers.authorization}`
+    errorResponseBuilder: (req, context) => {
+      throw createErrorWithStatus(
+        `Rate limit exceeded, retry in ${(
+          context.ttl / 1000
+        ).toFixed()} seconds`,
+        StatusCodes.TOO_MANY_REQUESTS,
+        `reqId: ${req.id}`
       );
-
-      return {
-        message: `Rate limit exceeded, retry in ${context.after}`,
-        statusCode: StatusCodes.TOO_MANY_REQUESTS,
-      };
     },
   });
 
-  logger.verbose(`Rate limiter initialized`);
+  logger.trace(`Rate limiter initialized`);
 };

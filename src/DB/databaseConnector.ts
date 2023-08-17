@@ -51,23 +51,24 @@ export interface DatabaseConnector {
 //             Implementation
 // ########################################
 
+const sleep = async (ms: number) =>
+  await new Promise((resolve) => setTimeout(resolve, ms));
+
 export const connectToDB = async () => {
   const dbName = env.DB_NAME;
   while (true) {
     try {
-      logger.verbose(`Trying to connect to '${dbName}' DB...`);
+      logger.debug(`Connecting to '${dbName}' DB...`);
       await client.connect();
-      logger.info(`Connected to '${dbName}' DB`);
+      logger.info(`Connected to '${dbName}' DB!`);
       return;
     } catch (error) {
-      logger.error(`Failed to connect to '${dbName}' DB!`);
+      logger.error(`Failed to connect to '${dbName}' DB!`, error);
 
-      logger.verbose(
+      logger.trace(
         `Retrying to connect to '${dbName}' DB in ${env.RECONNECTING_INTERVAL_DB_S} seconds...`
       );
-      await new Promise((resolve) =>
-        setTimeout(resolve, env.RECONNECTING_INTERVAL_DB_S * 1000)
-      );
+      await sleep(env.RECONNECTING_INTERVAL_DB_S * 1000);
     }
   }
 };

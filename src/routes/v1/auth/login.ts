@@ -58,6 +58,7 @@ const getUser = async (email: string, password: string) => {
   return user;
 };
 
+// TODO: should be stored in userDAL!
 const addAccessTokenToUser = async (userId: IdType, accessToken: string) => {
   const userCollection = getCollection("users");
 
@@ -66,23 +67,20 @@ const addAccessTokenToUser = async (userId: IdType, accessToken: string) => {
     { $push: { accessTokens: accessToken } }
   );
 
+  const massageError = `Failed to update user sessions for user ${userId}`;
   if (!updateResult.acknowledged) {
-    logger.error(`Failed to update user sessions for user ${userId}`);
-
     throw createErrorWithStatus(
       "Internal server error",
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to update user sessions for user ${userId}`
+      `${massageError}, not acknowledged`
     );
   }
 
   if (!updateResult.modifiedCount) {
-    logger.error(`Failed to update user sessions for user ${userId}`);
-
     throw createErrorWithStatus(
       "Internal server error",
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to update user sessions for user ${userId}`
+      `${massageError}, nothing was modified`
     );
   }
 
@@ -123,3 +121,30 @@ export const getLoginPlugin =
 
     done();
   };
+
+export const setLoginRoute = async (app: Application) => {
+  app.post(
+    `/login`,
+    {
+      schema: {
+        body: loginInputJSONSchema,
+      },
+    },
+    async (request, reply) => {
+      const { email, password } = request.body;
+
+      const user = await getUser(email, password);
+
+      const userId = user[idKey].toString();
+
+      const accessToken = createAccessToken({
+        userId,
+        email,
+      });
+
+      await addAccessTokenToUser(userId, accessToken);
+
+      reply.code(StatusCodes.OK).send({ accessToken });
+    }
+  );
+};

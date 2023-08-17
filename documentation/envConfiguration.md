@@ -104,8 +104,8 @@ Below is the list of environment variables along with their descriptions and def
 ### LOG_LEVEL
 
 - **Description:** The log level of the application.
-- **Available choices:** `error`, `warn`, `info`, `http`, `verbose`, `debug`, `silly`.
-- **Default value:** `http`.
+- **Available choices:** `fatal`, `error`, `warn`, `info`, `debug`, `trace`.
+- **Default value:** `info`.
 
 ## 📖 Pagination Configuration
 

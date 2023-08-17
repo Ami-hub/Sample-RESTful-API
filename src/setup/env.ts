@@ -5,13 +5,12 @@ import { cleanEnv, str, port, url, num, makeValidator, bool } from "envalid";
 const getRandomJWTSecret = () => btoa(randomBytes(256).toString("hex"));
 
 const availableLogLevel = [
+  "fatal",
   "error",
   "warn",
   "info",
-  "http",
-  "verbose",
   "debug",
-  "silly",
+  "trace",
 ] as const;
 
 config();
@@ -48,11 +47,11 @@ export const env = cleanEnv(process.env, {
 
   /**
    * The log level of the application.
-   * @default "http"
+   * @default "info"
    */
   LOG_LEVEL: str({
     choices: availableLogLevel,
-    default: "http",
+    default: "info",
   }),
 
   /**

@@ -1,13 +1,13 @@
 import Fastify from "fastify";
 import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
-import { fastifyWinstonLogger } from "../logging/logger";
+import { logger } from "../logging/logger";
 
 /**
  * The main application instance
  * @see https://www.fastify.io/docs/latest/TypeScript/
  */
 const app = Fastify({
-  logger: fastifyWinstonLogger,
+  logger,
 }).withTypeProvider<JsonSchemaToTsProvider>();
 
 /**

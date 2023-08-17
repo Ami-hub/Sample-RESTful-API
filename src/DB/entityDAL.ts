@@ -1,14 +1,10 @@
-import { ObjectId } from "mongodb";
-import { getEntityErrorBuilder } from "../errorHandling/errorBuilder";
 import {
   EntitiesMapDB,
   EntityJSONSchemaMap,
-  Filter,
   IdType,
   getEntityJSONSchema,
   getEntityPartialJSONSchema,
   EntityPartialJSONSchemaMap,
-  idKey,
   EntitiesMapDBWithoutId,
 } from "../types/general";
 import { ReadOptions, getCRUD } from "./CRUD";
@@ -167,53 +163,37 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   entityName: T
 ): EntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
-  const errorBuilder = getEntityErrorBuilder(entityName);
   const entitySchema = getEntityJSONSchema(entityName);
   const entityPartialSchema = getEntityPartialJSONSchema(entityName);
 
   const get = async (readOptions: ReadOptions = {}) => {
-    const filters = readOptions.filters ?? [{}];
+    logger.debug({ entityName, method: `get`, filters: readOptions.filters });
 
-    logger.verbose(
-      `trying to GET entities from ${entityName}, filters: ${JSON.stringify(
-        filters,
-        null,
-        4
-      )}`
-    );
-    const entities = await entityCrud.read({
-      filters,
-      limit: readOptions.limit,
-      offset: readOptions.offset,
-    });
-    logger.info(`found ${entities.length} entities from ${entityName}`);
+    const entities = await entityCrud.read(readOptions);
+
+    logger.info({ entityName, method: `get`, numOfFound: entities.length });
     return entities;
   };
 
   const getById = async (id: IdType) => {
-    logger.verbose(
-      `trying to GET ONE entity from ${entityName} by id: "${id}"`
-    );
-    return await entityCrud.readById(id);
+    logger.debug({ entityName, method: `getById`, id });
+    const entityFound = await entityCrud.readById(id);
+    logger.info({ entityName, method: `getById`, found: entityFound });
+    return entityFound;
   };
 
   const create = async (data: EntitiesMapDBWithoutId[T]) => {
-    logger.verbose(
-      `trying to CREATE entity to ${entityName}: ${JSON.stringify(
-        data,
-        null,
-        4
-      )}`
-    );
+    logger.debug({ entityName, method: `create`, data });
 
     /* consider add validation here instead of in the route options
-       something like:
+    something like:
     if (!isValid(data, entitySchema)) {
       throw errorBuilder.invalidEntity("create", data);
     }
     */
 
     const entity = await entityCrud.create(data);
+    logger.info({ entityName, method: `create`, created: entity });
 
     return entity;
   };
@@ -222,13 +202,7 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
     id: IdType,
     data: Partial<EntitiesMapDBWithoutId[T]>
   ) => {
-    logger.verbose(
-      `trying to UPDATE entity from ${entityName} by id: "${id}", to ${JSON.stringify(
-        data,
-        null,
-        4
-      )}`
-    );
+    logger.debug({ entityName, method: `update`, id, data });
 
     /* consider add validation here instead of in the route options
        something like:
@@ -237,14 +211,18 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
     }
     */
     const updatedEntity = await entityCrud.update(id, data);
+
+    logger.info({ entityName, method: `update`, updated: updatedEntity });
+
     return updatedEntity;
   };
 
   const deleteOne = async (id: IdType) => {
-    logger.verbose(`trying to DELETE entity from ${entityName} by id: "${id}"`);
+    logger.debug({ entityName, method: `delete`, id });
 
     const deletedEntity = await entityCrud.delete(id);
 
+    logger.info({ entityName, method: `delete`, deleted: deletedEntity });
     return deletedEntity;
   };
 
