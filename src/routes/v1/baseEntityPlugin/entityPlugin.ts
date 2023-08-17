@@ -6,8 +6,8 @@ import {
   EntitiesMapDBWithoutId,
   getIdJSONSchemaAsQueryParam,
   getPaginationOptionsJSONSchema,
-} from "../../../types/general";
-import { Application } from "../../../types/application";
+} from "../../../models/general";
+import { Application } from "../../../application";
 import { env } from "../../../setup/env";
 import { logger } from "../../../logging/logger";
 

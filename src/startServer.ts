@@ -1,7 +1,7 @@
 import { initializeApp, startListen } from "./setup/initSetUp";
 import { logger } from "./logging/logger";
 import { getDbConnector } from "./DB/databaseConnector";
-import { Application, getApplicationInstance } from "./types/application";
+import { Application, getApplicationInstance } from "./application";
 
 const start = async () => {
   logger.info(`Starting the server...`);

@@ -4,9 +4,9 @@ import bcrypt from "bcrypt";
 import { ObjectId } from "mongodb";
 
 import { env } from "../../../setup/env";
-import { IdType, idKey } from "../../../types/general";
+import { IdType, idKey } from "../../../models/general";
 import { getCollection } from "../../../DB/databaseConnector";
-import { Application } from "../../../types/application";
+import { Application } from "../../../application";
 import { getEntityDAL } from "../../../DB/entityDAL";
 import { createErrorWithStatus } from "../../../errorHandling/statusError";
 import { logger } from "../../../logging/logger";

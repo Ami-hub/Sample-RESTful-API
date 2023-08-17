@@ -6,7 +6,7 @@ import {
   getEntityPartialJSONSchema,
   EntityPartialJSONSchemaMap,
   EntitiesMapDBWithoutId,
-} from "../types/general";
+} from "../models/general";
 import { ReadOptions, getCRUD } from "./CRUD";
 import { logger } from "../logging/logger";
 

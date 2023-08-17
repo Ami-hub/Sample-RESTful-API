@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
-import { logger } from "../logging/logger";
+import { logger } from "./logging/logger";
 
 /**
  * The main application instance

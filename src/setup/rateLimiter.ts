@@ -2,7 +2,7 @@ import { fastifyRateLimit } from "@fastify/rate-limit";
 import { Redis } from "ioredis";
 
 import { env } from "./env";
-import { Application } from "../types/application";
+import { Application } from "../application";
 import { logger } from "../logging/logger";
 import { isValidToken } from "../routes/v1/auth/auth";
 import { FastifyRequest } from "fastify";

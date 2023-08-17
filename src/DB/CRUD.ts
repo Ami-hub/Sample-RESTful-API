@@ -5,7 +5,7 @@ import {
   IdType,
   idKey,
   Filter,
-} from "../types/general";
+} from "../models/general";
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
 import { env } from "../setup/env";

@@ -6,7 +6,7 @@ import { logger } from "../logging/logger";
 import { env } from "./env";
 import { errorHandler } from "../errorHandling/errorHandler";
 import { setApiVersion1 } from "../routes/v1/apiV1Plugin";
-import { Application } from "../types/application";
+import { Application } from "../application";
 import { setRateLimiter } from "./rateLimiter";
 import { createErrorWithStatus } from "../errorHandling/statusError";
 

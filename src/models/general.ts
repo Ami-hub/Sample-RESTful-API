@@ -1,6 +1,6 @@
 import { FromSchema } from "json-schema-to-ts";
-import { Theater, getTheaterJSONSchema } from "./models/theater";
-import { User, getUserJSONSchema } from "./models/user";
+import { Theater, getTheaterJSONSchema } from "./theater";
+import { User, getUserJSONSchema } from "./user";
 
 /**
  * Unwraps a promise type
