@@ -1,6 +1,10 @@
 import Fastify from "fastify";
 import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import { logger } from "./logging/logger";
+import { randomBytes } from "crypto";
+
+const requestIdLength = 8;
+const generateRequestId = () => randomBytes(requestIdLength).toString("hex");
 
 /**
  * The main application instance
@@ -8,6 +12,7 @@ import { logger } from "./logging/logger";
  */
 const app = Fastify({
   logger,
+  genReqId: generateRequestId,
 }).withTypeProvider<JsonSchemaToTsProvider>();
 
 /**
