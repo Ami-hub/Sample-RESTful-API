@@ -1,5 +1,6 @@
-import { LevelWithSilent, pino } from "pino";
 import { FastifyBaseLogger } from "fastify";
+import { requestContext } from "@fastify/request-context";
+import { LevelWithSilent, pino } from "pino";
 import pinoPretty from "pino-pretty";
 
 import { env } from "../setup/env";
@@ -13,11 +14,16 @@ const createPinoLogger = (level: LevelWithSilent) => {
   return pino(
     {
       level,
+      formatters: {
+        log: (object) => ({
+          ...object,
+          userId: requestContext.get("userId"),
+        }),
+      },
+      enabled: env.ENABLE_LOGGING,
     },
     stream
   );
 };
 
-const logLevel = env.ENABLE_LOGGING ? env.LOG_LEVEL : "silent";
-
-export const logger: FastifyBaseLogger = createPinoLogger(logLevel);
+export const logger: FastifyBaseLogger = createPinoLogger(env.LOG_LEVEL);

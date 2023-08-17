@@ -4,7 +4,7 @@ import { Redis } from "ioredis";
 import { env } from "./env";
 import { Application } from "../types/application";
 import { logger } from "../logging/logger";
-import { getToken, isValidToken } from "../routes/v1/auth/auth";
+import { isValidToken } from "../routes/v1/auth/auth";
 import { FastifyRequest } from "fastify";
 import { createErrorWithStatus } from "../errorHandling/statusError";
 import { StatusCodes } from "http-status-codes";
@@ -65,7 +65,7 @@ const connectToRedis = async () => {
 };
 
 const keyGenerator = (req: FastifyRequest) => {
-  const token = getToken(req.headers.authorization);
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token || !isValidToken(token)) return req.ip;
   return token;
 };

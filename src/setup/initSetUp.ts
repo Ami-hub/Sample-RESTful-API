@@ -1,4 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { fastifyRequestContext } from "@fastify/request-context";
 import { StatusCodes } from "http-status-codes";
 
 import { logger } from "../logging/logger";
@@ -26,14 +27,20 @@ const welcomeRoute = async (_request: FastifyRequest, reply: FastifyReply) => {
   });
 };
 
+const API_PREFIX = "/api";
+
 export const initializeApp = async (app: Application) => {
   await setRateLimiter(app);
-  app.register(async (api) => {
-    await setApiVersion1(api);
+  await app.register(fastifyRequestContext);
+  await app.register(
+    async (api) => {
+      await setApiVersion1(api);
 
-    api.get(`/`, welcomeRoute);
-    logger.trace(`Welcome route initialized`);
-  });
+      api.get(`/`, welcomeRoute);
+      logger.trace(`Welcome route initialized`);
+    },
+    { prefix: API_PREFIX }
+  );
 
   setNotFoundHandler(app);
   app.setErrorHandler(errorHandler);

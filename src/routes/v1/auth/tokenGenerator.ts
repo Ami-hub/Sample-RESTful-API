@@ -4,20 +4,24 @@ import bcrypt from "bcrypt";
 import { ObjectId } from "mongodb";
 
 import { env } from "../../../setup/env";
-import { logger } from "../../../logging/logger";
 import { IdType, idKey } from "../../../types/general";
 import { getCollection } from "../../../DB/databaseConnector";
 import { Application } from "../../../types/application";
 import { getEntityDAL } from "../../../DB/entityDAL";
 import { createErrorWithStatus } from "../../../errorHandling/statusError";
-import { FastifyPluginOptions } from "fastify";
+import { logger } from "../../../logging/logger";
 
-const createAccessToken = (user: object) =>
-  sign(user, env.JWT_SECRET, {
+export type JWTTokenPayload = {
+  userId: IdType;
+  email: string;
+};
+
+const createAccessToken = (userDetails: JWTTokenPayload) =>
+  sign(userDetails, env.JWT_SECRET, {
     expiresIn: `${env.JWT_EXPIRES_MINUTES}m`,
   });
 
-const loginInputJSONSchema = {
+const tokenGeneratorInputJSONSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -27,8 +31,8 @@ const loginInputJSONSchema = {
   required: ["email", "password"],
 } as const;
 
+const userDAL = getEntityDAL("users");
 const getUser = async (email: string, password: string) => {
-  const userDAL = getEntityDAL("users");
   const usersFound = await userDAL.get({
     filters: [
       {
@@ -54,6 +58,10 @@ const getUser = async (email: string, password: string) => {
       `Invalid password for user '${email}'`
     );
   }
+
+  logger.info(
+    `The ${user.role} '${user[idKey]}' logged in with email '${email}'`
+  );
 
   return user;
 };
@@ -87,47 +95,14 @@ const addAccessTokenToUser = async (userId: IdType, accessToken: string) => {
   return true;
 };
 
-export const getLoginPlugin =
-  () =>
-  async (
-    app: Application,
-    _options: FastifyPluginOptions,
-    done: (error?: Error) => void
-  ) => {
-    app.post(
-      `/`,
-      {
-        schema: {
-          body: loginInputJSONSchema,
-        },
-      },
-      async (request, reply) => {
-        const { email, password } = request.body;
-
-        const user = await getUser(email, password);
-
-        const userId = user[idKey].toString();
-
-        const accessToken = createAccessToken({
-          userId,
-          email,
-        });
-
-        await addAccessTokenToUser(userId, accessToken);
-
-        reply.code(StatusCodes.OK).send({ accessToken });
-      }
-    );
-
-    done();
-  };
-
-export const setLoginRoute = async (app: Application) => {
-  app.post(
-    `/login`,
+export const setTokenGeneratorRoute = async (
+  unprotectedRoutes: Application
+) => {
+  unprotectedRoutes.post(
+    `/users/token`,
     {
       schema: {
-        body: loginInputJSONSchema,
+        body: tokenGeneratorInputJSONSchema,
       },
     },
     async (request, reply) => {
