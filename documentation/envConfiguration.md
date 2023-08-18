@@ -13,7 +13,7 @@ Ensure that you have set these environment variables appropriately in your deplo
   MONGODB_URI=mongodb+srv://username:password@cluster0.1a2b3c4.mongodb.net/
   ```
 - **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).  
-  When using Docker and local Redis, make sure you set the network properly.
+  When using Docker and local Redis, make sure you set the network and the URI properly.
 
 ### DB_NAME (Required!)
 
@@ -141,4 +141,4 @@ Ensure that you have set these environment variables appropriately in your deplo
 
 - **Description:** The Redis URI to use for the rate limiting.
 - **Default value:** `redis://localhost:6379`.
-- **Additional information:** When using Docker and local Redis, make sure you set the network properly.
+- **Additional information:** When using Docker and local Redis, make sure you set the network and the URI properly.
