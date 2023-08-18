@@ -185,13 +185,6 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   const create = async (data: EntitiesMapDBWithoutId[T]) => {
     logger.debug({ entityName, method: `create`, data });
 
-    /* consider add validation here instead of in the route options
-    something like:
-    if (!isValid(data, entitySchema)) {
-      throw errorBuilder.invalidEntity("create", data);
-    }
-    */
-
     const entity = await entityCrud.create(data);
     logger.info({ entityName, method: `create`, created: entity });
 
@@ -204,12 +197,6 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   ) => {
     logger.debug({ entityName, method: `update`, id, data });
 
-    /* consider add validation here instead of in the route options
-       something like:
-    if (!isValid(data, entitySchema)) {
-      throw errorBuilder.invalidEntity("create", data);
-    }
-    */
     const updatedEntity = await entityCrud.update(id, data);
 
     logger.info({ entityName, method: `update`, updated: updatedEntity });
