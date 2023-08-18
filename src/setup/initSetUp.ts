@@ -21,7 +21,6 @@ export const setApi = async (app: Application) => {
       await setApiVersion1(api);
 
       api.get(`/`, welcomeRoute);
-      logger.trace(`Welcome route initialized`);
     },
     { prefix: API_PREFIX }
   );
