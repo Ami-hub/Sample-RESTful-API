@@ -4,9 +4,7 @@ import { getEntityDAL } from "../../../DB/entityDAL";
 import {
   EntitiesMapDB,
   EntitiesMapDBWithoutId,
-  getIdJSONSchemaAsQueryParam,
-  getPaginationOptionsJSONSchema,
-} from "../../../models/general";
+} from "../../../models/entitiesMaps";
 import { Application } from "../../../application";
 import { env } from "../../../setup/env";
 import { logger } from "../../../logging/logger";
@@ -19,7 +17,6 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
   const entityJSONSchema = entityDal.getSchema();
   const entityPartialJSONSchema = entityDal.getPartialSchema();
 
-  // const idSchemaAsQueryParam = getIdJSONSchemaAsQueryParam(); // TODO: decide whether to use this or the one below
   const idSchemaAsQueryParam = {
     type: "object",
     required: ["id"],
@@ -30,7 +27,17 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
       },
     },
   } as const;
-  const paginationOptions = getPaginationOptionsJSONSchema();
+
+  const paginationOptions = {
+    querystring: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        limit: { type: "number" },
+        offset: { type: "number" },
+      },
+    } as const,
+  };
 
   const entityPlugin = async (
     fastify: Application,

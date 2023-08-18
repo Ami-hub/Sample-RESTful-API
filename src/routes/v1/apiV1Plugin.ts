@@ -2,7 +2,7 @@ import { Application } from "../../application";
 import { getEntityPlugin } from "./baseEntityPlugin/entityPlugin";
 import { setTokenGeneratorRoute } from "./auth/tokenGenerator";
 import { setBearerAuthMiddleware } from "./auth/auth";
-import { EntitiesMapDB } from "../../models/general";
+import { EntitiesMapDB } from "../../models/entitiesMaps";
 import { logger } from "../../logging/logger";
 
 export const API_V1_PREFIX = "/v1";

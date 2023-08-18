@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { EntitiesMapDB, IdType } from "../models/general";
+import { EntitiesMapDB } from "../models/entitiesMaps";
+import { IdType } from "../models/id";
 import { CRUDOperation } from "../DB/CRUD";
 import { createErrorWithStatus } from "./statusError";
 

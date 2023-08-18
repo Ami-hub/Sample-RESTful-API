@@ -1,12 +1,12 @@
 import {
   EntitiesMapDB,
-  EntityJSONSchemaMap,
-  IdType,
   getEntityJSONSchema,
   getEntityPartialJSONSchema,
-  EntityPartialJSONSchemaMap,
   EntitiesMapDBWithoutId,
-} from "../models/general";
+  EntityJSONSchemaMap,
+  EntityPartialJSONSchemaMap,
+} from "../models/entitiesMaps";
+import { IdType } from "../models/id";
 import { ReadOptions, getCRUD } from "./CRUD";
 import { logger } from "../logging/logger";
 

@@ -1,6 +1,8 @@
 import { FromSchema } from "json-schema-to-ts";
 
-const MAXIMUM_NAME_LENGTH = 50;
+export const usersCollectionName = "users";
+
+const MAXIMUM_NAME_LENGTH = 40;
 
 const userJSONSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",

@@ -10,7 +10,7 @@ declare module "@fastify/request-context" {
 import { env } from "../../../setup/env";
 import { Application } from "../../../application";
 import { logger } from "../../../logging/logger";
-import { IdType } from "../../../models/general";
+import { IdType } from "../../../models/id";
 import { JWTTokenPayload } from "./tokenGenerator";
 import { requestContext } from "@fastify/request-context";
 
