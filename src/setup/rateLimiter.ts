@@ -1,72 +1,86 @@
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { fastifyRateLimit } from "@fastify/rate-limit";
+import { StatusCodes } from "http-status-codes";
 import { Redis } from "ioredis";
 
 import { env } from "./env";
-import { Application } from "../types/application";
 import { logger } from "../logging/logger";
-import { isValidateToken } from "../routes/v1/auth/auth";
-import { FastifyRequest } from "fastify";
-import { StatusCodes } from "http-status-codes";
-import { errorHandler } from "../errorHandling/errorHandler";
+import { isValidToken } from "../routes/v1/auth/auth";
+import { createErrorWithStatus } from "../errorHandling/statusError";
 
-/**
- * A Redis instance to use for rate limiting.
- */
-const redis = new Redis(env.REDIS_URL, {
-  /*
-   That configuration is recommended by `@fastify/rate-limit` to achieve performance.
-   @see https://github.com/fastify/fastify-rate-limit/blob/master/example/example.js
-  */
-  connectTimeout: 500, // in ms
-  maxRetriesPerRequest: 1,
+const reconnectingIntervalSec = env.RECONNECTING_INTERVAL_REDIS_S;
 
-  lazyConnect: true,
-  retryStrategy: (times: number) => {
-    if (times === 1) {
-      logger.warn(
-        `Redis connection closed unexpectedly, Rate limiter is not set up!`
-      );
-    } else {
-      logger.verbose(
-        `Retrying to connect to Redis in ${env.RECONNECTING_INTERVAL_REDIS_S} seconds...`
-      );
-    }
-    return env.RECONNECTING_INTERVAL_REDIS_S * 1000;
-  },
-})
-  .on("connect", () => {
-    logger.info(`Successfully connected to Redis, Rate limiter is set up!`);
-  })
-  .on("error", (error) => {
-    logger.error(`Error while connecting to Redis! ${error}`);
+const setEventListeners = (redis: Redis) => {
+  redis.on("connect", () => {
+    logger.debug(`Connected to Redis`);
+    logger.info(`Rate limiter is set up!`);
   });
+
+  redis.on("error", (error) => {
+    logger.error({
+      message: `Error in Redis`,
+      error,
+    });
+  });
+
+  redis.on("end", () => {
+    logger.debug(`Redis connection has ended`);
+    logger.error(`Rate limiter is disabled!`);
+  });
+
+  redis.on("close", () => {
+    logger.debug(`Redis connection has closed`);
+    logger.error(`Rate limiter is disabled!`);
+  });
+};
+
+const createRedisInstance = () => {
+  const redisInstance = new Redis(env.REDIS_URL, {
+    /*
+     That configuration is recommended by `@fastify/rate-limit` to achieve performance.
+     @see https://github.com/fastify/fastify-rate-limit/blob/master/example/example.js
+    */
+    connectTimeout: 500, // in ms
+    maxRetriesPerRequest: 1,
+
+    retryStrategy: (times: number) => {
+      logger.debug(
+        `Retrying to connect to Redis in ${reconnectingIntervalSec} seconds for the ${times} time...`
+      );
+
+      return reconnectingIntervalSec * 1000;
+    },
+  });
+
+  setEventListeners(redisInstance);
+
+  return redisInstance;
+};
 
 const keyGenerator = (req: FastifyRequest) => {
   const token = req.headers.authorization?.split(" ")[1];
-  if (!token || !isValidateToken(token)) {
-    return req.ip;
-  }
+  if (!token || !isValidToken(token)) return req.ip;
   return token;
 };
 
-export const setRateLimiter = async (app: Application) => {
-  await redis.connect();
+const redis = env.ENABLE_RATE_LIMITING ? createRedisInstance() : undefined;
 
-  await app.register(fastifyRateLimit, {
+export const setRateLimiter = async (fastify: FastifyInstance) => {
+  await fastify.register(fastifyRateLimit, {
     max: env.RATE_LIMIT_MAX_REQUESTS_PER_WINDOW,
     timeWindow: env.RATE_LIMIT_WINDOW_MS,
     redis,
     keyGenerator,
-    errorResponseBuilder(req, context) {
-      logger.warn(
-        `Rate limit exceeded for ${req.ip} with the token ${req.headers.authorization}`
+    errorResponseBuilder: (req, context) => {
+      throw createErrorWithStatus(
+        `Rate limit exceeded, retry in ${(
+          context.ttl / 1000
+        ).toFixed()} seconds`,
+        StatusCodes.TOO_MANY_REQUESTS,
+        `reqId: ${req.id}`
       );
-
-      return {
-        message: `Rate limit exceeded, retry in ${context.after} seconds`,
-        statusCode: StatusCodes.TOO_MANY_REQUESTS,
-      };
     },
   });
-  app.setErrorHandler(errorHandler); // TODO: fix duplication of error handler
+
+  return fastify;
 };

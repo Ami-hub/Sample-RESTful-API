@@ -1,5 +1,10 @@
 import { FromSchema } from "json-schema-to-ts";
 
+/**
+ * The name of the transactions collection
+ */
+export const theatersCollectionName = "theaters";
+
 const theaterJSONSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "object",

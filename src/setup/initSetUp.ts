@@ -1,41 +1,31 @@
-import { errorHandler } from "../errorHandling/errorHandler";
+import { FastifyReply, FastifyRequest } from "fastify";
+import { fastifyRequestContext } from "@fastify/request-context";
+import { StatusCodes } from "http-status-codes";
+
 import { logger } from "../logging/logger";
 import { env } from "./env";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { StatusCodes } from "http-status-codes";
-import { API_V1_PREFIX, getApiVersion1Plugin } from "../routes/v1/apiV1Plugin";
-import { Application } from "../types/application";
-import { setRateLimiter } from "./rateLimiter";
-import { createErrorWithStatus } from "../errorHandling/statusError";
+import { setApiVersion1 } from "../routes/v1/apiV1Plugin";
+import { Application } from "../application";
 
-const notFoundHandler = (_request: FastifyRequest, _reply: FastifyReply) => {
-  throw createErrorWithStatus(`Route not found`, StatusCodes.NOT_FOUND);
-};
-
-const welcomeRoute = async (request: FastifyRequest, reply: FastifyReply) => {
+const welcomeRoute = async (_request: FastifyRequest, reply: FastifyReply) => {
   reply.status(StatusCodes.OK).send({
     message: `Welcome to the API`,
   });
 };
 
-export const initializeApp = async (app: Application) => {
-  await setRateLimiter(app);
-  logger.verbose(`Initialized rate limiter`);
+const API_PREFIX = "/api";
 
-  await app.register(getApiVersion1Plugin(), {
-    prefix: API_V1_PREFIX,
-  });
-  logger.verbose(`Initialized API v1 plugin`);
+export const setApi = async (app: Application) => {
+  await app.register(
+    async (api) => {
+      await setApiVersion1(api);
 
-  app.get(`/`, welcomeRoute);
-  logger.verbose(`Initialized welcome route`);
+      api.get(`/`, welcomeRoute);
+    },
+    { prefix: API_PREFIX }
+  );
 
-  app.setErrorHandler(errorHandler);
-  logger.verbose(`Error handler initialized`);
-
-  app.setNotFoundHandler(notFoundHandler);
-
-  logger.verbose(`Not found handler initialized`);
+  logger.info(`Application fully initialized`);
 };
 
 export const startListen = async (app: Application) => {
@@ -45,7 +35,7 @@ export const startListen = async (app: Application) => {
       port: env.PORT,
     });
   } catch (error) {
-    logger.error(`Error while starting the server: ${error}`);
+    logger.fatal(`Cannot start the server: ${error}`);
     process.exit(1);
   }
 };

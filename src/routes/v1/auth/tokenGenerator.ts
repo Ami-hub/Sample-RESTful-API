@@ -4,20 +4,24 @@ import bcrypt from "bcrypt";
 import { ObjectId } from "mongodb";
 
 import { env } from "../../../setup/env";
-import { logger } from "../../../logging/logger";
-import { IdType, idKey } from "../../../types/general";
+import { IdType, idKey } from "../../../models/id";
 import { getCollection } from "../../../DB/databaseConnector";
-import { Application } from "../../../types/application";
+import { Application } from "../../../application";
 import { getEntityDAL } from "../../../DB/entityDAL";
 import { createErrorWithStatus } from "../../../errorHandling/statusError";
-import { FastifyPluginOptions } from "fastify";
+import { logger } from "../../../logging/logger";
 
-const createAccessToken = (user: object) =>
-  sign(user, env.JWT_SECRET, {
+export type JWTTokenPayload = {
+  userId: IdType;
+  email: string;
+};
+
+const createAccessToken = (userDetails: JWTTokenPayload) =>
+  sign(userDetails, env.JWT_SECRET, {
     expiresIn: `${env.JWT_EXPIRES_MINUTES}m`,
   });
 
-const loginInputJSONSchema = {
+const tokenGeneratorInputJSONSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -27,8 +31,8 @@ const loginInputJSONSchema = {
   required: ["email", "password"],
 } as const;
 
+const userDAL = getEntityDAL("users");
 const getUser = async (email: string, password: string) => {
-  const userDAL = getEntityDAL("users");
   const usersFound = await userDAL.get({
     filters: [
       {
@@ -55,9 +59,14 @@ const getUser = async (email: string, password: string) => {
     );
   }
 
+  logger.info(
+    `The ${user.role} '${user[idKey]}' logged in with email '${email}'`
+  );
+
   return user;
 };
 
+// TODO: should be stored in userDAL!
 const addAccessTokenToUser = async (userId: IdType, accessToken: string) => {
   const userCollection = getCollection("users");
 
@@ -66,60 +75,51 @@ const addAccessTokenToUser = async (userId: IdType, accessToken: string) => {
     { $push: { accessTokens: accessToken } }
   );
 
+  const massageError = `Failed to update user sessions for user ${userId}`;
   if (!updateResult.acknowledged) {
-    logger.error(`Failed to update user sessions for user ${userId}`);
-
     throw createErrorWithStatus(
       "Internal server error",
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to update user sessions for user ${userId}`
+      `${massageError}, not acknowledged`
     );
   }
 
   if (!updateResult.modifiedCount) {
-    logger.error(`Failed to update user sessions for user ${userId}`);
-
     throw createErrorWithStatus(
       "Internal server error",
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to update user sessions for user ${userId}`
+      `${massageError}, nothing was modified`
     );
   }
 
   return true;
 };
 
-export const getLoginPlugin =
-  () =>
-  async (
-    app: Application,
-    _options: FastifyPluginOptions,
-    done: (error?: Error) => void
-  ) => {
-    app.post(
-      `/`,
-      {
-        schema: {
-          body: loginInputJSONSchema,
-        },
+export const setTokenGeneratorRoute = async (
+  unprotectedRoutes: Application
+) => {
+  unprotectedRoutes.post(
+    `/users/token`,
+    {
+      schema: {
+        body: tokenGeneratorInputJSONSchema,
       },
-      async (request, reply) => {
-        const { email, password } = request.body;
+    },
+    async (request, reply) => {
+      const { email, password } = request.body;
 
-        const user = await getUser(email, password);
+      const user = await getUser(email, password);
 
-        const userId = user[idKey].toString();
+      const userId = user[idKey].toString();
 
-        const accessToken = createAccessToken({
-          userId,
-          email,
-        });
+      const accessToken = createAccessToken({
+        userId,
+        email,
+      });
 
-        await addAccessTokenToUser(userId, accessToken);
+      await addAccessTokenToUser(userId, accessToken);
 
-        reply.code(StatusCodes.OK).send({ accessToken });
-      }
-    );
-
-    done();
-  };
+      reply.code(StatusCodes.OK).send({ accessToken });
+    }
+  );
+};

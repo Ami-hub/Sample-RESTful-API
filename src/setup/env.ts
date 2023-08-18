@@ -5,13 +5,12 @@ import { cleanEnv, str, port, url, num, makeValidator, bool } from "envalid";
 const getRandomJWTSecret = () => btoa(randomBytes(256).toString("hex"));
 
 const availableLogLevel = [
+  "fatal",
   "error",
   "warn",
   "info",
-  "http",
-  "verbose",
   "debug",
-  "silly",
+  "trace",
 ] as const;
 
 config();
@@ -41,12 +40,18 @@ export const env = cleanEnv(process.env, {
   DB_NAME: str(),
 
   /**
+   * Whether to enable logging or not.
+   * @default true
+   */
+  ENABLE_LOGGING: bool({ default: true }),
+
+  /**
    * The log level of the application.
-   * @default "http"
+   * @default "info"
    */
   LOG_LEVEL: str({
     choices: availableLogLevel,
-    default: "http",
+    default: "info",
   }),
 
   /**
@@ -151,12 +156,12 @@ export const env = cleanEnv(process.env, {
 
   /**
    * Whether to enable the rate limiter or not.
-   * @default true
+   * @default false
    */
-  ENABLE_RATE_LIMITING: bool({ default: true }),
+  ENABLE_RATE_LIMITING: bool({ default: false }),
 
   /**
-   * Redis URL to connect to.
+   * Redis URL to connect to for the rate limiter.
    *
    * @default "redis://localhost:6379"
    * @example ```env

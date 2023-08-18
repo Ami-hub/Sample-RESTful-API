@@ -1,10 +1,9 @@
 # ⚙️ Environment Variables Configuration Explanation
 
-This document provides an explanation of the environment variables for the configuration of the application. The environment variables are used to customize various aspects of the application behavior. Ensure that you have set these environment variables appropriately in your deployment environment or in the `.env` file in the root directory of the application.
+This document provides an explanation of the environment variables for the configuration of the application.  
+Ensure that you have set these environment variables appropriately in your deployment environment or in the `.env` file in the root directory of the project.
 
-Below is the list of environment variables along with their descriptions and default values:
-
-## 💾 Database Configuration
+## 💾 Database
 
 ### MONGODB_URI (Required!)
 
@@ -13,7 +12,8 @@ Below is the list of environment variables along with their descriptions and def
   ```env
   MONGODB_URI=mongodb+srv://username:password@cluster0.1a2b3c4.mongodb.net/
   ```
-- **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).
+- **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).  
+  When using Docker and local Redis, make sure you set the network and the URI properly.
 
 ### DB_NAME (Required!)
 
@@ -64,7 +64,7 @@ Below is the list of environment variables along with their descriptions and def
 - **Description:** The interval in which the application will try to reconnect to the database if the connection fails (in seconds).
 - **Default value:** `15`
 
-## 🌐 Network Configuration
+## 🌐 Network
 
 ### PORT
 
@@ -78,7 +78,7 @@ Below is the list of environment variables along with their descriptions and def
 - **Default value:** `true`.
 - **Additional information:** While [using Docker](dockerStart.md), this must be set to `true`.
 
-## 🔐 Authentication Configuration
+## 🔐 Authentication
 
 ### JWT_SECRET
 
@@ -94,15 +94,20 @@ Below is the list of environment variables along with their descriptions and def
 - **Description:** The expiration time of the JWT in minutes.
 - **Default value:** `30`.
 
-## 📝 Logging Configuration
+## 📝 Logging
+
+### ENABLE_LOGGING
+
+- **Description:** Whether to enable any logging or not.
+- **Default value:** `true`.
 
 ### LOG_LEVEL
 
 - **Description:** The log level of the application.
-- **Available choices:** `error`, `warn`, `info`, `http`, `verbose`, `debug`, `silly`.
-- **Default value:** `http`.
+- **Available choices:** `fatal`, `error`, `warn`, `info`, `debug`, `trace`.
+- **Default value:** `info`.
 
-## 📖 Pagination Configuration
+## 📖 Pagination
 
 ### DEFAULT_PAGE_SIZE
 
@@ -114,12 +119,13 @@ Below is the list of environment variables along with their descriptions and def
 - **Description:** The maximum amount of entities to return per request.
 - **Default value:** `50`.
 
-## ⛔ Rate Limiting Configuration
+## ⛔ Rate Limiting
 
 ### ENABLE_RATE_LIMITING
 
 - **Description:** Whether to enable rate limiting or not.
-- **Default value:** `true`.
+- **Default value:** `false`.
+- **Additional information:** If you disable rate limiting, the following environment variables will be ignored.
 
 ### RATE_LIMIT_WINDOW_MS
 
@@ -135,3 +141,4 @@ Below is the list of environment variables along with their descriptions and def
 
 - **Description:** The Redis URI to use for the rate limiting.
 - **Default value:** `redis://localhost:6379`.
+- **Additional information:** When using Docker and local Redis, make sure you set the network and the URI properly.

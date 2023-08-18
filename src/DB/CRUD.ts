@@ -1,11 +1,6 @@
-import { ObjectId } from "mongodb";
-import {
-  EntitiesMapDB,
-  EntitiesMapDBWithoutId,
-  IdType,
-  idKey,
-  Filter,
-} from "../types/general";
+import { Filter, ObjectId } from "mongodb";
+import { EntitiesMapDB, EntitiesMapDBWithoutId } from "../models/entitiesMaps";
+import { IdType, idKey } from "../models/id";
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
 import { env } from "../setup/env";
@@ -123,12 +118,17 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
 
   const create = async (data: EntitiesMapDBWithoutId[N]) => {
     const result = await collection.insertOne(data);
+
+    logger.trace({
+      entityName: collectionName,
+      method: "create",
+      result,
+    });
+
     if (!result.acknowledged)
-      throw errorBuilder.general("create", "operation failed");
+      throw errorBuilder.general("create", "not acknowledged");
 
     const insertedId = result.insertedId.toString();
-
-    logger.verbose(`create result: ${JSON.stringify(result, null, 4)}`);
 
     const entityCreated = await readByIdHelper(insertedId);
 
@@ -156,11 +156,17 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
       offset,
     });
 
+    logger.trace({
+      entityName: collectionName,
+      method: "read",
+      result: `found ${entitiesFound.length} entities`,
+    });
     return entitiesFound;
   };
 
   const readByIdHelper = async (id: IdType) => {
-    if (!ObjectId.isValid(id)) throw errorBuilder.notFound(idKey, id);
+    if (!ObjectId.isValid(id))
+      throw errorBuilder.notFound(idKey, id, "invalid id format");
 
     const entity = await collection.findOne<EntitiesMapDB[N]>({
       [idKey]: new ObjectId(id),
@@ -173,6 +179,12 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
 
   const readById = async (id: IdType) => {
     const entity = await readByIdHelper(id);
+
+    logger.trace({
+      entityName: collectionName,
+      method: "readById",
+      result: entity,
+    });
 
     return entity;
   };
@@ -188,8 +200,14 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
       { $set: data }
     );
 
+    logger.trace({
+      entityName: collectionName,
+      method: "update",
+      result: insertionResult,
+    });
+
     if (!insertionResult.acknowledged)
-      throw errorBuilder.general("update", "operation failed");
+      throw errorBuilder.general("update", "not acknowledged");
 
     if (insertionResult.modifiedCount <= 0) return entityToUpdate;
 
@@ -202,10 +220,15 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     const entityToDelete = await readByIdHelper(id);
 
     const result = await collection.deleteOne({ [idKey]: new ObjectId(id) });
-    logger.verbose(`delete result: ${JSON.stringify(result, null, 4)}`);
+
+    logger.trace({
+      entityName: collectionName,
+      method: "delete",
+      result,
+    });
 
     if (!result.acknowledged)
-      throw errorBuilder.general("delete", "operation failed");
+      throw errorBuilder.general("delete", "not acknowledged");
 
     if (result.deletedCount <= 0)
       throw errorBuilder.general("delete", "nothing was deleted");

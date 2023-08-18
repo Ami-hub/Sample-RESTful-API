@@ -1,11 +1,12 @@
 # ❤️‍🔥 RESTful API Sample Project
 
 A sample [REST](https://en.wikipedia.org/wiki/Representational_state_transfer)ful [API](https://en.wikipedia.org/wiki/API) based on the data of [Mflix sample dataset](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) using [typescript](https://www.typescriptlang.org/), [mongoDB](https://www.mongodb.com/),
-and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times. Feel free to use it as a template for your own projects or as a reference for learning.
+and [fastify](https://www.fastify.io/). The API provides an easy way to perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations on the data, with fast response times.  
+Feel free to use it as a template for your own projects or as a reference for learning.
 
-<div style="text-align: center;">
-  <img src="https://i.ibb.co/bFHnVP6/sample-api-logo.png" alt="sample-api-logo" width="55%">
-</div>
+<p align="center">
+  <img src="https://i.ibb.co/bFHnVP6/sample-api-logo.png" alt="sample-api-logo" width="50%">
+</p>
 
 # 📖 Documentation
 
@@ -19,11 +20,11 @@ For the documentation about supported endpoints and their usage, please import [
 ## 📚 Prerequisites
 
 - [Node.js](https://nodejs.org/en/)
-- [MongoDB](https://www.mongodb.com/) cluster with [mflix sample data](https://www.mongodb.com/docs/atlas/sample-data/sample-mflix/) loaded (see how to [load sample data](https://www.mongodb.com/docs/guides/atlas/sample-data/))
+- [MongoDB](https://www.mongodb.com/)
 
 <br>
 
-## 🚀 Let's get started!
+## 🔥 Let's get started!
 
 ### ⬇️ Clone the repo from github
 
@@ -64,7 +65,7 @@ npm i
    ```env
    MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
    DB_BASE_NAME=sample_mflix
-   LOG_LEVEL=silly
+   LOG_LEVEL=trace
    ...
    ```
 
@@ -82,7 +83,7 @@ npm run start
 
 ### 🎉 Done!
 
-You can open your browser and go to `http://localhost:3000/api/v1` (or whatever port you chose) to see the welcome message.
+You can open your browser and go to `http://localhost:3000/api` (or whatever port you chose) to see the welcome message.
 
 You should see the following message:
 
