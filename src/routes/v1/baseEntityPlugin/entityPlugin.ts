@@ -7,7 +7,28 @@ import {
 } from "../../../models/entitiesMaps";
 import { Application } from "../../../application";
 import { env } from "../../../setup/env";
-import { logger } from "../../../logging/logger";
+
+const idSchemaAsQueryParam = {
+  type: "object",
+  required: ["id"],
+  additionalProperties: false,
+  properties: {
+    id: {
+      type: "string",
+    },
+  },
+} as const;
+
+const paginationOptions = {
+  querystring: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      limit: { type: "number" },
+      offset: { type: "number" },
+    },
+  } as const,
+};
 
 export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
   collectionName: T
@@ -17,34 +38,12 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
   const entityJSONSchema = entityDal.getSchema();
   const entityPartialJSONSchema = entityDal.getPartialSchema();
 
-  const idSchemaAsQueryParam = {
-    type: "object",
-    required: ["id"],
-    additionalProperties: false,
-    properties: {
-      id: {
-        type: "string",
-      },
-    },
-  } as const;
-
-  const paginationOptions = {
-    querystring: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        limit: { type: "number" },
-        offset: { type: "number" },
-      },
-    } as const,
-  };
-
   const entityPlugin = async (
-    fastify: Application,
+    protectedRoutes: Application,
     _options: FastifyPluginOptions = {},
     done: () => void
   ) => {
-    fastify.post(
+    protectedRoutes.post(
       `/`,
       {
         schema: {
@@ -59,7 +58,7 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
       }
     );
 
-    fastify.get(
+    protectedRoutes.get(
       `/`,
       {
         schema: {
@@ -78,7 +77,7 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
       }
     );
 
-    fastify.get(
+    protectedRoutes.get(
       `/:id`,
       {
         schema: {
@@ -91,7 +90,7 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
       }
     );
 
-    fastify.patch(
+    protectedRoutes.patch(
       `/:id`,
       {
         schema: {
@@ -109,7 +108,7 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
       }
     );
 
-    fastify.delete(
+    protectedRoutes.delete(
       `/:id`,
       {
         schema: {

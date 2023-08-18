@@ -8,18 +8,18 @@ import { logger } from "../../logging/logger";
 export const API_V1_PREFIX = "/v1";
 
 const setEntitiesPlugins = async <T extends keyof EntitiesMapDB>(
-  ProtectedRoutes: Application,
+  protectedRoutes: Application,
   entityNames: T[]
 ) => {
   await Promise.all(
     entityNames.map(async (entityName) => {
-      await ProtectedRoutes.register(getEntityPlugin(entityName), {
+      await protectedRoutes.register(getEntityPlugin(entityName), {
         prefix: `/${entityName}`,
       });
     })
   );
 
-  return ProtectedRoutes;
+  return protectedRoutes;
 };
 
 export const setApiVersion1 = async (api: Application) => {
