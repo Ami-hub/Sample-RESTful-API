@@ -4,22 +4,8 @@ import { StatusCodes } from "http-status-codes";
 
 import { logger } from "../logging/logger";
 import { env } from "./env";
-import { errorHandler } from "../errorHandling/errorHandler";
 import { setApiVersion1 } from "../routes/v1/apiV1Plugin";
 import { Application } from "../application";
-import { setRateLimiter } from "./rateLimiter";
-import { createErrorWithStatus } from "../errorHandling/statusError";
-
-const setNotFoundHandler = (app: Application) => {
-  app.setNotFoundHandler(
-    {
-      preHandler: app.rateLimit(),
-    },
-    (_request: FastifyRequest, _reply: FastifyReply) => {
-      throw createErrorWithStatus(`Route not found`, StatusCodes.NOT_FOUND);
-    }
-  );
-};
 
 const welcomeRoute = async (_request: FastifyRequest, reply: FastifyReply) => {
   reply.status(StatusCodes.OK).send({
@@ -29,9 +15,7 @@ const welcomeRoute = async (_request: FastifyRequest, reply: FastifyReply) => {
 
 const API_PREFIX = "/api";
 
-export const initializeApp = async (app: Application) => {
-  await setRateLimiter(app);
-  await app.register(fastifyRequestContext);
+export const setApi = async (app: Application) => {
   await app.register(
     async (api) => {
       await setApiVersion1(api);
@@ -41,9 +25,6 @@ export const initializeApp = async (app: Application) => {
     },
     { prefix: API_PREFIX }
   );
-
-  setNotFoundHandler(app);
-  app.setErrorHandler(errorHandler);
 
   logger.info(`Application fully initialized`);
 };

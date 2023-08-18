@@ -92,4 +92,5 @@ export const setRateLimiter = async (app: Application) => {
   });
 
   logger.trace(`Rate limiter initialized`);
+  return app;
 };

@@ -1,16 +1,16 @@
-import { initializeApp, startListen } from "./setup/initSetUp";
+import { setApi, startListen } from "./setup/initSetUp";
 import { logger } from "./logging/logger";
 import { getDbConnector } from "./DB/databaseConnector";
-import { Application, getApplicationInstance } from "./application";
+import { getApplicationInstance } from "./application";
 
 const start = async () => {
   logger.info(`Starting the server...`);
 
-  const app: Application = getApplicationInstance();
+  const app = await getApplicationInstance();
 
   await getDbConnector().connect();
 
-  await initializeApp(app);
+  await setApi(app);
 
   await startListen(app);
 
