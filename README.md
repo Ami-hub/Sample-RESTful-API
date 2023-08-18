@@ -65,7 +65,7 @@ npm i
    ```env
    MONGODB_URI=mongodb+srv://name:pass@cluster0.1a2b3c4.mongodb.net/
    DB_BASE_NAME=sample_mflix
-   LOG_LEVEL=silly
+   LOG_LEVEL=trace
    ...
    ```
 

@@ -1,8 +1,7 @@
 # ⚙️ Environment Variables Configuration Explanation
 
-This document provides an explanation of the environment variables for the configuration of the application. The environment variables are used to customize various aspects of the application behavior. Ensure that you have set these environment variables appropriately in your deployment environment or in the `.env` file in the root directory of the application.
-
-Below is the list of environment variables along with their descriptions and default values:
+This document provides an explanation of the environment variables for the configuration of the application.  
+Ensure that you have set these environment variables appropriately in your deployment environment or in the `.env` file in the root directory of the project.
 
 ## 💾 Database
 
@@ -13,7 +12,8 @@ Below is the list of environment variables along with their descriptions and def
   ```env
   MONGODB_URI=mongodb+srv://username:password@cluster0.1a2b3c4.mongodb.net/
   ```
-- **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).
+- **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).  
+  When using Docker and local Redis, make sure you set the network properly.
 
 ### DB_NAME (Required!)
 
@@ -141,3 +141,4 @@ Below is the list of environment variables along with their descriptions and def
 
 - **Description:** The Redis URI to use for the rate limiting.
 - **Default value:** `redis://localhost:6379`.
+- **Additional information:** When using Docker and local Redis, make sure you set the network properly.
