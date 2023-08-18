@@ -1,36 +1,14 @@
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { fastifyRateLimit } from "@fastify/rate-limit";
+import { StatusCodes } from "http-status-codes";
 import { Redis } from "ioredis";
 
 import { env } from "./env";
-import { Application } from "../application";
 import { logger } from "../logging/logger";
 import { isValidToken } from "../routes/v1/auth/auth";
-import { FastifyRequest } from "fastify";
 import { createErrorWithStatus } from "../errorHandling/statusError";
-import { StatusCodes } from "http-status-codes";
 
 const reconnectingIntervalSec = env.RECONNECTING_INTERVAL_REDIS_S;
-
-/**
- * A Redis instance to use for rate limiting.
- */
-const redis = new Redis(env.REDIS_URL, {
-  /*
-   That configuration is recommended by `@fastify/rate-limit` to achieve performance.
-   @see https://github.com/fastify/fastify-rate-limit/blob/master/example/example.js
-  */
-  connectTimeout: 500, // in ms
-  maxRetriesPerRequest: 1,
-
-  lazyConnect: true,
-  retryStrategy: (times: number) => {
-    logger.debug(
-      `Retrying to connect to Redis in ${reconnectingIntervalSec} seconds for the ${times} time...`
-    );
-
-    return reconnectingIntervalSec * 1000;
-  },
-});
 
 const setEventListeners = (redis: Redis) => {
   redis.on("connect", () => {
@@ -56,15 +34,27 @@ const setEventListeners = (redis: Redis) => {
   });
 };
 
-const connectToRedis = async () => {
-  try {
-    await redis.connect();
-  } catch (error) {
-    logger.error({
-      message: `Error while connecting to Redis`,
-      error,
-    });
-  }
+const createRedisInstance = () => {
+  const redisInstance = new Redis(env.REDIS_URL, {
+    /*
+     That configuration is recommended by `@fastify/rate-limit` to achieve performance.
+     @see https://github.com/fastify/fastify-rate-limit/blob/master/example/example.js
+    */
+    connectTimeout: 500, // in ms
+    maxRetriesPerRequest: 1,
+
+    retryStrategy: (times: number) => {
+      logger.debug(
+        `Retrying to connect to Redis in ${reconnectingIntervalSec} seconds for the ${times} time...`
+      );
+
+      return reconnectingIntervalSec * 1000;
+    },
+  });
+
+  setEventListeners(redisInstance);
+
+  return redisInstance;
 };
 
 const keyGenerator = (req: FastifyRequest) => {
@@ -73,12 +63,10 @@ const keyGenerator = (req: FastifyRequest) => {
   return token;
 };
 
-export const setRateLimiter = async (app: Application) => {
-  setEventListeners(redis);
+const redis = env.ENABLE_RATE_LIMITING ? createRedisInstance() : undefined;
 
-  await connectToRedis();
-
-  await app.register(fastifyRateLimit, {
+export const setRateLimiter = async (fastify: FastifyInstance) => {
+  await fastify.register(fastifyRateLimit, {
     max: env.RATE_LIMIT_MAX_REQUESTS_PER_WINDOW,
     timeWindow: env.RATE_LIMIT_WINDOW_MS,
     redis,
@@ -94,5 +82,5 @@ export const setRateLimiter = async (app: Application) => {
     },
   });
 
-  return app;
+  return fastify;
 };
