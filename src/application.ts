@@ -1,22 +1,26 @@
-import Fastify, { FastifyInstance, FastifyReply } from "fastify";
+import Fastify, {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
+import { fastifyRequestContext } from "@fastify/request-context";
 import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
-import { logger } from "./logging/logger";
 import { randomBytes } from "crypto";
+import { StatusCodes } from "http-status-codes";
+
+import { logger } from "./logging/logger";
 import { errorHandler } from "./errorHandling/errorHandler";
 import { setRateLimiter } from "./setup/rateLimiter";
-import { fastifyRequestContext } from "@fastify/request-context";
-import { FastifyRequest } from "fastify/types/request";
-import { StatusCodes } from "http-status-codes";
 import { createErrorWithStatus } from "./errorHandling/statusError";
 import { env } from "./setup/env";
 
 const requestIdLength = 8;
 const generateRequestId = () => randomBytes(requestIdLength).toString("hex");
 
-const setNotFoundHandler = (app: FastifyInstance) => {
-  return app.setNotFoundHandler(
+const setNotFoundHandler = (fastify: FastifyInstance) => {
+  return fastify.setNotFoundHandler(
     {
-      preHandler: env.ENABLE_RATE_LIMITING ? app.rateLimit() : undefined,
+      preHandler: env.ENABLE_RATE_LIMITING ? fastify.rateLimit() : undefined,
     },
     (_request: FastifyRequest, _reply: FastifyReply) => {
       throw createErrorWithStatus(`Route not found`, StatusCodes.NOT_FOUND);
