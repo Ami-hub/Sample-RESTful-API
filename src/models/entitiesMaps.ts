@@ -76,11 +76,3 @@ export type EntityPartialJSONSchemaMap = typeof entityPartialJSONSchemaMap;
 export const getEntityPartialJSONSchema = <T extends keyof EntitiesMapDB>(
   entityName: T
 ): EntityPartialJSONSchemaMap[T] => entityPartialJSONSchemaMap[entityName];
-
-/**
- * A filter for entities
- */
-export type Filter<T> = {
-  // TODO: make more type safe
-  [key: string]: any;
-};
