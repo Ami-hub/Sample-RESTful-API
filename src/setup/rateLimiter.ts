@@ -35,24 +35,24 @@ const redis = new Redis(env.REDIS_URL, {
 const setEventListeners = (redis: Redis) => {
   redis.on("connect", () => {
     logger.debug(`Connected to Redis`);
-
     logger.info(`Rate limiter is set up!`);
   });
 
   redis.on("error", (error) => {
-    logger.error(`Error in Redis`, error);
+    logger.error({
+      message: `Error in Redis`,
+      error,
+    });
   });
 
   redis.on("end", () => {
-    logger.warn(`Redis connection has ended`);
-
-    logger.info(`Rate limiter is disabled!`);
+    logger.debug(`Redis connection has ended`);
+    logger.error(`Rate limiter is disabled!`);
   });
 
   redis.on("close", () => {
-    logger.warn(`Redis connection has closed`);
-
-    logger.info(`Rate limiter is disabled!`);
+    logger.debug(`Redis connection has closed`);
+    logger.error(`Rate limiter is disabled!`);
   });
 };
 
@@ -60,7 +60,10 @@ const connectToRedis = async () => {
   try {
     await redis.connect();
   } catch (error) {
-    logger.error(`Failed to connect to Redis`, error);
+    logger.error({
+      message: `Error while connecting to Redis`,
+      error,
+    });
   }
 };
 
