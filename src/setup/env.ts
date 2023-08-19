@@ -36,8 +36,9 @@ export const env = cleanEnv(process.env, {
 
   /**
    * The name of the DB to use.
+   * @default "sample_mflix"
    */
-  DB_NAME: str(),
+  DB_NAME: str({ default: "sample_mflix" }),
 
   /**
    * Whether to enable logging or not.

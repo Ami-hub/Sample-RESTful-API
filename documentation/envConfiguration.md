@@ -15,12 +15,13 @@ Ensure that you have set these environment variables appropriately in your deplo
 - **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).  
   When using Docker and local Redis, make sure you set the network and the URI properly.
 
-### DB_NAME (Required!)
+### DB_NAME
 
 - **Description:** The name of the database to use.
+- **Default value:** `sample_mflix`.
 - **Example:**
   ```env
-  DB_NAME=sample_mflix
+  DB_NAME=mflix
   ```
 
 ### CONNECT_DB_TIMEOUT_MS
