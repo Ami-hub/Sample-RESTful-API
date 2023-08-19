@@ -21,6 +21,7 @@ For the documentation about supported endpoints and their usage, please import [
 
 - [Node.js](https://nodejs.org/en/)
 - [MongoDB](https://www.mongodb.com/)
+- [Redis](https://redis.io/) (optional)
 
 <br>
 
