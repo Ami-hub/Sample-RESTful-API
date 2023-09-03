@@ -15,12 +15,8 @@ export type IdKey = typeof idKey;
  * The schema of the unique identifier for each entity
  */
 export const idJsonSchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    $oid: jsonSchemaString,
-  },
-  required: ["$oid"],
+  type: "string",
+  pattern: "^[0-9a-fA-F]{24}$",
 } as const;
 
 /**
