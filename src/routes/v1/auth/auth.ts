@@ -9,25 +9,29 @@ declare module "@fastify/request-context" {
 
 import { env } from "../../../setup/env";
 import { Application } from "../../../application";
+import { requestContext } from "@fastify/request-context";
+
 import { logger } from "../../../logging/logger";
 import { IdType } from "../../../models/id";
 import { JWTTokenPayload } from "./tokenGenerator";
-import { requestContext } from "@fastify/request-context";
 
 const verifyAccessToken = (token: string) => verify(token, env.JWT_SECRET);
 
-const getUserDetailsFromAccessToken = (token: string) => {
+const getUserDetailsFromAccessToken = (
+  token: string
+): JWTTokenPayload | undefined => {
   try {
     const payload = verifyAccessToken(token);
     if (typeof payload !== "object") {
-      return undefined;
+      return;
     }
     return {
       userId: payload.userId,
       email: payload.email,
-    } as JWTTokenPayload;
+    };
   } catch (error) {
-    return undefined;
+    logger.error({ error });
+    return;
   }
 };
 
