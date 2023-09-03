@@ -1,11 +1,13 @@
+export const jsonSchemaDate = { type: "string", format: "date-time" } as const;
+
 /**
  * The type of the pagination options, used for getting a subset of entities
  */
-export type ToPartialJSONSchema<T> = {
+export type PartialJSONSchema<T> = {
   [K in keyof T]: K extends "required"
     ? []
     : T[K] extends object
-    ? ToPartialJSONSchema<T[K]>
+    ? PartialJSONSchema<T[K]>
     : T[K];
 };
 
@@ -31,5 +33,5 @@ const toPartialJSONSchemaHelper = (object: object) => {
  */
 export const toPartialJSONSchema = <T extends object>(
   schema: T
-): ToPartialJSONSchema<T> =>
-  toPartialJSONSchemaHelper(structuredClone(schema)) as ToPartialJSONSchema<T>;
+): PartialJSONSchema<T> =>
+  toPartialJSONSchemaHelper(structuredClone(schema)) as PartialJSONSchema<T>;

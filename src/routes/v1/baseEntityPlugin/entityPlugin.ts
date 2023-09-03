@@ -1,5 +1,6 @@
 import { FastifyPluginOptions } from "fastify";
 import { StatusCodes } from "http-status-codes";
+
 import { getEntityDAL } from "../../../DB/entityDAL";
 import {
   EntitiesMapDB,
@@ -7,6 +8,7 @@ import {
 } from "../../../models/entitiesMaps";
 import { Application } from "../../../application";
 import { env } from "../../../setup/env";
+import { toPartialJSONSchema } from "../../../models/jsonSchemaHelpers";
 
 const idSchemaAsQueryParam = {
   type: "object",
@@ -36,7 +38,6 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
   const entityDal = getEntityDAL(collectionName);
 
   const entityJSONSchema = entityDal.getSchema();
-  const entityPartialJSONSchema = entityDal.getPartialSchema();
 
   const entityPlugin = async (
     protectedRoutes: Application,
@@ -95,7 +96,7 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
       {
         schema: {
           params: idSchemaAsQueryParam,
-          body: entityPartialJSONSchema,
+          body: toPartialJSONSchema(entityJSONSchema),
         },
       },
       async (request, reply) => {

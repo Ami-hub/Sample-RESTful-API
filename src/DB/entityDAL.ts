@@ -1,10 +1,8 @@
 import {
   EntitiesMapDB,
   getEntityJSONSchema,
-  getEntityPartialJSONSchema,
   EntitiesMapDBWithoutId,
   EntityJSONSchemaMap,
-  EntityPartialJSONSchemaMap,
 } from "../models/entitiesMaps";
 import { IdType } from "../models/id";
 import { ReadOptions, getCRUD } from "./CRUD";
@@ -19,12 +17,6 @@ export interface EntityDAL<T extends keyof EntitiesMapDB> {
    * @returns the JSON schema of the entity
    */
   getSchema(): EntityJSONSchemaMap[T];
-
-  /**
-   * Get the partial JSON schema of the entity
-   * @returns the partial JSON schema of the entity
-   */
-  getPartialSchema(): EntityPartialJSONSchemaMap[T];
 
   /**
    * Get entities from the DB
@@ -163,8 +155,6 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   entityName: T
 ): EntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
-  const entitySchema = getEntityJSONSchema(entityName);
-  const entityPartialSchema = getEntityPartialJSONSchema(entityName);
 
   const get = async (readOptions: ReadOptions = {}) => {
     logger.debug({ entityName, method: `get`, filters: readOptions.filters });
@@ -213,9 +203,10 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
     return deletedEntity;
   };
 
+  const entitySchema = getEntityJSONSchema(entityName);
+
   return {
     getSchema: () => entitySchema,
-    getPartialSchema: () => entityPartialSchema,
     get,
     getById,
     create,
