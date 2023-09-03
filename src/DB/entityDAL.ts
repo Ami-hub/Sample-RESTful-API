@@ -203,10 +203,8 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
     return deletedEntity;
   };
 
-  const entitySchema = getEntityJSONSchema(entityName);
-
   return {
-    getSchema: () => entitySchema,
+    getSchema: () => getEntityJSONSchema(entityName),
     get,
     getById,
     create,
