@@ -1,10 +1,11 @@
 import { config } from "dotenv";
 import { randomBytes } from "crypto";
+import { Level } from "pino";
 import { cleanEnv, str, port, url, num, makeValidator, bool } from "envalid";
 
 const getRandomJWTSecret = () => btoa(randomBytes(256).toString("hex"));
 
-const availableLogLevel = [
+const availableLogLevel: readonly Level[] = [
   "fatal",
   "error",
   "warn",
