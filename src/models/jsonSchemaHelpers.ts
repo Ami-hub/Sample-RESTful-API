@@ -1,4 +1,29 @@
-export const jsonSchemaDate = { type: "string", format: "date-time" } as const;
+/*
+ * Helper functions and constants for JSON schemas
+ */
+
+export const jsonSchemaInteger = { type: "integer" } as const;
+
+export const jsonSchemaNumber = { type: "number" } as const;
+
+export const jsonSchemaString = { type: "string" } as const;
+
+export const jsonSchemaDateTime = {
+  type: "string",
+  format: "date-time",
+} as const;
+
+export const jsonSchemaUri = { type: "string", format: "uri" } as const;
+
+export const jsonSchemaEmail = {
+  type: "string",
+  format: "email",
+} as const;
+
+export const jsonSchemaArrayOfStrings = {
+  type: "array",
+  items: jsonSchemaString,
+} as const;
 
 /**
  * The type of the pagination options, used for getting a subset of entities

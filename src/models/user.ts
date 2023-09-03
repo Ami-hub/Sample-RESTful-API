@@ -1,24 +1,29 @@
 import { FromSchema } from "json-schema-to-ts";
+import {
+  jsonSchemaArrayOfStrings,
+  jsonSchemaEmail,
+  jsonSchemaString,
+} from "./jsonSchemaHelpers";
 
 export const usersCollectionName = "users";
 
 const MAXIMUM_NAME_LENGTH = 40;
+
+const validRoles = ["admin", "user"] as const;
 
 const userJSONSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "object",
   additionalProperties: false,
   properties: {
-    name: { type: "string", maxLength: MAXIMUM_NAME_LENGTH },
-    email: { type: "string", format: "email" },
-    password: { type: "string" },
-    role: { type: "string", enum: ["admin", "user"] },
-    accessTokens: {
-      type: "array",
-      items: {
-        type: "string",
-      },
-    },
+    name: {
+      type: "string",
+      maxLength: MAXIMUM_NAME_LENGTH,
+    } as const,
+    email: jsonSchemaEmail,
+    password: jsonSchemaString,
+    role: { type: "string", enum: validRoles },
+    accessTokens: jsonSchemaArrayOfStrings,
   },
   required: ["name", "email", "password", "role", "accessTokens"],
 } as const;
