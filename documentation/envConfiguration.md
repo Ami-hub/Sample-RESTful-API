@@ -143,3 +143,10 @@ Ensure that you have set these environment variables appropriately in your deplo
 - **Description:** The Redis URI to use for the rate limiting.
 - **Default value:** `redis://localhost:6379`.
 - **Additional information:** When using Docker and local Redis, make sure you set the network and the URI properly.
+
+## 💪 Survivability
+
+### GRACEFUL_SHUTDOWN_TIMEOUT_LIMIT_MS
+
+- **Description:** The maximum time to wait for the application to close gracefully (in milliseconds).
+- **Default value:** `5000` (5 seconds).

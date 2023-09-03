@@ -63,6 +63,12 @@ export const env = cleanEnv(process.env, {
   PORT: port({ default: 3000 }),
 
   /**
+   * The maximum time to wait for the application to close gracefully (in milliseconds).
+   * @default 5000 (5 seconds)
+   */
+  GRACEFUL_SHUTDOWN_TIMEOUT_LIMIT_MS: num({ default: 5000 }),
+
+  /**
    * The default amount of entities to return per request.
    * @default 15
    */
