@@ -1,4 +1,5 @@
 import { FromSchema } from "json-schema-to-ts";
+
 import { jsonSchemaNumber, jsonSchemaString } from "./jsonSchemaHelpers";
 
 /**

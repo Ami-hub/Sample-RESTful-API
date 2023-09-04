@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply, FastifyError } from "fastify";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
+
 import { logger } from "../logging/logger";
 
 export const errorHandler = (
