@@ -1,7 +1,6 @@
-/*
- * Helper functions and constants for JSON schemas
- */
-
+// ########################################
+//           Helper constants
+// ########################################
 export const jsonSchemaInteger = { type: "integer" } as const;
 
 export const jsonSchemaNumber = { type: "number" } as const;
@@ -30,10 +29,11 @@ export const jsonSchemaArrayOfStrings = {
   items: jsonSchemaString,
 } as const;
 
-/**
- * The type of the pagination options, used for getting a subset of entities
- */
-export type PartialJSONSchema<T> = {
+// ########################################
+//           Helper types
+// ########################################
+
+type PartialJSONSchema<T> = {
   [K in keyof T]: K extends "required"
     ? []
     : T[K] extends object
@@ -41,18 +41,19 @@ export type PartialJSONSchema<T> = {
     : T[K];
 };
 
-/**
- * Gets all the keys of an object with the correct type
- */
-export const getObjectKeys = <T extends object>(obj: T) =>
+// ########################################
+//           Helper functions
+// ########################################
+
+const getObjectKeys = <T extends object>(obj: T) =>
   Object.keys(obj) as (keyof T)[];
 
-const toPartialJSONSchemaHelper = (object: object) => {
-  getObjectKeys(object).forEach((key) => {
-    if (typeof object[key] === "object") toPartialJSONSchemaHelper(object[key]);
-    if (key === "required") delete object[key];
+const toPartialJSONSchemaHelper = (obj: object) => {
+  getObjectKeys(obj).forEach((key) => {
+    if (typeof obj[key] === "object") toPartialJSONSchemaHelper(obj[key]);
+    if (key === "required") delete obj[key];
   });
-  return object;
+  return obj;
 };
 
 /**
