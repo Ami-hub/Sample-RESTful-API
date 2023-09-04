@@ -59,16 +59,17 @@ export const getApplicationInstance = async () => {
 
   app.setErrorHandler(errorHandler);
 
-  process.on("unhandledRejection", async (error) => {
-    logger.fatal(`Unhandled rejection: ${error}`);
-    await startGracefulShutdown(app);
-  });
+  if (env.ENABLE_GRACEFUL_SHUTDOWN) {
+    process.on("unhandledRejection", async (error) => {
+      logger.fatal(`Unhandled rejection: ${error}`);
+      await startGracefulShutdown(app);
+    });
 
-  process.on("SIGTERM", async () => {
-    logger.info(`SIGTERM signal received`);
-
-    await startGracefulShutdown(app);
-  });
+    process.on("SIGTERM", async () => {
+      logger.info(`SIGTERM signal received`);
+      await startGracefulShutdown(app);
+    });
+  }
 
   return app.withTypeProvider<JsonSchemaToTsProvider>();
 };

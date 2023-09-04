@@ -144,7 +144,12 @@ Ensure that you have set these environment variables appropriately in your deplo
 - **Default value:** `redis://localhost:6379`.
 - **Additional information:** When using Docker and local Redis, make sure you set the network and the URI properly.
 
-## 🤝 Reliability
+## 🌠 Graceful Shutdown
+
+### ENABLE_GRACEFUL_SHUTDOWN
+
+- **Description:** Whether to enable graceful shutdown or not.
+- **Default value:** `true`.
 
 ### GRACEFUL_SHUTDOWN_TIMEOUT_LIMIT_MS
 

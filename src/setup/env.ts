@@ -63,6 +63,12 @@ export const env = cleanEnv(process.env, {
   PORT: port({ default: 3000 }),
 
   /**
+   * Whether to enable graceful shutdown or not.
+   * @default true
+   */
+  ENABLE_GRACEFUL_SHUTDOWN: bool({ default: true }),
+
+  /**
    * The maximum time to wait for the application to close gracefully (in milliseconds).
    * @default 5000 (5 seconds)
    */
