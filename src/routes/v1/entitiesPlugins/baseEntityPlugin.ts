@@ -1,7 +1,7 @@
 import { FastifyPluginOptions } from "fastify";
 import { StatusCodes } from "http-status-codes";
 
-import { getEntityDAL } from "../../../DB/entityDAL";
+import { getBaseEntityDAL } from "../../../DB/DALs/baseEntityDAL";
 import {
   EntitiesMapDB,
   EntitiesMapDBWithoutId,
@@ -35,7 +35,7 @@ const paginationOptions = {
 export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
   collectionName: T
 ) => {
-  const entityDal = getEntityDAL(collectionName);
+  const entityDal = getBaseEntityDAL(collectionName);
 
   const entityJSONSchema = entityDal.getSchema();
 

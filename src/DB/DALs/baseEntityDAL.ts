@@ -1,17 +1,17 @@
+import { ReadOptions, getCRUD } from "../CRUD";
+import { logger } from "../../logging/logger";
+import { IdType } from "../../models/id";
 import {
   EntitiesMapDB,
   getEntityJSONSchema,
   EntitiesMapDBWithoutId,
   EntityJSONSchemaMap,
-} from "../models/entitiesMaps";
-import { IdType } from "../models/id";
-import { ReadOptions, getCRUD } from "./CRUD";
-import { logger } from "../logging/logger";
+} from "../../models/entitiesMaps";
 
 /**
  * DAL for a specific entity, provides CRUD operations for the entity
  */
-export interface EntityDAL<T extends keyof EntitiesMapDB> {
+export interface BaseEntityDAL<T extends keyof EntitiesMapDB> {
   /**
    * Get the JSON schema of the entity
    * @returns the JSON schema of the entity
@@ -151,9 +151,9 @@ export interface EntityDAL<T extends keyof EntitiesMapDB> {
 //             Implementation
 // ########################################
 
-export const getEntityDAL = <T extends keyof EntitiesMapDB>(
+export const getBaseEntityDAL = <T extends keyof EntitiesMapDB>(
   entityName: T
-): EntityDAL<T> => {
+): BaseEntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
 
   const get = async (readOptions: ReadOptions = {}) => {
