@@ -6,7 +6,7 @@ import { EntitiesMapDB } from "../../models/entitiesMaps";
 import { IdType, idKey } from "../../models/id";
 import { BaseEntityDAL, getBaseEntityDAL } from "./baseEntityDAL";
 import { logger } from "../../logging/logger";
-import { UserCollectionName, usersCollectionName } from "../../models/user";
+import { UserCollectionName, userCollectionName } from "../../models/user";
 
 type TokenCreationDetails = {
   ip: string;
@@ -45,7 +45,7 @@ export interface UserDAL extends BaseEntityDAL<UserCollectionName> {
 }
 
 export const getUserDAL = (): UserDAL => {
-  const baseDAL = getBaseEntityDAL(usersCollectionName);
+  const baseDAL = getBaseEntityDAL(userCollectionName);
 
   const getByEmail = async (email: string) => {
     const usersFound = await baseDAL.get({

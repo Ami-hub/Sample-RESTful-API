@@ -4,7 +4,12 @@ import { jsonSchemaNumber, jsonSchemaString } from "./jsonSchemaHelpers";
 /**
  * The name of the transactions collection
  */
-export const theatersCollectionName = "theaters";
+export const theaterCollectionName = "theaters";
+
+/**
+ * The name of the transactions collection
+ */
+export type TheaterCollectionName = typeof theaterCollectionName;
 
 const geoCoordinatesSchema = {
   type: "array",

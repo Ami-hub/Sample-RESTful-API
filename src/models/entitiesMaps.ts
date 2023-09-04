@@ -2,22 +2,22 @@ import { Id } from "./id";
 import {
   Theater,
   getTheaterJSONSchema,
-  theatersCollectionName,
+  theaterCollectionName,
 } from "./theater";
-import { User, getUserJSONSchema, usersCollectionName } from "./user";
+import { User, getUserJSONSchema, userCollectionName } from "./user";
 
 /**
  * A map of all entities collection names to their types
  */
 export type EntitiesMapDBWithoutId = {
-  [theatersCollectionName]: Theater;
-  [usersCollectionName]: User;
+  [theaterCollectionName]: Theater;
+  [userCollectionName]: User;
   // Add new entities here
 };
 
 const entityJSONSchemaMap = {
-  [theatersCollectionName]: getTheaterJSONSchema(),
-  [usersCollectionName]: getUserJSONSchema(),
+  [theaterCollectionName]: getTheaterJSONSchema(),
+  [userCollectionName]: getUserJSONSchema(),
   // Add new entities here
 };
 

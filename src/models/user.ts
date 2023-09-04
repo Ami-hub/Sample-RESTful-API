@@ -10,12 +10,12 @@ import {
 /**
  * The name of the users collection
  */
-export const usersCollectionName = "users";
+export const userCollectionName = "users";
 
 /**
  * The type of the users collection name
  */
-export type UserCollectionName = typeof usersCollectionName;
+export type UserCollectionName = typeof userCollectionName;
 
 const MAXIMUM_NAME_LENGTH = 40;
 
