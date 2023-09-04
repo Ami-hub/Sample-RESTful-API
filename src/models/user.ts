@@ -1,8 +1,9 @@
 import { FromSchema } from "json-schema-to-ts";
 import {
-  jsonSchemaArrayOfStrings,
   jsonSchemaEmail,
   jsonSchemaString,
+  jsonSchemaDateTime,
+  jsonSchemaIpAddress,
 } from "./jsonSchemaHelpers";
 
 export const usersCollectionName = "users";
@@ -23,9 +24,18 @@ const userJSONSchema = {
     email: jsonSchemaEmail,
     password: jsonSchemaString,
     role: { type: "string", enum: validRoles },
-    accessTokens: jsonSchemaArrayOfStrings,
+    lastTokenInfo: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        ip: jsonSchemaIpAddress,
+        userAgent: jsonSchemaString,
+        date: jsonSchemaDateTime,
+      },
+      required: ["ip", "date"],
+    },
   },
-  required: ["name", "email", "password", "role", "accessTokens"],
+  required: ["name", "email", "password", "role"],
 } as const;
 
 export const getUserJSONSchema = () => userJSONSchema;
@@ -40,10 +50,11 @@ export const getUserJSONSchema = () => userJSONSchema;
     email: "test@test.com",
     password: "$2b$10$ITV/R/fmXonjOta/NvCnQetcYCabS1pEniDLyPwv.H3j.YMm1hBLG",
     role: "user",
-    accessTokens: [
-      "eyJhbGciOiJ...",
-      "eyJhbGcLSac..."
-    ],
+    lastTokenInfo: {
+      ip: "1.2.3.4",
+      userAgent: "test",
+      date: "2021-01-01T00:00:00.000Z",
+    },
   };
  * ```
  */

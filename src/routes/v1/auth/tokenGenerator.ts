@@ -32,6 +32,7 @@ const tokenGeneratorInputJSONSchema = {
 } as const;
 
 const userDAL = getEntityDAL("users");
+
 const getUser = async (email: string, password: string) => {
   const usersFound = await userDAL.get({
     filters: [
@@ -66,33 +67,31 @@ const getUser = async (email: string, password: string) => {
   return user;
 };
 
+type TokenCreationDetails = {
+  ip: string;
+  userAgent: string | undefined;
+};
+
 // TODO: should be stored in userDAL!
-const addAccessTokenToUser = async (userId: IdType, accessToken: string) => {
-  const userCollection = getCollection("users");
+const updateLastTokenInfo = async (
+  userId: IdType,
+  tokenCreationDetails: TokenCreationDetails
+) => {
+  const user = await userDAL.update(userId, {
+    lastTokenInfo: {
+      ip: tokenCreationDetails.ip,
+      userAgent: tokenCreationDetails.userAgent,
+      date: new Date().toISOString(),
+    },
+  });
 
-  const updateResult = await userCollection.updateOne(
-    { [idKey]: new ObjectId(userId) },
-    { $push: { accessTokens: accessToken } }
-  );
-
-  const massageError = `Failed to update user sessions for user ${userId}`;
-  if (!updateResult.acknowledged) {
+  if (!user) {
     throw createErrorWithStatus(
-      "Internal server error",
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      `${massageError}, not acknowledged`
+      "Invalid credentials",
+      StatusCodes.UNAUTHORIZED,
+      `User '${userId}' not found`
     );
   }
-
-  if (!updateResult.modifiedCount) {
-    throw createErrorWithStatus(
-      "Internal server error",
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      `${massageError}, nothing was modified`
-    );
-  }
-
-  return true;
 };
 
 export const setTokenGeneratorRoute = async (
@@ -116,8 +115,10 @@ export const setTokenGeneratorRoute = async (
         userId,
         email,
       });
-
-      await addAccessTokenToUser(userId, accessToken);
+      await updateLastTokenInfo(userId, {
+        ip: request.ip,
+        userAgent: request.headers["user-agent"],
+      });
 
       reply.code(StatusCodes.OK).send({ accessToken });
     }

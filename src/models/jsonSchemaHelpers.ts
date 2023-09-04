@@ -8,6 +8,11 @@ export const jsonSchemaNumber = { type: "number" } as const;
 
 export const jsonSchemaString = { type: "string" } as const;
 
+export const jsonSchemaIpAddress = {
+  type: "string",
+  format: "ipv4",
+} as const;
+
 export const jsonSchemaDateTime = {
   type: "string",
   format: "date-time",
