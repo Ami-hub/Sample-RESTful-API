@@ -26,10 +26,10 @@ const setEntitiesPlugins = async <T extends keyof EntitiesMapDB>(
 export const setApiVersion1 = async (api: Application) => {
   await api.register(
     async (apiV1) => {
-      await apiV1.register(async (ProtectedRoutes) => {
-        await setBearerAuthMiddleware(ProtectedRoutes);
+      await apiV1.register(async (protectedRoutes) => {
+        await setBearerAuthMiddleware(protectedRoutes);
 
-        await setEntitiesPlugins(ProtectedRoutes, ["users", "theaters"]);
+        await setEntitiesPlugins(protectedRoutes, ["users", "theaters"]);
       });
 
       await apiV1.register(async (unprotectedRoutes) => {

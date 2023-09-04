@@ -1,5 +1,4 @@
 import { FromSchema } from "json-schema-to-ts";
-import { jsonSchemaString } from "./jsonSchemaHelpers";
 
 /**
  * The key name of the unique identifier for each entity

@@ -9,15 +9,14 @@ import {
 import { Application } from "../../../application";
 import { env } from "../../../setup/env";
 import { toPartialJSONSchema } from "../../../models/jsonSchemaHelpers";
+import { idJsonSchema } from "../../../models/id";
 
 const idSchemaAsQueryParam = {
   type: "object",
   required: ["id"],
   additionalProperties: false,
   properties: {
-    id: {
-      type: "string",
-    },
+    id: idJsonSchema,
   },
 } as const;
 
