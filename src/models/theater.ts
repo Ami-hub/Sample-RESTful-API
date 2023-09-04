@@ -7,7 +7,7 @@ import { jsonSchemaNumber, jsonSchemaString } from "./jsonSchemaHelpers";
 export const theaterCollectionName = "theaters";
 
 /**
- * The name of the transactions collection
+ * The type of the transactions collection name
  */
 export type TheaterCollectionName = typeof theaterCollectionName;
 
