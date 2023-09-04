@@ -7,7 +7,15 @@ import {
   jsonSchemaIpAddress,
 } from "./jsonSchemaHelpers";
 
+/**
+ * The name of the users collection
+ */
 export const usersCollectionName = "users";
+
+/**
+ * The type of the users collection name
+ */
+export type UserCollectionName = typeof usersCollectionName;
 
 const MAXIMUM_NAME_LENGTH = 40;
 
