@@ -101,6 +101,7 @@ Ensure that you have set these environment variables appropriately in your deplo
 
 - **Description:** Whether to enable any logging or not.
 - **Default value:** `true`.
+- **Additional information:** If you disable logging, the following environment variables will be ignored.
 
 ### LOG_LEVEL
 
@@ -150,8 +151,9 @@ Ensure that you have set these environment variables appropriately in your deplo
 
 - **Description:** Whether to enable graceful shutdown or not.
 - **Default value:** `true`.
+- **Additional information:** If you disable graceful shutdown, the following environment variables will be ignored.
 
 ### GRACEFUL_SHUTDOWN_TIMEOUT_LIMIT_MS
 
-- **Description:** The maximum time to wait for the application to close gracefully (in milliseconds).
+- **Description:** The maximum time to wait for the application to close gracefully (in milliseconds). If the application does not close gracefully within the timeout limit, it will be forcefully closed.
 - **Default value:** `5000` (5 seconds).
