@@ -8,8 +8,6 @@ import { logger } from "../logging/logger";
 import { isValidToken } from "../routes/v1/auth/auth";
 import { createErrorWithStatus } from "../errorHandling/statusError";
 
-const reconnectingIntervalSec = env.RECONNECTING_INTERVAL_REDIS_S;
-
 const setEventListeners = (redis: Redis) => {
   redis.on("connect", () => {
     logger.debug(`Connected to Redis`);
@@ -45,10 +43,10 @@ const createRedisInstance = () => {
 
     retryStrategy: (times: number) => {
       logger.debug(
-        `Retrying to connect to Redis in ${reconnectingIntervalSec} seconds for the ${times} time...`
+        `Retrying to connect to Redis in ${env.RECONNECTING_INTERVAL_REDIS_S} seconds for the ${times} time...`
       );
 
-      return reconnectingIntervalSec * 1000;
+      return env.RECONNECTING_INTERVAL_REDIS_S * 1000;
     },
   });
 
@@ -63,13 +61,11 @@ const keyGenerator = (req: FastifyRequest) => {
   return token;
 };
 
-const redis = env.ENABLE_RATE_LIMITING ? createRedisInstance() : undefined;
-
 export const setRateLimiter = async (fastify: FastifyInstance) => {
   await fastify.register(fastifyRateLimit, {
     max: env.RATE_LIMIT_MAX_REQUESTS_PER_WINDOW,
     timeWindow: env.RATE_LIMIT_WINDOW_MS,
-    redis,
+    redis: createRedisInstance(),
     keyGenerator,
     errorResponseBuilder: (req, context) => {
       throw createErrorWithStatus(
