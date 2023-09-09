@@ -1,5 +1,4 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { fastifyRequestContext } from "@fastify/request-context";
 import { StatusCodes } from "http-status-codes";
 
 import { logger } from "../logging/logger";
