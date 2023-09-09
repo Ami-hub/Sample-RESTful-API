@@ -2,7 +2,6 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { StatusCodes } from "http-status-codes";
 
 import { logger } from "../logging/logger";
-import { env } from "./env";
 import { setApiVersion1 } from "../routes/v1/apiV1Plugin";
 import { Application } from "../application";
 
@@ -25,16 +24,4 @@ export const setApi = async (app: Application) => {
   );
 
   logger.info(`Application fully initialized`);
-};
-
-export const startListen = async (app: Application) => {
-  try {
-    await app.listen({
-      host: env.ENABLE_LISTENING_TO_ALL_INTERFACES ? "0.0.0.0" : "localhost",
-      port: env.PORT,
-    });
-  } catch (error) {
-    logger.fatal(`Cannot start the server: ${error}`);
-    process.exit(1);
-  }
 };
