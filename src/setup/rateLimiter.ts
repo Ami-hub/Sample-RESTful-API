@@ -72,8 +72,7 @@ export const setRateLimiter = async (fastify: FastifyInstance) => {
         `Rate limit exceeded, retry in ${(
           context.ttl / 1000
         ).toFixed()} seconds`,
-        StatusCodes.TOO_MANY_REQUESTS,
-        `reqId: ${req.id}`
+        StatusCodes.TOO_MANY_REQUESTS
       );
     },
   });
