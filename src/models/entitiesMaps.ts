@@ -6,15 +6,6 @@ import {
 } from "./theater";
 import { User, getUserJSONSchema, userCollectionName } from "./user";
 
-/**
- * A map of all entities collection names to their types
- */
-export type EntitiesMapDBWithoutId = {
-  [theaterCollectionName]: Theater;
-  [userCollectionName]: User;
-  // Add new entities here
-};
-
 const entityJSONSchemaMap = {
   [theaterCollectionName]: getTheaterJSONSchema(),
   [userCollectionName]: getUserJSONSchema(),
@@ -22,7 +13,24 @@ const entityJSONSchemaMap = {
 };
 
 /**
- * A map of all entities collection names and their types how they are stored in the database
+ * A map of all entities collection names to their types without an id
+ */
+export type EntitiesMapDBWithoutId = {
+  /*
+   I wish I could do:
+    ```
+    [T in keyof typeof entityJSONSchemaMap]: FromSchema<(typeof entityJSONSchemaMap)[T]>;
+    ```
+    but it doesn't work due to:
+    Expression produces a union type that is too complex to represent.ts(2590)
+  */
+  [theaterCollectionName]: Theater;
+  [userCollectionName]: User;
+  // Add new entities here
+};
+
+/**
+ * A map of all entities collection names and their types
  */
 export type EntitiesMap = {
   [T in keyof EntitiesMapDBWithoutId]: EntitiesMapDBWithoutId[T] & Id;
@@ -34,9 +42,9 @@ export type EntitiesMap = {
 export type EntityJSONSchemaMap = typeof entityJSONSchemaMap;
 
 /**
- * Gets the JSON schema of an entity
- * @param entityName the name of the entity
- * @returns the JSON schema of the entity
+ * Gets a JSON schema of an entity
+ * @param entityName a name of an entity
+ * @returns the matching JSON schema
  */
 export const getEntityJSONSchema = <T extends keyof EntitiesMap>(
   entityName: T
