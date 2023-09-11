@@ -1,10 +1,11 @@
 import { config } from "dotenv";
 import { randomBytes } from "crypto";
+import { Level } from "pino";
 import { cleanEnv, str, port, url, num, makeValidator, bool } from "envalid";
 
 const getRandomJWTSecret = () => btoa(randomBytes(256).toString("hex"));
 
-const availableLogLevel = [
+const availableLogLevel: readonly Level[] = [
   "fatal",
   "error",
   "warn",
@@ -36,8 +37,9 @@ export const env = cleanEnv(process.env, {
 
   /**
    * The name of the DB to use.
+   * @default "sample_mflix"
    */
-  DB_NAME: str(),
+  DB_NAME: str({ default: "sample_mflix" }),
 
   /**
    * Whether to enable logging or not.
@@ -59,6 +61,18 @@ export const env = cleanEnv(process.env, {
    * @default 3000
    */
   PORT: port({ default: 3000 }),
+
+  /**
+   * Whether to enable graceful shutdown or not.
+   * @default true
+   */
+  ENABLE_GRACEFUL_SHUTDOWN: bool({ default: true }),
+
+  /**
+   * The maximum time to wait for the application to close gracefully (in milliseconds).
+   * @default 5000 (5 seconds)
+   */
+  GRACEFUL_SHUTDOWN_TIMEOUT_LIMIT_MS: num({ default: 5000 }),
 
   /**
    * The default amount of entities to return per request.

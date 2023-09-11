@@ -1,4 +1,3 @@
-import { FastifyError } from "fastify";
 import { StatusCodes } from "http-status-codes";
 
 /**

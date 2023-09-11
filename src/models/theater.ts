@@ -1,61 +1,53 @@
 import { FromSchema } from "json-schema-to-ts";
 
+import { jsonSchemaNumber, jsonSchemaString } from "./jsonSchemaHelpers";
+
 /**
  * The name of the transactions collection
  */
-export const theatersCollectionName = "theaters";
+export const theaterCollectionName = "theaters";
+
+/**
+ * The type of the transactions collection name
+ */
+export type TheaterCollectionName = typeof theaterCollectionName;
+
+const geoCoordinatesSchema = {
+  type: "array",
+  additionalItems: false,
+  items: [jsonSchemaNumber, jsonSchemaNumber],
+  minItems: 2,
+  maxItems: 2,
+} as const;
+
+const locationSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    address: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        zipCode: jsonSchemaString,
+        street: jsonSchemaString,
+        city: jsonSchemaString,
+        state: jsonSchemaString,
+        country: jsonSchemaString,
+      },
+      required: ["street", "city", "state", "zipCode", "country"],
+    },
+    geoCoordinates: geoCoordinatesSchema,
+  },
+  required: ["address", "geoCoordinates"],
+} as const;
 
 const theaterJSONSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "object",
   additionalProperties: false,
   properties: {
-    name: {
-      type: "string",
-    },
-    location: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        address: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            zipCode: {
-              type: "string",
-            },
-            street: {
-              type: "string",
-            },
-            city: {
-              type: "string",
-            },
-            state: {
-              type: "string",
-            },
-            country: {
-              type: "string",
-            },
-          },
-          required: ["street", "city", "state", "zipCode", "country"],
-        },
-        geoCoordinates: {
-          type: "array",
-          additionalItems: false,
-          items: [
-            {
-              type: "number",
-            },
-            {
-              type: "number",
-            },
-          ],
-          minItems: 2,
-          maxItems: 2,
-        },
-      },
-      required: ["address", "geoCoordinates"],
-    },
+    name: jsonSchemaString,
+    location: locationSchema,
   },
   required: ["location", "name"],
 } as const;

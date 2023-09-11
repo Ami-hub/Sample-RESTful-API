@@ -15,12 +15,13 @@ Ensure that you have set these environment variables appropriately in your deplo
 - **Additional information:** For more information on the MongoDB Connection String URI Format, refer to the [MongoDB Connection Strings documentation](https://docs.mongodb.com/manual/reference/connection-string/).  
   When using Docker and local Redis, make sure you set the network and the URI properly.
 
-### DB_NAME (Required!)
+### DB_NAME
 
 - **Description:** The name of the database to use.
+- **Default value:** `sample_mflix`.
 - **Example:**
   ```env
-  DB_NAME=sample_mflix
+  DB_NAME=mflix
   ```
 
 ### CONNECT_DB_TIMEOUT_MS
@@ -100,6 +101,7 @@ Ensure that you have set these environment variables appropriately in your deplo
 
 - **Description:** Whether to enable any logging or not.
 - **Default value:** `true`.
+- **Additional information:** If you disable logging, the following environment variables will be ignored.
 
 ### LOG_LEVEL
 
@@ -142,3 +144,16 @@ Ensure that you have set these environment variables appropriately in your deplo
 - **Description:** The Redis URI to use for the rate limiting.
 - **Default value:** `redis://localhost:6379`.
 - **Additional information:** When using Docker and local Redis, make sure you set the network and the URI properly.
+
+## 🌠 Graceful Shutdown
+
+### ENABLE_GRACEFUL_SHUTDOWN
+
+- **Description:** Whether to enable graceful shutdown or not.
+- **Default value:** `true`.
+- **Additional information:** If you disable graceful shutdown, the following environment variables will be ignored.
+
+### GRACEFUL_SHUTDOWN_TIMEOUT_LIMIT_MS
+
+- **Description:** The maximum time to wait for the application to close gracefully (in milliseconds). If the application does not close gracefully within the timeout limit, it will be forcefully closed.
+- **Default value:** `5000` (5 seconds).

@@ -4,6 +4,7 @@
 
 - [Docker](https://www.docker.com/)
 - [MongoDB](https://www.mongodb.com/)
+- [Redis](https://redis.io/) (optional)
 
 #
 

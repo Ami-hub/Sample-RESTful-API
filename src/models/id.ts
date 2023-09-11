@@ -10,21 +10,18 @@ export const idKey = "_id";
  */
 export type IdKey = typeof idKey;
 
-const idSchema = {
-  $schema: "http://json-schema.org/draft-07/schema#",
+/**
+ * The schema of the unique identifier for each entity
+ */
+export const idJsonSchema = {
   type: "string",
   pattern: "^[0-9a-fA-F]{24}$",
 } as const;
 
 /**
- * The schema of the unique identifier for each entity
- */
-export const getIdJSONSchema = () => idSchema;
-
-/**
  * The type of the unique identifier for each entity
  */
-export type IdType = FromSchema<typeof idSchema>;
+export type IdType = FromSchema<typeof idJsonSchema>;
 
 /**
  * The unique identifier for each entity

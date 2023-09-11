@@ -1,30 +1,22 @@
+import { ReadOptions, getCRUD } from "../CRUD";
+import { logger } from "../../logging/logger";
+import { IdType } from "../../models/id";
 import {
   EntitiesMapDB,
   getEntityJSONSchema,
-  getEntityPartialJSONSchema,
   EntitiesMapDBWithoutId,
   EntityJSONSchemaMap,
-  EntityPartialJSONSchemaMap,
-} from "../models/entitiesMaps";
-import { IdType } from "../models/id";
-import { ReadOptions, getCRUD } from "./CRUD";
-import { logger } from "../logging/logger";
+} from "../../models/entitiesMaps";
 
 /**
  * DAL for a specific entity, provides CRUD operations for the entity
  */
-export interface EntityDAL<T extends keyof EntitiesMapDB> {
+export interface BaseEntityDAL<T extends keyof EntitiesMapDB> {
   /**
    * Get the JSON schema of the entity
    * @returns the JSON schema of the entity
    */
   getSchema(): EntityJSONSchemaMap[T];
-
-  /**
-   * Get the partial JSON schema of the entity
-   * @returns the partial JSON schema of the entity
-   */
-  getPartialSchema(): EntityPartialJSONSchemaMap[T];
 
   /**
    * Get entities from the DB
@@ -159,12 +151,10 @@ export interface EntityDAL<T extends keyof EntitiesMapDB> {
 //             Implementation
 // ########################################
 
-export const getEntityDAL = <T extends keyof EntitiesMapDB>(
+export const getBaseEntityDAL = <T extends keyof EntitiesMapDB>(
   entityName: T
-): EntityDAL<T> => {
+): BaseEntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
-  const entitySchema = getEntityJSONSchema(entityName);
-  const entityPartialSchema = getEntityPartialJSONSchema(entityName);
 
   const get = async (readOptions: ReadOptions = {}) => {
     logger.debug({ entityName, method: `get`, filters: readOptions.filters });
@@ -214,8 +204,7 @@ export const getEntityDAL = <T extends keyof EntitiesMapDB>(
   };
 
   return {
-    getSchema: () => entitySchema,
-    getPartialSchema: () => entityPartialSchema,
+    getSchema: () => getEntityJSONSchema(entityName),
     get,
     getById,
     create,

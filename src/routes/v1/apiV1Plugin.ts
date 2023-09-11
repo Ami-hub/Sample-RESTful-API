@@ -1,39 +1,18 @@
 import { Application } from "../../application";
-import { getEntityPlugin } from "./baseEntityPlugin/entityPlugin";
-import { setTokenGeneratorRoute } from "./auth/tokenGenerator";
-import { setBearerAuthMiddleware } from "./auth/auth";
-import { EntitiesMapDB } from "../../models/entitiesMaps";
 import { logger } from "../../logging/logger";
+import { setUserPlugin } from "./entitiesPlugins/userPlugin";
+import { setTheaterPlugin } from "./entitiesPlugins/theaterPlugin";
 
 export const API_V1_PREFIX = "/v1";
 
-const setEntitiesPlugins = async <T extends keyof EntitiesMapDB>(
-  protectedRoutes: Application,
-  entityNames: T[]
-) => {
-  await Promise.all(
-    entityNames.map(async (entityName) => {
-      await protectedRoutes.register(getEntityPlugin(entityName), {
-        prefix: `/${entityName}`,
-      });
-    })
-  );
-
-  return protectedRoutes;
+const setEntitiesPluginsV1 = async (apiV1: Application) => {
+  await Promise.all([setUserPlugin(apiV1), setTheaterPlugin(apiV1)]);
 };
 
 export const setApiVersion1 = async (api: Application) => {
   await api.register(
     async (apiV1) => {
-      await apiV1.register(async (ProtectedRoutes) => {
-        await setBearerAuthMiddleware(ProtectedRoutes);
-
-        await setEntitiesPlugins(ProtectedRoutes, ["users", "theaters"]);
-      });
-
-      await apiV1.register(async (unprotectedRoutes) => {
-        await setTokenGeneratorRoute(unprotectedRoutes);
-      });
+      await setEntitiesPluginsV1(apiV1);
     },
     { prefix: API_V1_PREFIX }
   );

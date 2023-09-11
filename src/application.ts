@@ -5,17 +5,15 @@ import Fastify, {
 } from "fastify";
 import { fastifyRequestContext } from "@fastify/request-context";
 import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
-import { randomBytes } from "crypto";
 import { StatusCodes } from "http-status-codes";
+import { v4 } from "uuid";
 
 import { logger } from "./logging/logger";
 import { errorHandler } from "./errorHandling/errorHandler";
 import { setRateLimiter } from "./setup/rateLimiter";
 import { createErrorWithStatus } from "./errorHandling/statusError";
 import { env } from "./setup/env";
-
-const requestIdLength = 8;
-const generateRequestId = () => randomBytes(requestIdLength).toString("hex");
+import { setGracefulShutdown } from "./setup/gracefulShutdown";
 
 const setNotFoundHandler = (fastify: FastifyInstance) => {
   return fastify.setNotFoundHandler(
@@ -33,22 +31,26 @@ const setNotFoundHandler = (fastify: FastifyInstance) => {
  * @see https://www.fastify.io/docs/latest/TypeScript/
  */
 export const getApplicationInstance = async () => {
-  const app = Fastify({
+  const fastify = Fastify({
     logger,
-    genReqId: generateRequestId,
+    genReqId: () => v4(),
   });
 
+  await fastify.register(fastifyRequestContext);
+
+  setNotFoundHandler(fastify);
+
+  fastify.setErrorHandler(errorHandler);
+
+  if (env.ENABLE_GRACEFUL_SHUTDOWN) {
+    setGracefulShutdown(fastify);
+  }
+
   env.ENABLE_RATE_LIMITING
-    ? await setRateLimiter(app)
+    ? await setRateLimiter(fastify)
     : logger.info(`Rate limiting is disabled`);
 
-  await app.register(fastifyRequestContext);
-
-  setNotFoundHandler(app);
-
-  app.setErrorHandler(errorHandler);
-
-  return app.withTypeProvider<JsonSchemaToTsProvider>();
+  return fastify.withTypeProvider<JsonSchemaToTsProvider>();
 };
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;

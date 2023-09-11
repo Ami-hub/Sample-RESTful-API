@@ -1,22 +1,26 @@
 import { FastifyPluginOptions } from "fastify";
 import { StatusCodes } from "http-status-codes";
-import { getEntityDAL } from "../../../DB/entityDAL";
+
+import { BaseEntityDAL } from "../../../DB/DALs/baseEntityDAL";
 import {
   EntitiesMapDB,
   EntitiesMapDBWithoutId,
 } from "../../../models/entitiesMaps";
 import { Application } from "../../../application";
 import { env } from "../../../setup/env";
+import {
+  jsonSchemaInteger,
+  toPartialJSONSchema,
+} from "../../../models/jsonSchemaHelpers";
+import { idJsonSchema } from "../../../models/id";
 
 const idSchemaAsQueryParam = {
   type: "object",
-  required: ["id"],
   additionalProperties: false,
   properties: {
-    id: {
-      type: "string",
-    },
+    id: idJsonSchema,
   },
+  required: ["id"],
 } as const;
 
 const paginationOptions = {
@@ -24,25 +28,21 @@ const paginationOptions = {
     type: "object",
     additionalProperties: false,
     properties: {
-      limit: { type: "number" },
-      offset: { type: "number" },
+      limit: jsonSchemaInteger,
+      offset: jsonSchemaInteger,
     },
   } as const,
 };
 
-export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
-  collectionName: T
+export const getBaseEntityPlugin = <T extends keyof EntitiesMapDB>(
+  entityDal: BaseEntityDAL<T>
 ) => {
-  const entityDal = getEntityDAL(collectionName);
-
-  const entityJSONSchema = entityDal.getSchema();
-  const entityPartialJSONSchema = entityDal.getPartialSchema();
-
-  const entityPlugin = async (
+  return async (
     protectedRoutes: Application,
     _options: FastifyPluginOptions = {},
     done: () => void
   ) => {
+    const entityJSONSchema = entityDal.getSchema();
     protectedRoutes.post(
       `/`,
       {
@@ -95,7 +95,7 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
       {
         schema: {
           params: idSchemaAsQueryParam,
-          body: entityPartialJSONSchema,
+          body: toPartialJSONSchema(entityJSONSchema),
         },
       },
       async (request, reply) => {
@@ -123,6 +123,4 @@ export const getEntityPlugin = <T extends keyof EntitiesMapDB>(
 
     done();
   };
-
-  return entityPlugin;
 };
