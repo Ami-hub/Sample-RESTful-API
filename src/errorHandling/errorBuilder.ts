@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 
-import { EntitiesMapDB } from "../models/entitiesMaps";
+import { EntitiesMap } from "../models/entitiesMaps";
 import { CRUDOperation } from "../DB/CRUD";
 import { createErrorWithStatus } from "./statusError";
 
-export const getEntityErrorBuilder = <T extends keyof EntitiesMapDB>(
+export const getEntityErrorBuilder = <T extends keyof EntitiesMap>(
   relatedEntity: T
 ) => {
   const general = (

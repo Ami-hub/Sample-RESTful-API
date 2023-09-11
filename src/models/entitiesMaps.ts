@@ -24,7 +24,7 @@ const entityJSONSchemaMap = {
 /**
  * A map of all entities collection names and their types how they are stored in the database
  */
-export type EntitiesMapDB = {
+export type EntitiesMap = {
   [T in keyof EntitiesMapDBWithoutId]: EntitiesMapDBWithoutId[T] & Id;
 };
 
@@ -38,6 +38,6 @@ export type EntityJSONSchemaMap = typeof entityJSONSchemaMap;
  * @param entityName the name of the entity
  * @returns the JSON schema of the entity
  */
-export const getEntityJSONSchema = <T extends keyof EntitiesMapDB>(
+export const getEntityJSONSchema = <T extends keyof EntitiesMap>(
   entityName: T
 ): EntityJSONSchemaMap[T] => entityJSONSchemaMap[entityName];

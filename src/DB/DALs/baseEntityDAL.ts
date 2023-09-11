@@ -2,7 +2,7 @@ import { ReadOptions, getCRUD } from "../CRUD";
 import { logger } from "../../logging/logger";
 import { IdType } from "../../models/id";
 import {
-  EntitiesMapDB,
+  EntitiesMap,
   getEntityJSONSchema,
   EntitiesMapDBWithoutId,
   EntityJSONSchemaMap,
@@ -11,7 +11,7 @@ import {
 /**
  * DAL for a specific entity, provides CRUD operations for the entity
  */
-export interface BaseEntityDAL<T extends keyof EntitiesMapDB> {
+export interface BaseEntityDAL<T extends keyof EntitiesMap> {
   /**
    * Get the JSON schema of the entity
    * @returns the JSON schema of the entity
@@ -52,7 +52,7 @@ export interface BaseEntityDAL<T extends keyof EntitiesMapDB> {
    * // ];
    * ```
    */
-  get(readOptions?: ReadOptions): Promise<EntitiesMapDB[T][]>;
+  get(readOptions?: ReadOptions): Promise<EntitiesMap[T][]>;
 
   /**
    * Get an entity by id from the DB
@@ -83,7 +83,7 @@ export interface BaseEntityDAL<T extends keyof EntitiesMapDB> {
    * // };
    * ```
    */
-  getById(id: IdType): Promise<EntitiesMapDB[T]>;
+  getById(id: IdType): Promise<EntitiesMap[T]>;
 
   /**
    * Create an entity
@@ -125,7 +125,7 @@ export interface BaseEntityDAL<T extends keyof EntitiesMapDB> {
    * // };
    * ```
    */
-  create(data: EntitiesMapDBWithoutId[T]): Promise<EntitiesMapDB[T]>;
+  create(data: EntitiesMapDBWithoutId[T]): Promise<EntitiesMap[T]>;
 
   /**
    * Update an entity by id, and save it to the DB if the entity is valid
@@ -137,21 +137,21 @@ export interface BaseEntityDAL<T extends keyof EntitiesMapDB> {
   update(
     id: IdType,
     data: Partial<EntitiesMapDBWithoutId[T]>
-  ): Promise<EntitiesMapDB[T]>;
+  ): Promise<EntitiesMap[T]>;
 
   /**
    * Delete an entity by id from the DB
    * @param id - the id of the entity to delete
    * @returns the deleted entity
    */
-  delete(id: IdType): Promise<EntitiesMapDB[T]>;
+  delete(id: IdType): Promise<EntitiesMap[T]>;
 }
 
 // ########################################
 //             Implementation
 // ########################################
 
-export const getBaseEntityDAL = <T extends keyof EntitiesMapDB>(
+export const getBaseEntityDAL = <T extends keyof EntitiesMap>(
   entityName: T
 ): BaseEntityDAL<T> => {
   const entityCrud = getCRUD(entityName);
