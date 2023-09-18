@@ -97,11 +97,13 @@ You should see the following message:
 <br>
 <br>
 
-# 🏰 Visit my deployed version [here](https://mysite-om0l.onrender.com/api)!
+# 🏰 Visit my deployed version [here](https://github.com/Ami-hub/Sample-RESTful-API/tree/deploy)!
 
 ### 🌟 Essence
 
-- This deployed version can help you to test the API without installing anything on your computer.
+- This deployed version can help you to test the API without running the project locally.  
+
+- To test the API you can use the user `User` with the password `123`, or the user `Admin` with the password `admin` to test the API as an admin.
 
 ### ❗Important
 
@@ -109,7 +111,7 @@ You should see the following message:
 
 - Due to this version is open to the public, some features like
   `DELETE` and `PATCH` requests are disabled.  
-   For more information about the deployed version see the [render deployed branch]()
+   For more information about the deployed version see the [render deployed branch](https://github.com/Ami-hub/Sample-RESTful-API/tree/deploy)
 
 <br>
 <br>
