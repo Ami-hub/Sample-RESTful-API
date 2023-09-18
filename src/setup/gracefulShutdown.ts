@@ -15,15 +15,10 @@ const startGracefulShutdown = async (app: FastifyInstance) => {
 };
 
 export const setGracefulShutdown = (app: FastifyInstance) => {
-  if (env.ENABLE_GRACEFUL_SHUTDOWN) {
-    process.on("unhandledRejection", async (error) => {
-      logger.fatal(`Unhandled rejection: ${error}`);
-      await startGracefulShutdown(app);
-    });
+  process.on("SIGTERM", async () => {
+    logger.info(`SIGTERM signal received`);
+    await startGracefulShutdown(app);
+  });
 
-    process.on("SIGTERM", async () => {
-      logger.info(`SIGTERM signal received`);
-      await startGracefulShutdown(app);
-    });
-  }
+  logger.info(`Graceful shutdown is set up!`);
 };

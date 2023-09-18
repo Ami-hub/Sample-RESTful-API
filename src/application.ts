@@ -1,16 +1,14 @@
 import Fastify from "fastify";
 import { fastifyRequestContext } from "@fastify/request-context";
 import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
-import { randomBytes } from "crypto";
+import { v4 as uuidV4 } from "uuid";
 
 import { logger } from "./logging/logger";
 import { errorHandler } from "./errorHandling/errorHandler";
 import { setRateLimiter } from "./setup/rateLimiter";
 import { env } from "./setup/env";
 import { setNotFoundHandler } from "./errorHandling/errorHandler";
-
-const requestIdLength = 8;
-const generateRequestId = () => randomBytes(requestIdLength).toString("hex");
+import { setGracefulShutdown } from "./setup/gracefulShutdown";
 
 /**
  * Get the main application instance
@@ -19,12 +17,20 @@ const generateRequestId = () => randomBytes(requestIdLength).toString("hex");
 export const getApplicationInstance = async () => {
   const app = Fastify({
     logger,
-    genReqId: generateRequestId,
+    genReqId: () => uuidV4(),
+  });
+
+  process.on("unhandledRejection", async (error) => {
+    logger.error(`Unhandled rejection: ${error}`);
   });
 
   env.ENABLE_RATE_LIMITING
     ? await setRateLimiter(app)
     : logger.info(`Rate limiting is disabled`);
+
+  env.ENABLE_GRACEFUL_SHUTDOWN
+    ? setGracefulShutdown(app)
+    : logger.info(`Graceful shutdown is disabled`);
 
   await app.register(fastifyRequestContext);
 

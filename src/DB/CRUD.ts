@@ -1,6 +1,6 @@
 import { Filter, ObjectId } from "mongodb";
 
-import { EntitiesMapDB, EntitiesMapDBWithoutId } from "../models/entitiesMaps";
+import { EntitiesMap, EntitiesMapDBWithoutId } from "../models/entitiesMaps";
 import { IdType, idKey } from "../models/id";
 import { getCollection } from "./databaseConnector";
 import { logger } from "../logging/logger";
@@ -23,7 +23,7 @@ export type ReadOptions = {
    * }]);
    * ```
    */
-  filters?: Array<Filter<EntitiesMapDB[keyof EntitiesMapDB]>>;
+  filters?: Array<Filter<EntitiesMap[keyof EntitiesMap]>>;
 
   /**
    * The amount of entities to return
@@ -36,7 +36,7 @@ export type ReadOptions = {
   offset?: number;
 };
 
-export interface CRUD<N extends keyof EntitiesMapDB, E = EntitiesMapDB[N]> {
+export interface CRUD<N extends keyof EntitiesMap, E = EntitiesMap[N]> {
   /**
    * Creates a new entity instance
    * @param data data of the entity instance
@@ -111,7 +111,7 @@ export interface CRUD<N extends keyof EntitiesMapDB, E = EntitiesMapDB[N]> {
 //             Implementation
 // ########################################
 
-export const getCRUD = <N extends keyof EntitiesMapDB>(
+export const getCRUD = <N extends keyof EntitiesMap>(
   collectionName: N
 ): CRUD<N> => {
   const collection = getCollection(collectionName);
@@ -138,7 +138,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
 
   const readHelper = async (readOptions: Required<ReadOptions>) => {
     return await collection
-      .aggregate<EntitiesMapDB[N]>([
+      .aggregate<EntitiesMap[N]>([
         ...readOptions.filters.map((filter) => ({ $match: filter })),
         { $skip: readOptions.offset },
         { $limit: readOptions.limit },
@@ -169,7 +169,7 @@ export const getCRUD = <N extends keyof EntitiesMapDB>(
     if (!ObjectId.isValid(id))
       throw errorBuilder.notFound(idKey, id, "invalid id format");
 
-    const entity = await collection.findOne<EntitiesMapDB[N]>({
+    const entity = await collection.findOne<EntitiesMap[N]>({
       [idKey]: new ObjectId(id),
     });
 

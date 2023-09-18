@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { compare } from "bcrypt";
 
 import { createErrorWithStatus } from "../../errorHandling/statusError";
-import { EntitiesMapDB } from "../../models/entitiesMaps";
+import { EntitiesMap } from "../../models/entitiesMaps";
 import { IdType, idKey } from "../../models/id";
 import { BaseEntityDAL, getBaseEntityDAL } from "./baseEntityDAL";
 import { logger } from "../../logging/logger";
@@ -19,7 +19,7 @@ export interface UserDAL extends BaseEntityDAL<UserCollectionName> {
    * @param email the email of the user to get
    * @returns the user found
    */
-  getByEmail: (email: string) => Promise<EntitiesMapDB[UserCollectionName]>;
+  getByEmail: (email: string) => Promise<EntitiesMap[UserCollectionName]>;
 
   /**
    * Update the last token info of a user
@@ -41,7 +41,7 @@ export interface UserDAL extends BaseEntityDAL<UserCollectionName> {
   findCredentials: (
     email: string,
     password: string
-  ) => Promise<EntitiesMapDB[UserCollectionName]>;
+  ) => Promise<EntitiesMap[UserCollectionName]>;
 }
 
 export const getUserDAL = (): UserDAL => {

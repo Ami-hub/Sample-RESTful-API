@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 
 import { BaseEntityDAL } from "../../../DB/DALs/baseEntityDAL";
 import {
-  EntitiesMapDB,
+  EntitiesMap,
   EntitiesMapDBWithoutId,
 } from "../../../models/entitiesMaps";
 import { Application } from "../../../application";
@@ -34,7 +34,7 @@ const paginationOptions = {
   } as const,
 };
 
-export const getBaseEntityPlugin = <T extends keyof EntitiesMapDB>(
+export const getBaseEntityPlugin = <T extends keyof EntitiesMap>(
   entityDal: BaseEntityDAL<T>
 ) => {
   return async (

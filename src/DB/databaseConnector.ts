@@ -2,7 +2,7 @@ import { MongoClient } from "mongodb";
 
 import { env } from "../setup/env";
 import { logger } from "../logging/logger";
-import { EntitiesMapDB } from "../models/entitiesMaps";
+import { EntitiesMap } from "../models/entitiesMaps";
 
 /**
  * The client that connects to the DB
@@ -115,7 +115,7 @@ export const getDbConnector = (): DatabaseConnector => {
  * @param collectionName name of the collection
  * @returns a collection from the DB
  */
-export const getCollection = <T extends keyof EntitiesMapDB>(
+export const getCollection = <T extends keyof EntitiesMap>(
   collectionName: T
 ) => {
   return getDbInstance().collection(collectionName);
