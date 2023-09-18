@@ -1,4 +1,5 @@
 import { Id } from "./id";
+import { Movie, getMovieJSONSchema, movieCollectionName } from "./movie";
 import {
   Theater,
   getTheaterJSONSchema,
@@ -9,6 +10,7 @@ import { User, getUserJSONSchema, userCollectionName } from "./user";
 const entityJSONSchemaMap = {
   [theaterCollectionName]: getTheaterJSONSchema(),
   [userCollectionName]: getUserJSONSchema(),
+  [movieCollectionName]: getMovieJSONSchema(),
   // Add new entities here
 };
 
@@ -26,6 +28,7 @@ export type EntitiesMapDBWithoutId = {
   */
   [theaterCollectionName]: Theater;
   [userCollectionName]: User;
+  [movieCollectionName]: Movie;
   // Add new entities here
 };
 

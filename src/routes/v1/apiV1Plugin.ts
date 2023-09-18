@@ -2,11 +2,16 @@ import { Application } from "../../application";
 import { logger } from "../../logging/logger";
 import { setUserPlugin } from "./entitiesPlugins/userPlugin";
 import { setTheaterPlugin } from "./entitiesPlugins/theaterPlugin";
+import { setMoviePlugin } from "./entitiesPlugins/moviePlugin";
 
 export const API_V1_PREFIX = "/v1";
 
 const setEntitiesPluginsV1 = async (apiV1: Application) => {
-  await Promise.all([setUserPlugin(apiV1), setTheaterPlugin(apiV1)]);
+  await Promise.all([
+    setUserPlugin(apiV1),
+    setTheaterPlugin(apiV1),
+    setMoviePlugin(apiV1),
+  ]);
 };
 
 export const setApiVersion1 = async (api: Application) => {
