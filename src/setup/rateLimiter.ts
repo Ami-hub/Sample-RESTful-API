@@ -11,7 +11,7 @@ import { createErrorWithStatus } from "../errorHandling/statusError";
 const setEventListeners = (redis: Redis) => {
   redis.on("connect", () => {
     logger.debug(`Connected to Redis`);
-    logger.info(`Rate limiter is set up!`);
+    logger.info(`Rate limiter is now available`);
   });
 
   redis.on("error", (error) => {
@@ -23,12 +23,12 @@ const setEventListeners = (redis: Redis) => {
 
   redis.on("end", () => {
     logger.debug(`Redis connection has ended`);
-    logger.error(`Rate limiter is not available now`);
+    logger.error(`Rate limiter is unavailable currently`);
   });
 
   redis.on("close", () => {
     logger.debug(`Redis connection has closed`);
-    logger.error(`Rate limiter is not available now`);
+    logger.error(`Rate limiter is unavailable currently`);
   });
 };
 
@@ -67,7 +67,7 @@ export const setRateLimiter = async (fastify: FastifyInstance) => {
     timeWindow: env.RATE_LIMIT_WINDOW_MS,
     redis: createRedisInstance(),
     keyGenerator,
-    errorResponseBuilder: (req, context) => {
+    errorResponseBuilder: (_req, context) => {
       throw createErrorWithStatus(
         `Rate limit exceeded, retry in ${(
           context.ttl / 1000
