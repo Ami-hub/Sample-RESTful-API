@@ -26,7 +26,7 @@ For the documentation about supported endpoints and their usage, please import [
 
 - ✅ Make sure you put [this URL](https://mysite-om0l.onrender.com/api) in the `BASE URL` variable of the Postman collection.
 
-- 👤 Use the user `User` with the password `123`, or the user `Admin` with the password `admin` to test the API.
+- 👤 Use the user `user@gmail.com` with the password `123`, or the user `admin@gmail.com` with the password `admin` to test the API.
 
 - 😁 Enjoy!
 
