@@ -23,12 +23,12 @@ const setEventListeners = (redis: Redis) => {
 
   redis.on("end", () => {
     logger.debug(`Redis connection has ended`);
-    logger.error(`Rate limiter is disabled!`);
+    logger.error(`Rate limiter is not available now`);
   });
 
   redis.on("close", () => {
     logger.debug(`Redis connection has closed`);
-    logger.error(`Rate limiter is disabled!`);
+    logger.error(`Rate limiter is not available now`);
   });
 };
 
