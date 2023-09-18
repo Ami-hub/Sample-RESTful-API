@@ -98,13 +98,10 @@ export const getBaseEntityPlugin = <T extends keyof EntitiesMap>(
           body: toPartialJSONSchema(entityJSONSchema),
         },
       },
-      async (request, reply) => {
-        const updated = await entityDal.update(
-          request.params.id,
-          // `as any` is needed due to `Type instantiation is excessively deep and possibly infinite` error
-          request.body as any as EntitiesMapDBWithoutId[T]
-        );
-        reply.status(StatusCodes.OK).send(updated);
+      async (_request, reply) => {
+        reply.status(StatusCodes.METHOD_NOT_ALLOWED).send({
+          message: `PATCH method is not allowed in the deployed version`,
+        });
       }
     );
 
@@ -115,9 +112,10 @@ export const getBaseEntityPlugin = <T extends keyof EntitiesMap>(
           params: idSchemaAsQueryParam,
         },
       },
-      async (request, reply) => {
-        const deleted = await entityDal.delete(request.params.id);
-        reply.status(StatusCodes.OK).send(deleted);
+      async (_request, reply) => {
+        reply
+          .status(StatusCodes.METHOD_NOT_ALLOWED)
+          .send(`DELETE method is not allowed in the deployed version`);
       }
     );
 
