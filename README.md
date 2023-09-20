@@ -99,20 +99,6 @@ You should see the following message:
 
 # 🏰 Visit my deployed version [here](https://github.com/Ami-hub/Sample-RESTful-API/tree/deploy)!
 
-### 🌟 Essence
-
-- This deployed version can help you to test the API without running the project locally.  
-
-- To test the API you can use the user `User` with the password `123`, or the user `Admin` with the password `admin` to test the API as an admin.
-
-### ❗Important
-
-- It use the free tier of [render](https://render.com/), so **the first response may take about 1 minute to load**. For more information [click here](https://render.com/docs/free#free-web-services).
-
-- Due to this version is open to the public, some features like
-  `DELETE` and `PATCH` requests are disabled.  
-   For more information about the deployed version see the [render deployed branch](https://github.com/Ami-hub/Sample-RESTful-API/tree/deploy)
-
 <br>
 <br>
 
