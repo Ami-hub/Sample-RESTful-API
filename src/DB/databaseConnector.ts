@@ -64,7 +64,7 @@ export const connectToDB = async () => {
       logger.info(`Connected to '${dbName}' DB!`);
       return;
     } catch (error) {
-      logger.error(`Failed to connect to '${dbName}' DB!`, error);
+      logger.error(`Failed to connect to '${dbName}' DB!\n${error}`);
 
       logger.trace(
         `Retrying to connect to '${dbName}' DB in ${env.RECONNECTING_INTERVAL_DB_S} seconds...`

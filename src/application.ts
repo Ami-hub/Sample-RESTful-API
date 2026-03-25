@@ -16,7 +16,7 @@ import { setGracefulShutdown } from "./setup/gracefulShutdown";
  */
 export const getApplicationInstance = async () => {
   const app = Fastify({
-    logger,
+    loggerInstance: logger,
     genReqId: () => uuidV4(),
   });
 
