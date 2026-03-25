@@ -1,17 +1,30 @@
-FROM node:current-alpine3.17
+FROM node:current-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN npm ci --omit=dev
 
-COPY src ./src
-
-COPY tsconfig.json ./
+COPY . .
 
 RUN npm run build
 
-RUN rm -rf ./src
+FROM node:current-alpine AS runner
 
-CMD [ "npm", "run", "start" ]
+ARG PORT=3000
+
+ENV NODE_ENV=production
+ENV PORT=$PORT
+
+WORKDIR /app
+
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+
+USER node
+
+EXPOSE $PORT
+
+CMD ["node", "dist/startServer.js"]
