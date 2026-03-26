@@ -1,27 +1,28 @@
-FROM node:current-alpine AS builder
+FROM node:lts-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci
 
 COPY . .
 
 RUN npm run build
 
-FROM node:current-alpine AS runner
-
-ARG PORT=3000
-
-ENV NODE_ENV=production
-ENV PORT=$PORT
+FROM node:lts-alpine AS runner
 
 WORKDIR /app
 
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+ARG PORT=3000
+
+ENV PORT=$PORT
+ENV NODE_ENV=production
+
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+
+RUN npm ci --omit=dev
 
 USER node
 
