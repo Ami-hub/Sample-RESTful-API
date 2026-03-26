@@ -5,9 +5,11 @@
   "main": "src/startServer.ts",
   "scripts": {
     "build": "tsc -p .",
+    "typecheck:test": "tsc -p tsconfig.test.json",
     "start": "node dist/startServer.js",
     "dev": "nodemon --exec npx ts-node src/startServer.ts -w src -w .env",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run tests/api --exclude tests/api.test.ts",
+    "test:watch": "vitest tests/api --exclude tests/api.test.ts"
   },
   "keywords": [
     "fastify",
@@ -40,6 +42,7 @@
     "@types/uuid": "^9.0.3",
     "json-schema-to-ts": "^3.1.1",
     "nodemon": "^3.0.1",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.1"
   }
 }
