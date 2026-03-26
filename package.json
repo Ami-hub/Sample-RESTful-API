@@ -8,8 +8,8 @@
     "typecheck:test": "tsc -p tsconfig.test.json",
     "start": "node dist/startServer.js",
     "dev": "nodemon --exec npx ts-node src/startServer.ts -w src -w .env",
-    "test": "vitest run tests/api --exclude tests/api.test.ts",
-    "test:watch": "vitest tests/api --exclude tests/api.test.ts"
+    "test": "vitest run tests",
+    "test:watch": "vitest tests"
   },
   "keywords": [
     "fastify",
